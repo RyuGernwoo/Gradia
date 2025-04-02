@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:enabled="true"
+        android:icon="@drawable/outline_home_black_24"
+        android:title="@string/text_label_home"/>
+
+    <item
+        android:id="@+id/nav_subject"
+        android:enabled="true"
+        android:icon="@drawable/outline_library_books_black_24"
+        android:title="@string/text_label_subject"/>
+
+    <item
+        android:id="@+id/nav_time"
+        android:enabled="true"
+        android:icon="@drawable/outline_timer_black_24"
+        android:title="@string/text_label_time"/>
+
+    <item
+        android:id="@+id/nav_analysis"
+        android:enabled="true"
+        android:icon="@drawable/outline_auto_graph_black_24"
+        android:title="@string/text_label_analysis"/>
+</menu>
