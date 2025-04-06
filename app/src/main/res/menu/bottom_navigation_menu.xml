@@ -15,7 +15,7 @@
     <item
         android:id="@+id/nav_time"
         android:enabled="true"
-        android:icon="@drawable/outline_timer_black_24"
+        android:icon="@drawable/calendar_clock_24px"
         android:title="@string/text_label_time"/>
 
     <item

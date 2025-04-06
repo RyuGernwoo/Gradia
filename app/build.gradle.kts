@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -29,12 +30,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
+    implementation(libs.core.ktx)
     val fragment_version = "1.8.3"
     implementation("androidx.fragment:fragment:$fragment_version")
-    implementation("com.google.android.material:material:1.12.0")
 
     implementation(libs.appcompat)
     implementation(libs.material)

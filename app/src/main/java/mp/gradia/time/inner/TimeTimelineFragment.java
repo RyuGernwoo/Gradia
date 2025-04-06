@@ -1,4 +1,4 @@
-package mp.gradia;
+package mp.gradia.time.inner;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,9 +7,11 @@ import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
-public class AnalysisFragment extends Fragment {
+import mp.gradia.R;
+
+public class TimeTimelineFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_analysis, container, false);
+        return inflater.inflate(R.layout.fragment_time_timeline, container, false);
     }
 }
