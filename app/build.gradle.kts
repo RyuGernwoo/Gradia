@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -39,6 +40,13 @@ dependencies {
     implementation(libs.core.ktx)
     val fragment_version = "1.8.3"
     implementation("androidx.fragment:fragment:$fragment_version")
+
+    val room_version = "2.6.1"
+    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
+    // See Add the KSP plugin to your project
+    //ksp("androidx.room:room-compiler:$room_version")
+    //implementation("androidx.room:room-runtime:$room_version")
+    //implementation("androidx.room:room-ktx:$room_version")
 
     implementation(libs.appcompat)
     implementation(libs.material)

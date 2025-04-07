@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/toggle_container"
+        android:orientation="horizontal"
+        android:background="@drawable/toggle_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="15dp"
+        android:padding="5dp"
+        app:layout_constraintHeight_percent="0.060"
+        app:layout_constraintWidth_percent="0.70"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+        <LinearLayout
+            android:id="@+id/toggle_btn_record"
+            android:background="@drawable/toggle_selected_background"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            >
+            <ImageView
+                android:id="@+id/record_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/outline_timer_black_24" />
+
+            <TextView
+                android:id="@+id/record_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="5dp"
+                android:text="기록" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/toggle_btn_timeline"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/timeline_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/outline_timeline_black_24"
+                app:tint="@color/gray" />
+
+            <TextView
+                android:id="@+id/timeline_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="5dp"
+                android:text="타임라인"
+                android:textColor="@color/gray"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <mp.gradia.NestedScrollableHost
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/toggle_container"
+        app:layout_constraintBottom_toBottomOf="parent" >
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </mp.gradia.NestedScrollableHost>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
