@@ -1,6 +1,7 @@
 package mp.gradia.main;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,9 +12,15 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import mp.gradia.R;
+import mp.gradia.subject.Subject;
 
 public class MainActivity extends AppCompatActivity {
+
+    private ViewPager2 viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // ViewPager Object
-        ViewPager2 viewPager = findViewById(R.id.view_pager);
+        viewPager = findViewById(R.id.view_pager);
         // Set ViewPager Adapter
         viewPager.setAdapter(new MainFragmentAdapter(this));
 
@@ -43,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
             else if (item.getItemId() == R.id.nav_analysis) viewPager.setCurrentItem(3, true);
             else return false;
 
+            Log.d("MainActivity", "test");
             return true;
         });
 
@@ -57,5 +65,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+    /* Home에 추가된 과목 없을 때 사용 */
+    public void moveToSubjectPage() {
+        viewPager.setCurrentItem(1, true); // 1 = SubjectFragment 위치
+    }
+
+    /* 과목 추가 (임시) */
+    private final List<Subject> selectedSubjects = new ArrayList<>();
+
+    public void addSubject(Subject subject) {
+        selectedSubjects.add(subject);
+        Log.d("MainActivity", "Subject 추가됨: " + subject.getName());
+    }
+
+    public List<Subject> getSelectedSubjects() {
+        return selectedSubjects;
     }
 }
