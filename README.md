@@ -35,3 +35,6 @@ Gradia is a combination of Grade and AI, an app service that provides personaliz
 * **Increased Learning Efficiency** : Maximize learning efficiency through data-based analysis and customized information
 * **Improved Self-Directed Learning Ability** : Improved Self-directed learning ability by increasing understanding of individual learning situations
 * **Imporved Grades** : Improved learning performance through efficient learning strategies and time management
+
+# Related Projects
+- [Gradia_ML](https://github.com/windopper/gradia-ml)
