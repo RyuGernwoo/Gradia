@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.20"
     id("com.google.devtools.ksp")
 }
 
@@ -10,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "mp.gradia"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -34,20 +35,30 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
     implementation(libs.core.ktx)
+
+    // Fragment
     val fragment_version = "1.8.3"
     implementation("androidx.fragment:fragment:$fragment_version")
 
+    // Android Room & RxJava
     val room_version = "2.6.1"
-    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
-    // See Add the KSP plugin to your project
-    //ksp("androidx.room:room-compiler:$room_version")
-    //implementation("androidx.room:room-runtime:$room_version")
-    //implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    implementation("androidx.room:room-rxjava3:$room_version")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.5")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
 
+    val compose_runtime_version = "1.7.8"
+    implementation("androidx.compose.runtime:runtime:$compose_runtime_version")
+    
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

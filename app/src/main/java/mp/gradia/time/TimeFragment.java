@@ -1,5 +1,6 @@
 package mp.gradia.time;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,7 +17,9 @@ import androidx.viewpager2.widget.ViewPager2;
 import mp.gradia.R;
 
 public class TimeFragment extends Fragment {
-    private View v;
+    private static final int PAGE_RECORD = 0;
+    private static final int PAGE_TIMELINE = 1;
+
     private ViewPager2 viewPager;
     private ToggleViewHolder recordToggle;
     private ToggleViewHolder timelineToggle;
@@ -32,29 +35,28 @@ public class TimeFragment extends Fragment {
             text = parent.findViewById(textId);
         }
 
-        void setSelected(View context, boolean isSelected) {
+        void setSelected(Context context, boolean isSelected) {
             if (isSelected) {
                 container.setBackgroundResource(R.drawable.toggle_selected_background);
-                text.setTextColor(ContextCompat.getColor(context.getContext(), R.color.black));
-                icon.setColorFilter(ContextCompat.getColor(context.getContext(), R.color.black));
-            }
-            else {
+                text.setTextColor(ContextCompat.getColor(context, R.color.black));
+                icon.setColorFilter(ContextCompat.getColor(context, R.color.black));
+            } else {
                 container.setBackgroundColor(Color.TRANSPARENT);
-                text.setTextColor(ContextCompat.getColor(context.getContext(), R.color.gray));
-                icon.setColorFilter(ContextCompat.getColor(context.getContext(), R.color.gray));
+                text.setTextColor(ContextCompat.getColor(context, R.color.gray));
+                icon.setColorFilter(ContextCompat.getColor(context, R.color.gray));
             }
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_time_main, container, false);
+        View v = inflater.inflate(R.layout.fragment_time_main, container, false);
 
         viewPager = v.findViewById(R.id.view_pager);
         viewPager.setAdapter(new TimeFragmentAdapter(this));
 
-        recordToggle = new ToggleViewHolder(v, R.id.toggle_btn_record, R.id.record_icon, R.id.record_text);
-        timelineToggle = new ToggleViewHolder(v, R.id.toggle_btn_timeline, R.id.timeline_icon, R.id.timeline_text);
+        recordToggle = new ToggleViewHolder(v, R.id.record_toggle, R.id.record_icon, R.id.record_text);
+        timelineToggle = new ToggleViewHolder(v, R.id.timeline_toggle, R.id.timeline_icon, R.id.timeline_text);
 
         setupToggleListener();
         setupViewPagerCallBack();
@@ -65,12 +67,12 @@ public class TimeFragment extends Fragment {
     private void setupToggleListener() {
         recordToggle.container.setOnClickListener(v -> {
             setToggleSelected(0);
-            viewPager.setCurrentItem(0, true);
+            viewPager.setCurrentItem(PAGE_RECORD, true);
         });
 
         timelineToggle.container.setOnClickListener(v -> {
             setToggleSelected(1);
-            viewPager.setCurrentItem(1, true);
+            viewPager.setCurrentItem(PAGE_TIMELINE, true);
         });
     }
 
@@ -82,8 +84,9 @@ public class TimeFragment extends Fragment {
             }
         });
     }
+
     private void setToggleSelected(int position) {
-        recordToggle.setSelected(v, position == 0);
-        timelineToggle.setSelected(v, position == 1);
+        recordToggle.setSelected(requireContext(), position == 0);
+        timelineToggle.setSelected(requireContext(), position == 1);
     }
 }

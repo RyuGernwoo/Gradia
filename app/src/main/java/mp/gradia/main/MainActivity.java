@@ -19,7 +19,6 @@ import mp.gradia.R;
 import mp.gradia.subject.Subject;
 
 public class MainActivity extends AppCompatActivity {
-
     private ViewPager2 viewPager;
 
     @Override
@@ -34,16 +33,17 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // ViewPager Object
+        // ViewPager
         viewPager = findViewById(R.id.view_pager);
         // Set ViewPager Adapter
         viewPager.setAdapter(new MainFragmentAdapter(this));
 
-        // BottomNavigationView Object
+        // BottomNavigationView
         BottomNavigationView bottomNavigation = findViewById(R.id.bottom_navigation);
         // BottonNavigationView Event Listener
         bottomNavigation.setOnItemSelectedListener(item -> {
-            // 0: HomeFragment, 1: SubjectFragment, 2: TimeFragment, 3:AnalysisFragment
+            // Navigate to the corresponding fragment page when a tab is selected
+            // 0: HomeFragment, 1: SubjectFragment, 2: TimeFragment, 3: AnalysisFragment
             if (item.getItemId() == R.id.nav_home) viewPager.setCurrentItem(0, true);
             else if (item.getItemId() == R.id.nav_subject) viewPager.setCurrentItem(1, true);
             else if (item.getItemId() == R.id.nav_time) viewPager.setCurrentItem(2, true);
@@ -54,14 +54,25 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        // Sync BottomNavigationView selection when ViewPager2 page changes
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
+                // Reflect current page on BottomNavigationView
+                // 0: Home, 1: Subject, 2: Time, 3: Analysis
                 switch (position) {
-                    case 0: bottomNavigation.setSelectedItemId(R.id.nav_home); break;
-                    case 1: bottomNavigation.setSelectedItemId(R.id.nav_subject); break;
-                    case 2: bottomNavigation.setSelectedItemId(R.id.nav_time); break;
-                    case 3: bottomNavigation.setSelectedItemId(R.id.nav_analysis); break;
+                    case 0:
+                        bottomNavigation.setSelectedItemId(R.id.nav_home);
+                        break;
+                    case 1:
+                        bottomNavigation.setSelectedItemId(R.id.nav_subject);
+                        break;
+                    case 2:
+                        bottomNavigation.setSelectedItemId(R.id.nav_time);
+                        break;
+                    case 3:
+                        bottomNavigation.setSelectedItemId(R.id.nav_analysis);
+                        break;
                 }
             }
         });

@@ -7,5 +7,27 @@
     <string name="text_label_time">기록</string>
     <string name="text_label_analysis">분석</string>
 
+    <!-- Time Fragment -->
+    <!-- Toggle Button -->
+    <string name="text_label_toggle_record">기록</string>
+    <string name="text_label_toggle_timeline">타임라인</string>
+    <!-- Bottom Sheet -->
+    <string name="text_label_bottom_sheet">과목</string>
+    <string name="text_label_subject_target_hour">목표 시간</string>
+    <string name="text_label_subject_studied_hour">공부 시간</string>
+    <string name="text_label_subject_type">이수 구분</string>
+    <string name="text_label_subject_credit">학점</string>
+    <!-- Greeting Messages -->
+    <string-array name="text_label_study_greeting_messages">
+        <item>무엇에 집중하실건가요?</item>
+        <item>지금 이 순간, 천천히 집중해보세요</item>
+        <item>작은 기록이 큰 변화를 만듭니다</item>
+        <item>공부는 천천히, 그러나 꾸준히</item>
+        <item>이 시간을 소중히 기록해 드릴게요</item>
+        <item>당신의 속도로, 당신만의 방향으로</item>
+        <item>방해는 잠시 멈추고, 나만의 시간을 채워보세요</item>
+        <item>불안해하지 마세요. 한 걸음씩 가면 됩니다</item>
+        <item>어제보다 나은 오늘을 위해, 천천히 시작해볼까요?</item>
+    </string-array>
 
 </resources>

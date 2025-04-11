@@ -5,4 +5,11 @@
     <color name="gray">#737373</color>
     <color name="orange">#F36A0D</color>
 
+    <!-- RecyclerView Item Example Color Code -->
+    <color name="c1">#dd3333</color>
+    <color name="c2">#1e73be</color>
+    <color name="c3">#eeee22</color>
+    <color name="c4">#8224e3</color>
+    <color name="c5">#e12797</color>
+    <color name="c6">#F36A0D</color>
 </resources>
