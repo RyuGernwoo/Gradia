@@ -16,6 +16,10 @@ public class UserEntity {
     @ColumnInfo(name = "user_id")
     public String uid;
 
+    // 사용자 비밀 번호
+    @ColumnInfo(name = "password")
+    public String password;
+
     // 사용자 이름
     @ColumnInfo(name = "name")
     public String name;

@@ -1,12 +1,17 @@
 package mp.gradia.home;
 
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +25,6 @@ import mp.gradia.subject.Subject;
 
 public class HomeFragment extends Fragment {
     private LinearLayout subjectListContainer;
-
     private TextView textNoData;
     private Button btnGoToSubjects;
 
@@ -40,6 +44,27 @@ public class HomeFragment extends Fragment {
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).moveToSubjectPage();
             }
+        });
+
+        ImageView imgProfile = view.findViewById(R.id.img_profile);
+        ImageView imgNotifications = view.findViewById(R.id.img_notifications);
+
+        // 알림 팝업
+        imgNotifications.setOnClickListener(v -> {
+            View popupView = LayoutInflater.from(getContext()).inflate(R.layout.popup_notifications, null);
+            PopupWindow popupWindow = new PopupWindow(popupView,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    true);
+
+            popupWindow.setElevation(10f);
+            popupWindow.showAsDropDown(v, -150, 20); // 위치 조정 가능
+        });
+
+        // 프로필 창 진입
+        imgProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), ProfileActivity.class);
+            startActivity(intent);
         });
 
         updateSubjectList();

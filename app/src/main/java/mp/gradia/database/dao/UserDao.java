@@ -11,13 +11,11 @@ import java.util.List;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import mp.gradia.database.entity.UserEntity;
 
 @Dao
 public interface UserDao {
-
-    // @Query("SELECT * FROM User")
-    // Flowable<List<UserEntity>> getAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insert(UserEntity... user);
@@ -27,4 +25,12 @@ public interface UserDao {
 
     @Delete
     Completable delete(UserEntity... user);
+
+    // 로그인 쿼리
+    @Query("SELECT * FROM User WHERE user_id = :uid AND password = :password")
+    Maybe<UserEntity> login(String uid, String password);
+
+    // 중복 확인 쿼리
+    @Query("SELECT * FROM User WHERE user_id = :uid")
+    Maybe<UserEntity> getUserById(String uid);
 }

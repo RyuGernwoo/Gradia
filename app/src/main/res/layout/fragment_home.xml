@@ -9,18 +9,18 @@
     <!-- 좌상단 메인 아이콘 -->
     <ImageView
         android:id="@+id/img_main_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:src="@drawable/ic_main_logo"
-        android:contentDescription="Main Icon"
+        android:contentDescription="Main_Icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
     <!-- 우상단: 프로필, 알림, 검색 아이콘 (오른쪽부터 순서대로 배치) -->
     <ImageView
         android:id="@+id/img_profile"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:src="@drawable/ic_profile"
         android:contentDescription="Profile"
         app:layout_constraintTop_toTopOf="parent"
@@ -28,8 +28,8 @@
 
     <ImageView
         android:id="@+id/img_notifications"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:src="@drawable/ic_notifications"
         android:contentDescription="Notifications"
         app:layout_constraintTop_toTopOf="parent"
@@ -38,8 +38,8 @@
 
     <ImageView
         android:id="@+id/img_search"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:src="@drawable/ic_search"
         android:contentDescription="Search"
         app:layout_constraintTop_toTopOf="parent"

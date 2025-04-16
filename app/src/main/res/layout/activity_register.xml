@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/et_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="이메일"
+            android:inputType="textEmailAddress"
+            android:minHeight="48dp" />
+
+        <EditText
+            android:id="@+id/et_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="이름"
+            android:minHeight="48dp" />
+
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="비밀번호"
+            android:inputType="textPassword"
+            android:minHeight="48dp" />
+
+        <EditText
+            android:id="@+id/et_password_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="비밀번호 확인"
+            android:inputType="textPassword"
+            android:minHeight="48dp" />
+
+        <EditText
+            android:id="@+id/et_age"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="나이"
+            android:inputType="number"
+            android:minHeight="48dp" />
+
+        <EditText
+            android:id="@+id/et_major"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="전공"
+            android:minHeight="48dp" />
+
+        <RadioGroup android:id="@+id/rg_gender" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical">
+            <RadioButton android:id="@+id/rb_male" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="남성"/>
+            <RadioButton android:id="@+id/rb_female" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="여성"/>
+        </RadioGroup>
+
+        <Button android:id="@+id/btn_register" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="20dp"
+            android:text="회원가입" />
+        <Button android:id="@+id/btn_cancel" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="취소" />
+    </LinearLayout>
+</ScrollView>
