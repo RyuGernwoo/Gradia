@@ -1,7 +1,13 @@
 package mp.gradia.time.inner;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,14 +23,21 @@ import android.widget.Toast;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.shape.CornerFamily;
 import com.google.android.material.shape.ShapeAppearanceModel;
 
+import org.w3c.dom.Text;
+
+import java.time.LocalTime;
 import java.util.Random;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import mp.gradia.R;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.SubjectDao;
@@ -34,6 +47,7 @@ import mp.gradia.time.inner.bottomsheet.adapter.OnSubjectSelectListener;
 import mp.gradia.time.inner.bottomsheet.adapter.SubjectSelectBottomSheetFragment;
 import mp.gradia.time.inner.stopwatch.TimerRecordStopwatchFragment;
 import mp.gradia.time.inner.timer.TimeRecordTimerFragment;
+import mp.gradia.time.inner.timer.TimerService;
 
 public class TimeRecordFragment extends Fragment implements OnSubjectSelectListener {
 
@@ -51,15 +65,43 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
     private SubjectSelectBottomSheetFragment modalBottomSheet;
 
     private AppDatabase db;
+    private SubjectDao dao;
     private SubjectViewModel subjectViewModel;
     private boolean hasData = true;
     private SubjectEntity selectedSubject;
+
+    private final BroadcastReceiver stateChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("TimerService", "Receive Broadcast :" + intent.getAction());
+            final String action = TimerService.BROADCAST_ACTION_TIMER_STATE_CHANGED;
+            if (intent != null && action.equals(intent.getAction())) {
+                SharedPreferences prefs = requireContext().getSharedPreferences(TimerService.PREFS_NAME, Context.MODE_PRIVATE);
+                int selectedSubjectId = prefs.getInt(TimerService.KEY_SELECTED_SUBJECT_ID, -1);
+                CompositeDisposable compositeDisposable = new CompositeDisposable();
+                compositeDisposable.add(dao.getById(selectedSubjectId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                subject -> {
+                                    selectedSubject = subject;
+                                    setSelectedSubject(selectedSubject);
+                                },
+                                error -> {
+                                    Log.e("ERROR", "Error getting selected subject", error);
+                                }
+                        )
+                );
+                subjectViewModel.selectSubject(selectedSubject);
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = AppDatabase.getInstance(requireContext());
-        SubjectDao dao = db.subjectDao();
+        dao = db.subjectDao();
         SubjectViewModelFactory factory = new SubjectViewModelFactory(dao);
         subjectViewModel = new ViewModelProvider(this, factory).get(SubjectViewModel.class);
     }
@@ -81,6 +123,20 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
     public void onResume() {
         super.onResume();
         setRandomGreetingMessage();
+
+        Context context = requireContext();
+        String state = TimerService.BROADCAST_ACTION_TIMER_STATE_CHANGED;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            LocalBroadcastManager.getInstance(context).registerReceiver(stateChangeReceiver, new IntentFilter(state));
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Context context = requireContext();
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(stateChangeReceiver);
     }
 
     private void initViews(View v) {
@@ -178,11 +234,7 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
                         if (getChildFragmentManager().findFragmentById(R.id.fragment_container) == null) {
                             selectedSubject = subjectList.get(0);
                             subjectViewModel.selectSubject(selectedSubject);
-
-                            selectedSubjectTextView.setText(selectedSubject.getName());
-                            GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.color_circle);
-                            drawable.setColor(Color.parseColor(selectedSubject.getColor()));
-                            cShape.setImageDrawable(drawable);
+                            setSelectedSubject(selectedSubject);
                             loadChildFragment(new TimeRecordTimerFragment());
                         }
                     }
@@ -202,15 +254,18 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
         modalBottomSheet.dismiss();
         selectedSubject = item;
         subjectViewModel.selectSubject(selectedSubject);
-
-        selectedSubjectTextView.setText(selectedSubject.getName());
-        GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.color_circle);
-        drawable.setColor(Color.parseColor(selectedSubject.getColor()));
-        cShape.setImageDrawable(drawable);
+        setSelectedSubject(selectedSubject);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+    }
+
+    public void setSelectedSubject(SubjectEntity subject) {
+        selectedSubjectTextView.setText(subject.getName());
+        GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.color_circle);
+        drawable.setColor(Color.parseColor(subject.getColor()));
+        cShape.setImageDrawable(drawable);
     }
 }

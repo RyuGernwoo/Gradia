@@ -21,9 +21,9 @@
         android:layout_marginTop="25dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.09"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timer_view"
-        app:layout_constraintHeight_percent="0.09" >
+        app:layout_constraintTop_toBottomOf="@+id/timer_view">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/subtract_minute_fab"
@@ -41,7 +41,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:text="25:00"
             android:textSize="30dp"
             android:textStyle="bold" />
 
@@ -87,7 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            app:srcCompat="@drawable/outline_volume_off_black_24" />
+            app:srcCompat="@drawable/outline_volume_up_black_24" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/session_control_fab"

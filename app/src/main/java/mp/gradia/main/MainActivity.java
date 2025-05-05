@@ -1,5 +1,6 @@
 package mp.gradia.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -8,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -17,6 +19,7 @@ import java.util.List;
 
 import mp.gradia.R;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.time.inner.timer.TimerService;
 
 public class MainActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
@@ -24,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int SUBJECT_FRAGMENT = 1;
     public static final int TIME_FRAGMENT = 2;
     public static final int ANALYSIS_FRAGMENT = 3;
+
+    private static boolean processInitialized = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

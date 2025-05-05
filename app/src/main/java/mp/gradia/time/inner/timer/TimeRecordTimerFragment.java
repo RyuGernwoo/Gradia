@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,11 +18,13 @@ import android.widget.Button;
 
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
@@ -38,6 +41,10 @@ import orion.gz.pomodorotimer.OnTimerChangeListener;
 import orion.gz.pomodorotimer.TimerView;
 
 public class TimeRecordTimerFragment extends Fragment {
+    private static final int SESSION_START = 0;
+    private static final int SESSION_END = 1;
+    private static final int SESSION_PAUSE = 2;
+    private static final int SESSION_RESUME = 3;
     private static final long DEFAULT_MINUTES = 25;
     private TimerView timerView;
     private TextView timeTextview;
@@ -52,6 +59,7 @@ public class TimeRecordTimerFragment extends Fragment {
 
     private boolean isTimerPause = false;
     private boolean isMuted = false;
+    private int sessionState = -1;
     private long sessionDuration;
     private long currentMinutes = 25;
     private long currentSeconds = 0;
@@ -84,6 +92,31 @@ public class TimeRecordTimerFragment extends Fragment {
         return v;
     }
 
+    private final BroadcastReceiver stateChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("TimerService", "Receive Broadcast :" + intent.getAction());
+            final String action = TimerService.BROADCAST_ACTION_TIMER_STATE_CHANGED;
+            if (intent != null && action.equals(intent.getAction())) {
+                SharedPreferences prefs = requireContext().getSharedPreferences(TimerService.PREFS_NAME, Context.MODE_PRIVATE);
+                boolean isRunning = prefs.getBoolean(TimerService.KEY_IS_RUNNING, true);
+                isMuted = prefs.getBoolean(TimerService.KEY_IS_MUTED, false);
+                isTimerPause = prefs.getBoolean(TimerService.KEY_IS_PAUSED, false);
+                sessionDuration = prefs.getLong(TimerService.KEY_DURATION_TIME, 0);
+                startTime = prefs.getString(TimerService.KEY_START_TIME, null) == null ? null : LocalTime.parse(prefs.getString(TimerService.KEY_START_TIME, null));
+
+                if (isRunning) {
+                    sessionState = SESSION_START;
+                    viewControl(SESSION_START);
+                }
+                if (isTimerPause) {
+                    sessionState = SESSION_PAUSE;
+                }
+
+                viewControl(sessionState);
+            }
+        }
+    };
 
     private final BroadcastReceiver timerUpdateReceiver = new BroadcastReceiver() {
         @Override
@@ -111,6 +144,7 @@ public class TimeRecordTimerFragment extends Fragment {
             final String action = TimerService.BROADCAST_ACTION_TIMER_STOP;
 
             if (intent != null && action.equals(intent.getAction())) {
+                endTime = LocalTime.now();
                 resetTimer();
                 addSession();
             }
@@ -123,27 +157,32 @@ public class TimeRecordTimerFragment extends Fragment {
         Context context = requireContext();
         String update = TimerService.BROADCAST_ACTION_TIMER_UPDATE;
         String stop = TimerService.BROADCAST_ACTION_TIMER_STOP;
+        String state = TimerService.BROADCAST_ACTION_TIMER_STATE_CHANGED;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             LocalBroadcastManager.getInstance(context).registerReceiver(timerUpdateReceiver, new IntentFilter(update));
             LocalBroadcastManager.getInstance(context).registerReceiver(timerStopReceiver, new IntentFilter(stop));
+            LocalBroadcastManager.getInstance(context).registerReceiver(stateChangeReceiver, new IntentFilter(state));
             Log.d("TimerService", "registerReceiver");
         } else {
             Log.w("TimerService", "registerReceiver Falied");
         }
     }
 
+
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onPause() {
+        super.onPause();
         Context context = requireContext();
-        context.unregisterReceiver(timerUpdateReceiver);
-        context.unregisterReceiver(timerStopReceiver);
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(timerUpdateReceiver);
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(timerStopReceiver);
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(stateChangeReceiver);
     }
 
     private void initViews(View v) {
         timerView = v.findViewById(R.id.timer_view);
         timeTextview = v.findViewById(R.id.time_textview);
+        timeTextview.setText(String.format("%02d:%02d", currentMinutes, currentSeconds));
 
         timeControlLayout = v.findViewById(R.id.timer_time_control_layout);
         addMinuteFab = v.findViewById(R.id.add_minute_fab);
@@ -156,6 +195,61 @@ public class TimeRecordTimerFragment extends Fragment {
         muteFab = v.findViewById(R.id.mute_fab);
     }
 
+    private void viewControl(int state) {
+        if (state == SESSION_START) {
+            sessionState = SESSION_START;
+            sessionStartBtn.setVisibility(View.GONE);
+            sessionControlLayout.setVisibility(View.VISIBLE);
+            addMinuteFab.setVisibility(View.VISIBLE);
+            subtractMinuteFab.setVisibility(View.VISIBLE);
+            timerView.setTouchable(false);
+
+            try {
+                Fragment parent = requireParentFragment();
+                View parentView = parent.getView();
+
+                if (parentView != null) {
+                    parentView.findViewById(R.id.add_session_fab).setVisibility(View.GONE);
+                    parentView.findViewById(R.id.subject_select_btn).setClickable(false);
+                }
+            }
+            catch (IllegalStateException e) {
+                Log.e("TimeRecordTimerFragment", "TimeRecordFragment not found");
+            }
+        }
+        else if (state == SESSION_END) {
+            sessionState = SESSION_END;
+            sessionControlFab.setImageResource(R.drawable.outline_pause_black_24);
+            muteFab.setImageResource(R.drawable.outline_volume_up_black_24);
+            sessionControlLayout.setVisibility(View.GONE);
+            addMinuteFab.setVisibility(View.GONE);
+            subtractMinuteFab.setVisibility(View.GONE);
+            sessionStartBtn.setVisibility(View.VISIBLE);
+
+            try {
+                Fragment parent = requireParentFragment();
+                View parentView = parent.getView();
+
+                if (parentView != null) {
+                    parentView.findViewById(R.id.add_session_fab).setVisibility(View.VISIBLE);
+                    parentView.findViewById(R.id.subject_select_btn).setClickable(true);
+                }
+            }
+            catch (IllegalStateException e) {
+                Log.e("TimeRecordTimerFragment", "TimeRecordFragment not found");
+            }
+        }
+        else if (state == SESSION_PAUSE) {
+            sessionState = SESSION_PAUSE;
+            timerView.setAlpha(0.5F);
+            sessionControlFab.setImageResource(R.drawable.outline_play_arrow_black_24);
+        }
+        else if (state == SESSION_RESUME) {
+            sessionState = SESSION_RESUME;
+            timerView.setAlpha(1F);
+            sessionControlFab.setImageResource(R.drawable.outline_pause_black_24);
+        }
+    }
     private void resetTimer() {
         if (isTimerPause) isTimerPause = false;
         timerView.resetRotation();
@@ -163,11 +257,7 @@ public class TimeRecordTimerFragment extends Fragment {
         timerView.setTouchable(true);
         timerView.setAlpha(1F);
 
-        sessionControlFab.setImageResource(R.drawable.outline_pause_black_24);
-        sessionControlLayout.setVisibility(View.GONE);
-        addMinuteFab.setVisibility(View.GONE);
-        subtractMinuteFab.setVisibility(View.GONE);
-        sessionStartBtn.setVisibility(View.VISIBLE);
+        viewControl(SESSION_END);
     }
 
     private void setupTimer() {
@@ -206,36 +296,38 @@ public class TimeRecordTimerFragment extends Fragment {
     private void setupTimerControl() {
         Context context = requireContext();
         sessionStartBtn.setOnClickListener(v -> {
-            Intent startTimerIntent = new Intent(context, TimerService.class);
-            startTimerIntent.setAction(TimerService.ACTION_START);
             sessionDuration = currentMinutes;
-            startTimerIntent.putExtra(TimerService.TIMER_TIME, sessionDuration * 60);
-            context.startService(startTimerIntent);
             startTime = LocalTime.now();
 
-            sessionStartBtn.setVisibility(View.GONE);
-            sessionControlLayout.setVisibility(View.VISIBLE);
-            addMinuteFab.setVisibility(View.VISIBLE);
-            subtractMinuteFab.setVisibility(View.VISIBLE);
-            timerView.setTouchable(false);
+            Bundle bundle = new Bundle();
+            bundle.putLong(TimerService.BUNDLE_TIMER_TIME, sessionDuration * 60);
+            bundle.putString(TimerService.BUNDLE_SUBJECT_NAME, selectedSubjectViewModel.selectedSubjectLiveData.getValue().getName());
+            bundle.putInt(TimerService.BUNDLE_SUBJECT_ID, selectedSubjectViewModel.selectedSubjectLiveData.getValue().getSubjectId());
+            bundle.putString(TimerService.BUNDLE_START_TIME, startTime.toString());
+
+            Intent startTimerIntent = new Intent(context, TimerService.class);
+            startTimerIntent.setAction(TimerService.ACTION_START);
+            startTimerIntent.putExtras(bundle);
+            context.startService(startTimerIntent);
+
+            viewControl(SESSION_START);
         });
         sessionControlFab.setOnClickListener(v -> {
             if (isTimerPause) {
                 Intent resumeTimerIntent = new Intent(context, TimerService.class);
                 resumeTimerIntent.setAction(TimerService.ACTION_RESUME);
                 context.startService(resumeTimerIntent);
-                timerView.setAlpha(1F);
 
-                sessionControlFab.setImageResource(R.drawable.outline_pause_black_24);
+                viewControl(SESSION_RESUME);
                 isTimerPause = false;
             } else {
                 Intent pauseTimerIntent = new Intent(context, TimerService.class);
                 pauseTimerIntent.setAction(TimerService.ACTION_PAUSE);
                 context.startService(pauseTimerIntent);
-                timerView.setAlpha(0.5F);
 
+                viewControl(SESSION_PAUSE);
                 isTimerPause = true;
-                sessionControlFab.setImageResource(R.drawable.outline_play_arrow_black_24);
+
             }
         });
 
@@ -243,6 +335,7 @@ public class TimeRecordTimerFragment extends Fragment {
             Intent stopTimerIntent = new Intent(context, TimerService.class);
             stopTimerIntent.setAction(TimerService.ACTION_STOP);
             context.startService(stopTimerIntent);
+            endTime = LocalTime.now();
             resetTimer();
             addSession();
         });
@@ -283,6 +376,13 @@ public class TimeRecordTimerFragment extends Fragment {
     private void addSession() {
         int subjectId = selectedSubjectViewModel.selectedSubjectLiveData.getValue().getSubjectId();
         LocalDate date = LocalDate.now();
-        StudySessionEntity studySessionEntity = new StudySessionEntity(subjectId, date, sessionDuration, startTime, endTime,);
+        Duration duration = Duration.between(startTime, endTime);
+        long restTime = duration.toMinutes() - sessionDuration;
+        if (restTime < 0) {
+            sessionDuration = duration.toMinutes();
+            restTime = 0;
+        }
+        StudySessionEntity studySessionEntity = new StudySessionEntity(subjectId, date, sessionDuration, startTime, endTime, restTime);
+        db.studySessionDao().insert(studySessionEntity);
     }
 }
