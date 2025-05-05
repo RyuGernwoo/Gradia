@@ -61,11 +61,11 @@ public class SubjectEntity {
 
     // UI Color Tag
     @ColumnInfo(name = "color")
-    public int color;
+    public String color;
 
     private boolean isExpanded = false;
 
-    public SubjectEntity(String name, int credit, int color, int type, String midTermSchedule, String finalTermSchedule, EvaluationRatio ratio, TargetStudyTime time) {
+    public SubjectEntity(String name, int credit, String color, int type, String midTermSchedule, String finalTermSchedule, EvaluationRatio ratio, TargetStudyTime time) {
         this.name = name;
         this.credit = credit;
         this.color = color;
@@ -148,11 +148,11 @@ public class SubjectEntity {
         this.ratio = ratio;
     }
 
-    public int getColor() {
+    public String getColor() {
         return color;
     }
 
-    public void setColor(int color) {
+    public void setColor(String color) {
         this.color = color;
     }
 

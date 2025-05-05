@@ -1,6 +1,7 @@
 package mp.gradia.time.inner.bottomsheet.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
@@ -44,7 +45,7 @@ public class SubjectSelectHolder extends RecyclerView.ViewHolder {
 
         Drawable baseDrawable = ContextCompat.getDrawable(context, R.drawable.color_circle);
         if (baseDrawable instanceof GradientDrawable) {
-            ((GradientDrawable) baseDrawable).setColor(ContextCompat.getColor(context, subject.getColor()));
+            ((GradientDrawable) baseDrawable).setColor(Color.parseColor(subject.getColor()));
             colorCircle.setImageDrawable(baseDrawable);
         }
 

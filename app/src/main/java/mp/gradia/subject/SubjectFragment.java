@@ -36,12 +36,12 @@ public class SubjectFragment extends Fragment {
 
         Button addSubjectBtn = view.findViewById(R.id.btn_add_subject);
         addSubjectBtn.setOnClickListener(v -> {
-            SubjectEntity newSubject1 = new SubjectEntity("모바일 프로그래밍", 3, R.color.c1, SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
-            SubjectEntity newSubject2 = new SubjectEntity("인공지능 개론", 3, R.color.c2, SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
-            SubjectEntity newSubject3 = new SubjectEntity("AI 수학", 3, R.color.c3, SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
-            SubjectEntity newSubject4 = new SubjectEntity("데이터 과학", 3, R.color.c4, SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
-            SubjectEntity newSubject5 = new SubjectEntity("디지털 마케팅", 2, R.color.c5, SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
-            SubjectEntity newSubject6 = new SubjectEntity("운영체제", 3, R.color.c6, SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
+            SubjectEntity newSubject1 = new SubjectEntity("모바일 프로그래밍", 3, "#dd3333", SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
+            SubjectEntity newSubject2 = new SubjectEntity("인공지능 개론", 3, "#1e73be", SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
+            SubjectEntity newSubject3 = new SubjectEntity("AI 수학", 3, "#eeee22", SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
+            SubjectEntity newSubject4 = new SubjectEntity("데이터 과학", 3,"#8224e3", SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
+            SubjectEntity newSubject5 = new SubjectEntity("디지털 마케팅", 2, "#e12797", SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
+            SubjectEntity newSubject6 = new SubjectEntity("운영체제", 3, "#F36A0D", SubjectEntity.REQUIRED_SUBJECT, null, null, null, null);
 
            disposable.add(
                    dao.insert(newSubject1, newSubject2, newSubject3, newSubject4, newSubject5, newSubject6)

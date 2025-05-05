@@ -18,7 +18,7 @@ import mp.gradia.database.entity.UserEntity;
 
 @Database(
         entities = {UserEntity.class, SubjectEntity.class, StudySessionEntity.class},
-        version = 2
+        version = 4
 )
 @TypeConverters({DateConverter.class, LocalDateConverter.class})
 public abstract class AppDatabase extends RoomDatabase {

@@ -45,6 +45,7 @@ public class SubjectSelectBottomSheetFragment extends BottomSheetDialogFragment 
     public void setOnBottomSheetItemClickListener(OnSubjectSelectListener listener) {
         this.listener = listener;
     }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +53,7 @@ public class SubjectSelectBottomSheetFragment extends BottomSheetDialogFragment 
 
         SubjectDao dao = db.subjectDao();
         SubjectViewModelFactory factory = new SubjectViewModelFactory(dao);
-        subjectViewModel = new ViewModelProvider(this, factory).get(SubjectViewModel.class);
+        subjectViewModel = new ViewModelProvider(requireParentFragment(), factory).get(SubjectViewModel.class);
     }
 
     @Override
@@ -89,11 +90,11 @@ public class SubjectSelectBottomSheetFragment extends BottomSheetDialogFragment 
         RecyclerView rv = getView().findViewById(R.id.subject_list);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // RecyclerView example
         item = new ArrayList<>();
 
         subjectViewModel.subjectListLiveData.observe(getViewLifecycleOwner(),
                 subjectList -> {
+                    Log.d("hasData", "ADD DATA");
                     item.addAll(subjectList);
                 }
         );

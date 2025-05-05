@@ -14,17 +14,49 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.15" />
 
-    <TextView
-        android:id="@+id/time_textview"
+    <LinearLayout
+        android:id="@+id/timer_time_control_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="25dp"
-        android:text="25:00"
-        android:textSize="30dp"
-        android:textStyle="bold"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timer_view" />
+        app:layout_constraintTop_toBottomOf="@+id/timer_view"
+        app:layout_constraintHeight_percent="0.09" >
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/subtract_minute_fab"
+            style="?attr/floatingActionButtonSmallStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/outline_remove_black_24" />
+
+        <TextView
+            android:id="@+id/time_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:text="25:00"
+            android:textSize="30dp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_minute_fab"
+            style="?attr/floatingActionButtonSmallStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/outline_add_black_24" />
+
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/session_start_btn"
@@ -34,11 +66,11 @@
         android:text="@string/btn_session_start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/time_textview"
+        app:layout_constraintTop_toBottomOf="@+id/timer_time_control_layout"
         app:layout_constraintWidth_percent="0.5" />
 
     <LinearLayout
-        android:id="@+id/session_control_layout"
+        android:id="@+id/timer_session_control_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
@@ -46,7 +78,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/time_textview">
+        app:layout_constraintTop_toBottomOf="@+id/timer_time_control_layout">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/mute_fab"

@@ -34,16 +34,15 @@ public class TimerService extends Service {
     public static final String ACTION_START = "ACTION_START";
     public static final String ACTION_PAUSE = "ACTION_PAUSE";
     public static final String ACTION_RESUME = "ACTION_RESUME";
+    public static final String ACTION_ADJUST_TIME = "ACTION_ADJUST_TIME";
     public static final String ACTION_STOP = "ACTION_STOP";
-    public static final String TIMER_TIME = "TIMER_TIME";
-
     public static final String ACTION_MUTE = "ACTION_MUTE";
     public static final String ACTION_UNMUTE = "ACTION_UNMUTE";
-
+    public static final String TIMER_TIME = "TIMER_TIME";
     public static final String BROADCAST_ACTION_TIMER_UPDATE = "TIMER_UPDATE";
     public static final String BROADCAST_ACTION_TIMER_STOP = "TIMER_STOP";
     public static final String BROADCAST_EXTRA_REMAINING = "REMAINING";
-
+    public static final String EXTRA_ADJUSTMENT_TIME = "EXTRA_ADJUSTMENT_TIME";
     // Notification
     private static final String CHANNEL_ID = "timer_channel";
     private static final String FINISHED_CHANNEL_ID = "timer_finished_channel";
@@ -90,13 +89,23 @@ public class TimerService extends Service {
                 if (duration > 0 && !isTimerRunning) {
                     showTempStopNotification(this, "Timer is running");
                     startTimer(duration);
-                } else if (isTimerRunning) {
+                }
+                else if (isTimerRunning) {
                     Log.w(TAG, "Timer is already running");
                     showTempStopNotification(this, "Timer is already running");
-                } else {
+                }
+                else {
                     Log.w(TAG, "Invalid duration: " + duration);
                     stopSelf();
                 }
+                break;
+            case ACTION_ADJUST_TIME:
+                long adjustDuration = intent.getLongExtra(EXTRA_ADJUSTMENT_TIME, 0L);
+                if (isTimerRunning && !isPaused && adjustDuration != 0) {
+                    adjustTimerTime(adjustDuration);
+                }
+                else
+                    Log.w(TAG, "Cannot Adjust Time");
                 break;
             case ACTION_PAUSE:
                 pauseTimer();
@@ -145,6 +154,13 @@ public class TimerService extends Service {
         sendTimerUpdateBroadcast(durationMillis);
     }
 
+    private void adjustTimerTime(long adjustDuration) {
+        Log.d(TAG, "Adjusting timer time by " + adjustDuration + " seconds");
+        long adjustMillis = adjustDuration * 1000;
+        durationMillis += adjustMillis;
+        remainingMillis += adjustMillis;
+        sendTimerUpdateBroadcast(remainingMillis);
+    }
     private void pauseTimer() {
         if (isTimerRunning && !isPaused) {
             Log.d(TAG, "Pausing Timer");

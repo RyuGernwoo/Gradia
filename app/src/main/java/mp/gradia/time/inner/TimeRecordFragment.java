@@ -1,5 +1,6 @@
 package mp.gradia.time.inner;
 
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +24,7 @@ import com.google.android.material.shape.CornerFamily;
 import com.google.android.material.shape.ShapeAppearanceModel;
 
 import java.util.Random;
+
 import mp.gradia.R;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.SubjectDao;
@@ -50,7 +52,7 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
 
     private AppDatabase db;
     private SubjectViewModel subjectViewModel;
-    private boolean noData = false;
+    private boolean hasData = true;
     private SubjectEntity selectedSubject;
 
     @Override
@@ -102,10 +104,13 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
 
     private void setupBottomSheet() {
         subjectSelectBtn.setOnClickListener(v -> {
-            if (noData) {
+            if (!hasData) {
                 ViewPager2 viewPager = getActivity().findViewById(R.id.view_pager);
                 viewPager.setCurrentItem(MainActivity.SUBJECT_FRAGMENT, true);
-            } else showBottomSheet();
+            } else {
+                showBottomSheet();
+                Log.d("hasData", "setup -" + String.valueOf(hasData));
+            }
         });
     }
 
@@ -155,16 +160,16 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
         subjectViewModel.subjectListLiveData.observe(getViewLifecycleOwner(),
                 subjectList -> {
                     if (subjectList.isEmpty()) {
-                        noData = true;
+                        hasData = false;
                         fragmentContainer.setClickable(false);
                         fragmentContainer.setAlpha(0.5F);
                         addSessionFab.setClickable(false);
                         addSessionFab.setAlpha(0.5F);
-                        Log.d("NODATA", "setup" + String.valueOf(noData));
+                        Log.d("hasData", "DATA " + String.valueOf(hasData));
                         Toast.makeText(requireContext(), R.string.toast_message_no_subjects, Toast.LENGTH_LONG).show();
-                    }
-                    else {
-                        noData = false;
+                    } else {
+                        hasData = true;
+                        Log.d("hasData", "DATA " + String.valueOf(hasData));
                         fragmentContainer.setClickable(true);
                         fragmentContainer.setAlpha(1F);
                         addSessionFab.setClickable(true);
@@ -176,7 +181,7 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
 
                             selectedSubjectTextView.setText(selectedSubject.getName());
                             GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.color_circle);
-                            drawable.setColor(getResources().getColor(selectedSubject.getColor()));
+                            drawable.setColor(Color.parseColor(selectedSubject.getColor()));
                             cShape.setImageDrawable(drawable);
                             loadChildFragment(new TimeRecordTimerFragment());
                         }
@@ -200,7 +205,12 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
 
         selectedSubjectTextView.setText(selectedSubject.getName());
         GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.color_circle);
-        drawable.setColor(getResources().getColor(selectedSubject.getColor()));
+        drawable.setColor(Color.parseColor(selectedSubject.getColor()));
         cShape.setImageDrawable(drawable);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 }
