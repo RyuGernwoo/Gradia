@@ -1,7 +1,6 @@
 package mp.gradia.time.inner.bottomsheet.adapter;
-import mp.gradia.time.inner.bottomsheet.Subject;
+import mp.gradia.database.entity.SubjectEntity;
 
-// Call
 public interface OnSubjectSelectListener {
-    void onBottomSheetItemClick(Subject item);
+    void onBottomSheetItemClick(SubjectEntity item);
 }

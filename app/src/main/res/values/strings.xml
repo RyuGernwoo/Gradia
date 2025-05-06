@@ -8,15 +8,30 @@
     <string name="text_label_analysis">분석</string>
 
     <!-- Time Fragment -->
+    <!-- Toast Message -->
+    <string name="toast_message_no_subjects">현재 추가된 과목이 없습니다. 과목을 추가해주세요.</string>
+    <!-- FAB -->
+    <string name="text_label_add_session_fab">세션 추가</string>
+
+    <!-- FAB expanded menu -->
+    <string name="fab_expanded_menu_item1">타이머</string>
+    <string name="fab_expanded_menu_item2">스탑워치</string>
+    <string name="fab_expanded_menu_item3">직접 추가</string>
+
+    <!-- Button -->
+    <string name="btn_session_start">세션을 시작합니다</string>
+
     <!-- Toggle Button -->
     <string name="text_label_toggle_record">기록</string>
     <string name="text_label_toggle_timeline">타임라인</string>
+
     <!-- Bottom Sheet -->
     <string name="text_label_bottom_sheet">과목</string>
     <string name="text_label_subject_target_hour">목표 시간</string>
     <string name="text_label_subject_studied_hour">공부 시간</string>
     <string name="text_label_subject_type">이수 구분</string>
     <string name="text_label_subject_credit">학점</string>
+
     <!-- Greeting Messages -->
     <string-array name="text_label_study_greeting_messages">
         <item>무엇에 집중하실건가요?</item>

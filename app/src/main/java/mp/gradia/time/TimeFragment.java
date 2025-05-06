@@ -24,10 +24,57 @@ public class TimeFragment extends Fragment {
     private ToggleViewHolder recordToggle;
     private ToggleViewHolder timelineToggle;
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_time_main, container, false);
+
+        initViewPager(v);
+        initToggles(v);
+        setupToggleListeners();
+        setupViewPagerCallback();
+
+        return v;
+    }
+
+    private void initViewPager(View v) {
+        viewPager = v.findViewById(R.id.view_pager);
+        viewPager.setAdapter(new TimeFragmentAdapter(this));
+    }
+
+    private void initToggles(View v) {
+        recordToggle = new ToggleViewHolder(v, R.id.record_toggle, R.id.record_icon, R.id.record_text);
+        timelineToggle = new ToggleViewHolder(v, R.id.timeline_toggle, R.id.timeline_icon, R.id.timeline_text);
+    }
+
+    private void setupToggleListeners() {
+        recordToggle.container.setOnClickListener(v -> selectPage(PAGE_RECORD));
+        timelineToggle.container.setOnClickListener(v -> selectPage(PAGE_TIMELINE));
+    }
+
+    private void setupViewPagerCallback() {
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                updateToggleSelection(position);
+            }
+        });
+    }
+
+    private void selectPage(int page) {
+        updateToggleSelection(page);
+        viewPager.setCurrentItem(page, true);
+    }
+
+    private void updateToggleSelection(int position) {
+        Context context = requireContext();
+        recordToggle.setSelected(context, position == PAGE_RECORD);
+        timelineToggle.setSelected(context, position == PAGE_TIMELINE);
+    }
+
     private static class ToggleViewHolder {
-        LinearLayout container;
-        ImageView icon;
-        TextView text;
+        final LinearLayout container;
+        final ImageView icon;
+        final TextView text;
 
         ToggleViewHolder(View parent, int containerId, int iconId, int textId) {
             container = parent.findViewById(containerId);
@@ -36,57 +83,12 @@ public class TimeFragment extends Fragment {
         }
 
         void setSelected(Context context, boolean isSelected) {
-            if (isSelected) {
-                container.setBackgroundResource(R.drawable.toggle_selected_background);
-                text.setTextColor(ContextCompat.getColor(context, R.color.black));
-                icon.setColorFilter(ContextCompat.getColor(context, R.color.black));
-            } else {
-                container.setBackgroundColor(Color.TRANSPARENT);
-                text.setTextColor(ContextCompat.getColor(context, R.color.gray));
-                icon.setColorFilter(ContextCompat.getColor(context, R.color.gray));
-            }
+            int textColor = ContextCompat.getColor(context, isSelected ? R.color.black : R.color.gray);
+            int iconColor = textColor;
+
+            container.setBackgroundResource(isSelected ? R.drawable.toggle_selected_background : android.R.color.transparent);
+            text.setTextColor(textColor);
+            icon.setColorFilter(iconColor);
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_time_main, container, false);
-
-        viewPager = v.findViewById(R.id.view_pager);
-        viewPager.setAdapter(new TimeFragmentAdapter(this));
-
-        recordToggle = new ToggleViewHolder(v, R.id.record_toggle, R.id.record_icon, R.id.record_text);
-        timelineToggle = new ToggleViewHolder(v, R.id.timeline_toggle, R.id.timeline_icon, R.id.timeline_text);
-
-        setupToggleListener();
-        setupViewPagerCallBack();
-
-        return v;
-    }
-
-    private void setupToggleListener() {
-        recordToggle.container.setOnClickListener(v -> {
-            setToggleSelected(0);
-            viewPager.setCurrentItem(PAGE_RECORD, true);
-        });
-
-        timelineToggle.container.setOnClickListener(v -> {
-            setToggleSelected(1);
-            viewPager.setCurrentItem(PAGE_TIMELINE, true);
-        });
-    }
-
-    private void setupViewPagerCallBack() {
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                setToggleSelected(position);
-            }
-        });
-    }
-
-    private void setToggleSelected(int position) {
-        recordToggle.setSelected(requireContext(), position == 0);
-        timelineToggle.setSelected(requireContext(), position == 1);
     }
 }

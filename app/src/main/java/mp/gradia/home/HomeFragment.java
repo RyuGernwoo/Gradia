@@ -20,8 +20,8 @@ import androidx.fragment.app.Fragment;
 import java.util.List;
 
 import mp.gradia.R;
+import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.main.MainActivity;
-import mp.gradia.subject.Subject;
 
 public class HomeFragment extends Fragment {
     private LinearLayout subjectListContainer;
@@ -73,7 +73,7 @@ public class HomeFragment extends Fragment {
     
     /* 추가된 과목 여부에 따라 텍스트와 버튼 또는 추가된 과목 표시 */
     private void updateSubjectList() {
-        List<Subject> subjects = ((MainActivity) requireActivity()).getSelectedSubjects();
+        List<SubjectEntity> subjects = ((MainActivity) requireActivity()).getSelectedSubjects();
 
         subjectListContainer.removeAllViews();
 
@@ -86,7 +86,7 @@ public class HomeFragment extends Fragment {
             btnGoToSubjects.setVisibility(View.GONE);
             subjectListContainer.setVisibility(View.VISIBLE);
 
-            for (Subject subject : subjects) {
+            for (SubjectEntity subject : subjects) {
                 TextView tv = new TextView(requireContext());
                 tv.setText(subject.getName());
                 tv.setTextSize(18f);

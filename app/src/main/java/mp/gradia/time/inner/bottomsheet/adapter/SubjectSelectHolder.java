@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import mp.gradia.R;
+import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.time.inner.bottomsheet.Subject;
 
 // ViewHolder caches item views for RecyclerView to improve scroll performance and avoid redundant findViewById calls
@@ -33,10 +34,13 @@ public class SubjectSelectHolder extends RecyclerView.ViewHolder {
         expandImgBtn = v.findViewById(R.id.expand_img_btn);
     }
 
-    public void bind(Subject subject, Context context, SubjectSelectAdapter.OnItemClickListener listener) {
-        subjectName.setText(subject.getSubjectName());
-        studyTime.setText(subject.getStudyTime() + " 시간");
-        subjectCredit.setText(subject.getSubjectCredit() + " 학점");
+    public void bind(SubjectEntity subject, Context context, SubjectSelectAdapter.OnItemClickListener listener) {
+        String timeStr = "0 시간";
+        String creditStr = subject.getCredit() + " 학점";
+
+        subjectName.setText(subject.getName());
+        studyTime.setText(timeStr);
+        subjectCredit.setText(creditStr);
 
         Drawable baseDrawable = ContextCompat.getDrawable(context, R.drawable.color_circle);
         if (baseDrawable instanceof GradientDrawable) {

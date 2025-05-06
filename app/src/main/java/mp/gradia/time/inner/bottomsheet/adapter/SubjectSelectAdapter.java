@@ -1,7 +1,6 @@
 package mp.gradia.time.inner.bottomsheet.adapter;
 
 import android.content.Context;
-import android.graphics.drawable.GradientDrawable;
 import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,19 +13,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import mp.gradia.R;
+import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.time.inner.bottomsheet.Subject;
 
 // Adapter connects data source to RecyclerView
 public class SubjectSelectAdapter extends RecyclerView.Adapter<SubjectSelectHolder> {
-    private List<Subject> itemList;
+    private List<SubjectEntity> itemList;
     private Context context;
     private OnItemClickListener listener;
 
     public interface OnItemClickListener {
-        void onItemClick(Subject item);
+        void onItemClick(SubjectEntity item);
     }
 
-    public SubjectSelectAdapter(List<Subject> itemList, Context context, OnItemClickListener listener) {
+    public SubjectSelectAdapter(List<SubjectEntity> itemList, Context context, OnItemClickListener listener) {
         this.itemList = itemList;
         this.context = context;
         this.listener = listener;
@@ -40,7 +40,7 @@ public class SubjectSelectAdapter extends RecyclerView.Adapter<SubjectSelectHold
 
     @Override
     public void onBindViewHolder(@NonNull SubjectSelectHolder holder, int position) {
-        Subject item = itemList.get(position);
+        SubjectEntity item = itemList.get(position);
         // Bind subject data to view components
         holder.bind(item, context, listener);
 
