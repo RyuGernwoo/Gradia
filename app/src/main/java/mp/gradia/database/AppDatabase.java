@@ -9,6 +9,7 @@ import androidx.room.TypeConverters;
 
 import mp.gradia.database.converter.DateConverter;
 import mp.gradia.database.converter.LocalDateConverter;
+import mp.gradia.database.converter.LocalTimeConverter;
 import mp.gradia.database.dao.StudySessionDao;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.dao.UserDao;
@@ -18,9 +19,9 @@ import mp.gradia.database.entity.UserEntity;
 
 @Database(
         entities = {UserEntity.class, SubjectEntity.class, StudySessionEntity.class},
-        version = 1
+        version = 4
 )
-@TypeConverters({DateConverter.class, LocalDateConverter.class})
+@TypeConverters({LocalDateConverter.class, LocalTimeConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();
 

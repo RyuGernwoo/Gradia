@@ -1,5 +1,6 @@
 package mp.gradia.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -8,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -16,10 +18,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mp.gradia.R;
-import mp.gradia.subject.Subject;
+import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.time.inner.timer.TimerService;
 
 public class MainActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
+    public static final int HOME_FRAGMENT = 0;
+    public static final int SUBJECT_FRAGMENT = 1;
+    public static final int TIME_FRAGMENT = 2;
+    public static final int ANALYSIS_FRAGMENT = 3;
+
+    private static boolean processInitialized = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +53,10 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation.setOnItemSelectedListener(item -> {
             // Navigate to the corresponding fragment page when a tab is selected
             // 0: HomeFragment, 1: SubjectFragment, 2: TimeFragment, 3: AnalysisFragment
-            if (item.getItemId() == R.id.nav_home) viewPager.setCurrentItem(0, true);
-            else if (item.getItemId() == R.id.nav_subject) viewPager.setCurrentItem(1, true);
-            else if (item.getItemId() == R.id.nav_time) viewPager.setCurrentItem(2, true);
-            else if (item.getItemId() == R.id.nav_analysis) viewPager.setCurrentItem(3, true);
+            if (item.getItemId() == R.id.nav_home) viewPager.setCurrentItem(HOME_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_subject) viewPager.setCurrentItem(SUBJECT_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_time) viewPager.setCurrentItem(TIME_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_analysis) viewPager.setCurrentItem(ANALYSIS_FRAGMENT, true);
             else return false;
 
             Log.d("MainActivity", "test");
@@ -79,18 +88,18 @@ public class MainActivity extends AppCompatActivity {
     }
     /* Home에 추가된 과목 없을 때 사용 */
     public void moveToSubjectPage() {
-        viewPager.setCurrentItem(1, true); // 1 = SubjectFragment 위치
+        viewPager.setCurrentItem(SUBJECT_FRAGMENT, true); // 1 = SubjectFragment 위치
     }
 
     /* 과목 추가 (임시) */
-    private final List<Subject> selectedSubjects = new ArrayList<>();
+    private final List<SubjectEntity> selectedSubjects = new ArrayList<>();
 
-    public void addSubject(Subject subject) {
+    public void addSubject(SubjectEntity subject) {
         selectedSubjects.add(subject);
         Log.d("MainActivity", "Subject 추가됨: " + subject.getName());
     }
 
-    public List<Subject> getSelectedSubjects() {
+    public List<SubjectEntity> getSelectedSubjects() {
         return selectedSubjects;
     }
 }
