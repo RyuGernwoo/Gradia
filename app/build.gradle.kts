@@ -58,7 +58,8 @@ dependencies {
 
     val compose_runtime_version = "1.7.8"
     implementation("androidx.compose.runtime:runtime:$compose_runtime_version")
-    
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0") //그래프용 라이브러리로 MPAndroidchart 사용하려고 추가함
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
