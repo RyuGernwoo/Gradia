@@ -58,7 +58,7 @@ dependencies {
 
     val compose_runtime_version = "1.7.8"
     implementation("androidx.compose.runtime:runtime:$compose_runtime_version")
-
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.github.orion-gz:Pomodoro-Timer-Widget:1.0.7")
 
     implementation(libs.appcompat)
