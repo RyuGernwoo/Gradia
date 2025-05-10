@@ -1,0 +1,63 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- 검색창 + 정렬 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextSearch"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="과목명 검색" />
+
+        <Button
+            android:id="@+id/buttonSort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="정렬" />
+    </LinearLayout>
+
+    <!-- 정렬 기준 텍스트 -->
+    <TextView
+        android:id="@+id/sortTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="정렬: 과목명"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp" />
+
+
+    <!-- 과목 없음 -->
+    <TextView
+        android:id="@+id/textEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="등록된 과목이 없습니다."
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:layout_marginTop="16dp"/>
+
+    <!-- 과목 리스트 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewSubjects"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- 과목 추가 버튼 -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddSubject"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add" />
+</LinearLayout>

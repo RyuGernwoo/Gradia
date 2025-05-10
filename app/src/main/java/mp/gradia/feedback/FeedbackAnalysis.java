@@ -1,5 +1,6 @@
 package mp.gradia.feedback;
 
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -12,8 +13,8 @@ public class FeedbackAnalysis {
     int averageSessionDurationMinutes;
 //    int activityTimeRatio;
 
-    Date startDate;
-    Date endDate;
+    LocalTime startDate;
+    LocalTime endDate;
 
     Map<String, Integer> subjectStudyTime;
 //    Map<String, Integer> activityDistribution;
@@ -53,7 +54,7 @@ public class FeedbackAnalysis {
      * 시작 날짜를 가져옵니다.
      * @return 시작 날짜
      */
-    public Date getStartDate() {
+    public LocalTime getStartDate() {
         return startDate;
     }
 
@@ -61,7 +62,7 @@ public class FeedbackAnalysis {
      * 종료 날짜를 가져옵니다.
      * @return 종료 날짜
      */
-    public Date getEndDate() {
+    public LocalTime getEndDate() {
         return endDate;
     }
 
@@ -115,7 +116,7 @@ public class FeedbackAnalysis {
      * 시작 날짜를 설정합니다.
      * @param startDate 시작 날짜
      */
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalTime startDate) {
         this.startDate = startDate;
     }
 
@@ -123,7 +124,7 @@ public class FeedbackAnalysis {
      * 종료 날짜를 설정합니다.
      * @param endDate 종료 날짜
      */
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalTime endDate) {
         this.endDate = endDate;
     }
 

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/subjectListFragment">
+
+    <fragment
+        android:id="@+id/subjectListFragment"
+        android:name="mp.gradia.subject.ui.SubjectListFragment"
+        android:label="과목 목록">
+        <action
+            android:id="@+id/action_subjectList_to_subjectDetail"
+            app:destination="@id/subjectDetailFragment" />
+        <action
+            android:id="@+id/action_subjectList_to_subjectAdd"
+            app:destination="@id/subjectAddFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/subjectDetailFragment"
+        android:name="mp.gradia.subject.ui.SubjectDetailFragment"
+        android:label="과목 상세">
+        <action
+            android:id="@+id/action_subjectDetail_to_subjectAdd"
+            app:destination="@id/subjectAddFragment" />
+        <action
+            android:id="@+id/action_subjectDetail_to_subjectDeleteDialog"
+            app:destination="@id/subjectDeleteDialog"
+            app:popUpTo="@id/subjectDetailFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/subjectAddFragment"
+        android:name="mp.gradia.subject.ui.SubjectAddFragment"
+        android:label="과목 추가" />
+
+
+    <dialog
+        android:id="@+id/subjectDeleteDialog"
+        android:name="mp.gradia.subject.ui.SubjectDeleteDialog"
+        android:label="과목 삭제 확인">
+        <action
+            android:id="@+id/action_subjectDeleteDialog_to_subjectList"
+            app:destination="@id/subjectListFragment"
+            app:popUpTo="@id/subjectListFragment"
+            app:popUpToInclusive="true"/>
+    </dialog>
+</navigation>

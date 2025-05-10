@@ -1,5 +1,6 @@
 package mp.gradia.feedback;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -28,16 +29,16 @@ public class FeedbackManager {
 
         analysis.setTotalSessionCount(logList.size());
         analysis.setTotalDurationMinutes(logList.stream()
-                .reduce(0, (sum, session) -> sum + session.studyTime, Integer::sum));
+                .reduce(0, (sum, session) -> sum + (int) session.studyTime, Integer::sum));
         analysis.setSubjectStudyTime(new HashMap<>());
 
         // 과목별 학습 시간 계산
         for (var session : logList) {
-            if (!analysis.getSubjectStudyTime().containsKey(session.subjectId)) {
-                analysis.getSubjectStudyTime().put(session.subjectId, session.studyTime);
+            if (!analysis.getSubjectStudyTime().containsKey(Integer.toString(session.subjectId))) {
+                analysis.getSubjectStudyTime().put(Integer.toString(session.subjectId), (int) session.studyTime);
             } else {
-                analysis.getSubjectStudyTime().put(session.subjectId,
-                        analysis.getSubjectStudyTime().get(session.subjectId) + session.studyTime);
+                analysis.getSubjectStudyTime().put(Integer.toString(session.subjectId),
+                        analysis.getSubjectStudyTime().get(Integer.toString(session.subjectId)) + (int) session.studyTime);
             }
         }
 
@@ -53,14 +54,14 @@ public class FeedbackManager {
         // ...
 
         // 분석 결과에 기간 시작/종료 추가
-        Date startDate = null;
-        Date endDate = null;
+        LocalTime startDate = null;
+        LocalTime endDate = null;
 
         for (var session : logList) {
-            if (startDate == null || session.startTime.before(startDate)) {
+            if (startDate == null || session.startTime.isBefore(startDate)) {
                 startDate = session.startTime;
             }
-            if (endDate == null || session.endTime.after(endDate)) {
+            if (endDate == null || session.endTime.isAfter(endDate)) {
                 endDate = session.endTime;
             }
         }
