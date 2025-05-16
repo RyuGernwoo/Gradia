@@ -1,0 +1,87 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 뒤로가기 -->
+        <ImageButton
+            android:id="@+id/buttonBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back"
+            android:background="@android:color/transparent"/>
+
+        <TextView android:id="@+id/textSubjectName" android:textSize="24sp" android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/textType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/textCredit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/textDifficulty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/textMidSchedule"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/textFinalSchedule"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/textEvalRatio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/textTargetTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- 할 일 항목은 따로 RecyclerView 가능 -->
+        <TextView
+            android:text="할 일 목록"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerTodo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+        <!-- 할 일 추가 버튼 -->
+        <Button
+            android:id="@+id/buttonAddTodo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="할 일 추가"
+            android:layout_marginTop="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <ImageButton
+                android:id="@+id/buttonEdit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit"
+                android:background="@null"/>
+
+            <ImageButton
+                android:id="@+id/buttonDelete"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_delete"
+                android:background="@null"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

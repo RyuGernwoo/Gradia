@@ -47,6 +47,8 @@ dependencies {
     val fragment_version = "1.8.3"
     implementation("androidx.fragment:fragment:$fragment_version")
 
+    implementation ("androidx.navigation:navigation-fragment:2.7.7")
+    implementation ("androidx.navigation:navigation-ui:2.7.7")
     // Android Room & RxJava
     val room_version = "2.6.1"
     ksp("androidx.room:room-compiler:$room_version")
@@ -65,7 +67,14 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:2.9.0")
 }
