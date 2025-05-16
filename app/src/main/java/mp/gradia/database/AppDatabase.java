@@ -12,14 +12,16 @@ import mp.gradia.database.converter.LocalDateConverter;
 import mp.gradia.database.converter.LocalTimeConverter;
 import mp.gradia.database.dao.StudySessionDao;
 import mp.gradia.database.dao.SubjectDao;
+import mp.gradia.database.dao.TodoDao;
 import mp.gradia.database.dao.UserDao;
 import mp.gradia.database.entity.StudySessionEntity;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.database.entity.TodoEntity;
 import mp.gradia.database.entity.UserEntity;
 
 @Database(
-        entities = {UserEntity.class, SubjectEntity.class, StudySessionEntity.class},
-        version = 4
+        entities = {UserEntity.class, SubjectEntity.class, StudySessionEntity.class, TodoEntity.class },
+        version = 5
 )
 @TypeConverters({LocalDateConverter.class, LocalTimeConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
@@ -27,6 +29,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract SubjectDao subjectDao();
 
+    public abstract TodoDao todoDao();
     public abstract StudySessionDao studySessionDao();
 
     // If app runs in a single process, should follow the singleton design pattern when instantiating an AppDatabase object

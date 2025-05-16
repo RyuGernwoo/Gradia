@@ -121,23 +121,42 @@ public class SubjectAddFragment extends Fragment {
     }
     // 기존 데이터로 입력 필드 채우기
     private void fillForm(SubjectEntity subject) {
+        if (subject == null) return;
+
         inputName.setText(subject.name);
         inputType.setSelection(subject.type);
         inputCredit.setText(String.valueOf(subject.credit));
-        inputDifficulty.setText(String.valueOf(subject.difficulty));
-        inputMid.setText(subject.midTermSchedule);
-        inputFinal.setText(subject.finalTermSchedule);
+        inputDifficulty.setText(subject.difficulty == null ? "" : String.valueOf(subject.difficulty));
+        inputMid.setText(subject.midTermSchedule != null ? subject.midTermSchedule : "");
+        inputFinal.setText(subject.finalTermSchedule != null ? subject.finalTermSchedule : "");
 
-        inputMidRatio.setText(String.valueOf(subject.ratio.midTermRatio));
-        inputFinalRatio.setText(String.valueOf(subject.ratio.finalTermRatio));
-        inputQuizRatio.setText(String.valueOf(subject.ratio.quizRatio));
-        inputAssignmentRatio.setText(String.valueOf(subject.ratio.assignmentRatio));
-        inputAttendanceRatio.setText(String.valueOf(subject.ratio.attendanceRatio));
+        // subject.ratio가 null일 수 있음
+        if (subject.ratio != null) {
+            inputMidRatio.setText(String.valueOf(subject.ratio.midTermRatio));
+            inputFinalRatio.setText(String.valueOf(subject.ratio.finalTermRatio));
+            inputQuizRatio.setText(String.valueOf(subject.ratio.quizRatio));
+            inputAssignmentRatio.setText(String.valueOf(subject.ratio.assignmentRatio));
+            inputAttendanceRatio.setText(String.valueOf(subject.ratio.attendanceRatio));
+        } else {
+            inputMidRatio.setText("");
+            inputFinalRatio.setText("");
+            inputQuizRatio.setText("");
+            inputAssignmentRatio.setText("");
+            inputAttendanceRatio.setText("");
+        }
 
-        inputDaily.setText(String.valueOf(subject.time.dailyTargetStudyTime));
-        inputWeekly.setText(String.valueOf(subject.time.weeklyTargetStudyTime));
-        inputMonthly.setText(String.valueOf(subject.time.monthlyTargetStudyTime));
+        // subject.time도 null일 수 있음
+        if (subject.time != null) {
+            inputDaily.setText(String.valueOf(subject.time.dailyTargetStudyTime));
+            inputWeekly.setText(String.valueOf(subject.time.weeklyTargetStudyTime));
+            inputMonthly.setText(String.valueOf(subject.time.monthlyTargetStudyTime));
+        } else {
+            inputDaily.setText("");
+            inputWeekly.setText("");
+            inputMonthly.setText("");
+        }
     }
+
 
     private int parse(EditText e) {
         return TextUtils.isEmpty(e.getText()) ? 0 : Integer.parseInt(e.getText().toString());

@@ -47,6 +47,8 @@ dependencies {
     val fragment_version = "1.8.3"
     implementation("androidx.fragment:fragment:$fragment_version")
 
+    implementation ("androidx.navigation:navigation-fragment:2.7.7")
+    implementation ("androidx.navigation:navigation-ui:2.7.7")
     // Android Room & RxJava
     val room_version = "2.6.1"
     ksp("androidx.room:room-compiler:$room_version")

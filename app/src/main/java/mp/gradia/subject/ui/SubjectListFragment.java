@@ -3,6 +3,7 @@ package mp.gradia.subject.ui;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,6 +43,7 @@ public class SubjectListFragment extends Fragment {
     private List<SubjectEntity> fullSubjectList = new ArrayList<>();
     private int selectedFilterType = -1; // -1: 전체, 0~2: 필터
     private int selectedSort = 0; // 0: 이름, 1: 학점, 2: 주간 목표시간
+    private boolean isShowingAll = false;
 
     public SubjectListFragment() {}
 
@@ -87,6 +90,7 @@ public class SubjectListFragment extends Fragment {
             bundle.putInt("subjectId", subject.subjectId);
             Navigation.findNavController(requireView()).navigate(R.id.action_subjectList_to_subjectDetail, bundle);
 
+            Log.d("subjectId", String.valueOf(subject.subjectId));
         });
 
         // 추가 버튼
@@ -104,13 +108,19 @@ public class SubjectListFragment extends Fragment {
 
                 if (itemId == R.id.sort_name) {
                     selectedSort = 0;
+                    isShowingAll = false;
                 } else if (itemId == R.id.sort_credit) {
                     selectedSort = 1;
+                    isShowingAll = false;
                 } else if (itemId == R.id.sort_weekly) {
                     selectedSort = 2;
+                    isShowingAll = false;
                 } else if (itemId == R.id.sort_all) {
                     selectedFilterType = -1;
                     subjectViewModel.setFilterType(selectedFilterType);
+                    isShowingAll = true;
+                    updateFilteredAndSortedList();
+                    return true;
                 }
 
                 subjectViewModel.setSortType(selectedSort);
@@ -151,17 +161,25 @@ public class SubjectListFragment extends Fragment {
                 Collections.sort(filtered, (s1, s2) -> Integer.compare(s2.credit, s1.credit));
                 break;
             case 2: // 주간 목표시간 내림차순
-                Collections.sort(filtered, (s1, s2) -> Integer.compare(
-                        s2.time.weeklyTargetStudyTime,
-                        s1.time.weeklyTargetStudyTime));
+                Collections.sort(filtered, (s1, s2) -> {
+                    int t1 = (s1.time != null) ? s1.time.weeklyTargetStudyTime : 0;
+                    int t2 = (s2.time != null) ? s2.time.weeklyTargetStudyTime : 0;
+                    return Integer.compare(t2, t1); // 내림차순
+                });
                 break;
         }
 
         subjectAdapter.setSubjects(filtered);
         textEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
         TextView sortTextView = requireView().findViewById(R.id.sortTextView);
-        String[] sortNames = {"이름", "학점", "주간 목표시간"};
-        sortTextView.setText("정렬: " + sortNames[selectedSort]);
+        if (isShowingAll) {
+            sortTextView.setText("정렬: 전체 보기");
+        } else {
+            String[] sortNames = {"이름", "학점", "주간 목표시간"};
+            if (selectedSort >= 0 && selectedSort < sortNames.length) {
+                sortTextView.setText("정렬: " + sortNames[selectedSort]);
+            }
+        }
 
     }
 }
