@@ -6,7 +6,7 @@ package mp.gradia.feedback;
 public class FeedbackAdvice {
     private FeedbackAdviceType type;
     private int days;
-    private String subjectName;
+    private int subjectId;
 
     private FeedbackAdvice(FeedbackAdviceType type) {
         this.type = type;
@@ -20,12 +20,13 @@ public class FeedbackAdvice {
         return days;
     }
 
-    public String getSubjectName() {
-        return subjectName;
+    public int getSubjectId() {
+        return subjectId;
     }
 
     /**
      * 분석 결과 없음
+     * 
      * @return 피드백 조언 객체
      */
     public static FeedbackAdvice createNoAnalysisAdvice() {
@@ -34,6 +35,7 @@ public class FeedbackAdvice {
 
     /**
      * 최근 n일간 세션 없음
+     * 
      * @param days 최근 세션이 없었던 일수
      * @return 피드백 조언 객체
      */
@@ -45,6 +47,7 @@ public class FeedbackAdvice {
 
     /**
      * 최근 n일 평균 보다 세션이 길어짐
+     * 
      * @param days 최근 세션이 길어졌던 일수
      * @return 피드백 조언 객체
      */
@@ -56,6 +59,7 @@ public class FeedbackAdvice {
 
     /**
      * 최근 n일 평균 보다 세션이 짧아짐
+     * 
      * @param days 최근 세션이 짧아졌던 일수
      * @return 피드백 조언 객체
      */
@@ -67,30 +71,33 @@ public class FeedbackAdvice {
 
     /**
      * 최근 n일간 특정 과목의 학습 없음
-     * @param days 최근 특정 과목의 학습이 없었던 일수
-     * @param subjectName 특정 과목 이름
+     * 
+     * @param days      최근 특정 과목의 학습이 없었던 일수
+     * @param subjectId 특정 과목 이름
      * @return 피드백 조언 객체
      */
-    public static FeedbackAdvice createNoRecentSpecificSubjectAdvice(int days, String subjectName) {
+    public static FeedbackAdvice createNoRecentSpecificSubjectAdvice(int days, int subjectId) {
         FeedbackAdvice advice = new FeedbackAdvice(FeedbackAdviceType.NO_RECENT_SPECIFIC_SUBJECT);
         advice.days = days;
-        advice.subjectName = subjectName;
+        advice.subjectId = subjectId;
         return advice;
     }
 
     /**
      * 새로운 과목 시작
-     * @param subjectName 새로운 과목 이름
+     * 
+     * @param subjectId 새로운 과목 이름
      * @return 피드백 조언 객체
      */
-    public static FeedbackAdvice createStartNewSubjectAdvice(String subjectName) {
+    public static FeedbackAdvice createStartNewSubjectAdvice(int subjectId) {
         FeedbackAdvice advice = new FeedbackAdvice(FeedbackAdviceType.START_NEW_SUBJECT);
-        advice.subjectName = subjectName;
+        advice.subjectId = subjectId;
         return advice;
     }
 
     /**
      * 특별한 패턴 변화 없음
+     * 
      * @return 피드백 조언 객체
      */
     public static FeedbackAdvice createNoSpecialPatternChangedAdvice() {
@@ -99,6 +106,7 @@ public class FeedbackAdvice {
 
     /**
      * 평균 세션이 짧음
+     * 
      * @return 피드백 조언 객체
      */
     public static FeedbackAdvice createAverageSessionShortAdvice() {
@@ -107,6 +115,7 @@ public class FeedbackAdvice {
 
     /**
      * 평균 세션이 길음
+     * 
      * @return 피드백 조언 객체
      */
     public static FeedbackAdvice createAverageSessionLongAdvice() {
@@ -115,12 +124,13 @@ public class FeedbackAdvice {
 
     /**
      * 특정 과목 집중
-     * @param subjectName 특정 과목 이름
+     * 
+     * @param subjectId 특정 과목 이름
      * @return 피드백 조언 객체
      */
-    public static FeedbackAdvice createSubjectConcentrationAdvice(String subjectName) {
+    public static FeedbackAdvice createSubjectConcentrationAdvice(int subjectId) {
         FeedbackAdvice advice = new FeedbackAdvice(FeedbackAdviceType.SUBJECT_CONCENTRATION);
-        advice.subjectName = subjectName;
+        advice.subjectId = subjectId;
         return advice;
     }
 }

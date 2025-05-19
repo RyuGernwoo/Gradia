@@ -16,7 +16,7 @@ public class FeedbackAnalysis {
     LocalTime startDate;
     LocalTime endDate;
 
-    Map<String, Integer> subjectStudyTime;
+    Map<Integer, Long> subjectStudyTime;
 //    Map<String, Integer> activityDistribution;
 //    Map<String, Integer> activityTimeDistribution;
 
@@ -70,7 +70,7 @@ public class FeedbackAnalysis {
      * 과목별 학습 시간을 가져옵니다.
      * @return 과목별 학습 시간 (Map<과목명, 학습시간>)
      */
-    public Map<String, Integer> getSubjectStudyTime() {
+    public Map<Integer, Long> getSubjectStudyTime() {
         return subjectStudyTime;
     }
 
@@ -132,7 +132,7 @@ public class FeedbackAnalysis {
      * 과목별 학습 시간을 설정합니다.
      * @param subjectStudyTime 과목별 학습 시간 (Map<과목명, 학습시간>)
      */
-    public void setSubjectStudyTime(Map<String, Integer> subjectStudyTime) {
+    public void setSubjectStudyTime(Map<Integer, Long> subjectStudyTime) {
         this.subjectStudyTime = subjectStudyTime;
     }
 
