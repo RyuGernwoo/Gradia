@@ -2,9 +2,11 @@ package mp.gradia.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -14,15 +16,28 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import mp.gradia.R;
+import mp.gradia.api.ApiHelper;
+import mp.gradia.api.AuthManager;
+import mp.gradia.api.CloudSyncManager;
+import mp.gradia.api.RetrofitClient;
+import mp.gradia.api.models.AuthResponse;
 import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.time.inner.timer.TimerService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
+    private CloudSyncManager cloudSyncManager;
+
+    private AuthManager authManager;
+
     public static final int HOME_FRAGMENT = 0;
     public static final int SUBJECT_FRAGMENT = 1;
     public static final int TIME_FRAGMENT = 2;
@@ -40,6 +55,26 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, systemBars.top, 0, 0);
             return insets;
+        });
+
+        // 클라우드 동기화
+        // 서버로부터 데이터를 다운로드 후 기기에 저장
+        cloudSyncManager = new CloudSyncManager(this);
+        cloudSyncManager.downloadFromServer(new CloudSyncManager.SyncCallback() {
+            @Override
+            public void onSuccess() {
+                Log.e("MainActivity", "Cloud Sync Success");
+            }
+
+            @Override
+            public void onError(String message) {
+                Log.e("MainActivity", "Cloud Sync Error: " + message);
+            }
+
+            @Override
+            public void onProgress(int progress, int total) {
+
+            }
         });
 
         // ViewPager
@@ -86,6 +121,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        cloudSyncManager.uploadToServer(new CloudSyncManager.SyncCallback() {
+            @Override
+            public void onSuccess() {
+                Log.e("MainActivity", "Cloud Sync Success");
+            }
+
+            @Override
+            public void onError(String message) {
+                Log.e("MainActivity", "Cloud Sync Error: " + message);
+            }
+
+            @Override
+            public void onProgress(int progress, int total) {
+
+            }
+        });
+    }
+
     /* Home에 추가된 과목 없을 때 사용 */
     public void moveToSubjectPage() {
         viewPager.setCurrentItem(SUBJECT_FRAGMENT, true); // 1 = SubjectFragment 위치
