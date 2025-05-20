@@ -22,4 +22,20 @@ public class EvaluationRatio {
     // 출석 비율
     @ColumnInfo(name = "attendance_ratio")
     public int attendanceRatio;
+
+    public EvaluationRatio(int midTermRatio, int finalTermRatio, int quizRatio, int assignmentRatio, int attendanceRatio) {
+        this.midTermRatio = midTermRatio;
+        this.finalTermRatio = finalTermRatio;
+        this.quizRatio = quizRatio;
+        this.assignmentRatio = assignmentRatio;
+        this.attendanceRatio = attendanceRatio;
+    }
+
+    public EvaluationRatio() {
+        this.midTermRatio = 0;
+        this.finalTermRatio = 0;
+        this.quizRatio = 0;
+        this.assignmentRatio = 0;
+        this.attendanceRatio = 0;
+    }
 }
