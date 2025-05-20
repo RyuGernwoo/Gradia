@@ -5,15 +5,11 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
+    <!-- 목표 시간에 도달하지 않은 과목을 표시하도록 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="🔔 새로운 공지사항이 있습니다."
+        android:text="A 학습 시간이 아직 달성되지 않았어요!"
         android:padding="8dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="🕒 시간표가 변경되었습니다."
-        android:padding="8dp" />
 </LinearLayout>
