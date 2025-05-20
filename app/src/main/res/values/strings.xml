@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Gradia</string>
 
+    <string name="profile_image_description">사용자 프로필 사진</string>
+    <string name="default_web_client_id">YOUR_WEB_CLIENT_ID_HERE</string>
+
+    <string name="subject_type_required">전공필수</string>
+    <string name="subject_type_elective">전공선택</string>
+    <string name="subject_type_liberal_arts">교양</string>
+    <string name="subject_type_unknown">미분류</string>
+
     <!-- Navigation Bar -->
     <string name="text_label_home">홈</string>
     <string name="text_label_subject">과목</string>
@@ -44,5 +52,8 @@
         <item>불안해하지 마세요. 한 걸음씩 가면 됩니다</item>
         <item>어제보다 나은 오늘을 위해, 천천히 시작해볼까요?</item>
     </string-array>
+
+    <string name="google_web_client_id">637824960431-fo6ev723vd5u0pmqm4m17r79icm5ugc1.apps.googleusercontent.com</string>
+    <string name="kakao_web_client_id">kakao0ae3bc452c369df08a11b5fd073d3df9</string>
 
 </resources>

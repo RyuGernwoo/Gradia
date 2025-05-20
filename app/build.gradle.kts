@@ -81,4 +81,16 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     testImplementation(libs.mockito.core)
+
+    // 구글 연동
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    // 카카오 로그인 SDK
+    implementation("com.kakao.sdk:v2-user:2.21.2")
+
+    // Glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    // annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0' // Java 프로젝트의 경우 필요할 수 있지만, ksp와 함께 사용 시 생략 가능성 있음
+    // 또는 최신 가이드에 따라 ksp 사용
+    ksp("com.github.bumptech.glide:ksp:4.16.0") // Glide KSP
 }
