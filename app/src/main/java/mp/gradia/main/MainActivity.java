@@ -35,8 +35,7 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
     private CloudSyncManager cloudSyncManager;
-
-    private AuthManager authManager;
+//    private AuthManager authManager;
 
     public static final int HOME_FRAGMENT = 0;
     public static final int SUBJECT_FRAGMENT = 1;
@@ -59,23 +58,24 @@ public class MainActivity extends AppCompatActivity {
 
         // 클라우드 동기화
         // 서버로부터 데이터를 다운로드 후 기기에 저장
-        cloudSyncManager = new CloudSyncManager(this);
-        cloudSyncManager.downloadFromServer(new CloudSyncManager.SyncCallback() {
-            @Override
-            public void onSuccess() {
-                Log.e("MainActivity", "Cloud Sync Success");
-            }
+        // TODO: 사용자로 하여금 서버에서 가져오도록 요청할 수 있도록 구현 예정.
+         cloudSyncManager = new CloudSyncManager(this);
+        // cloudSyncManager.downloadFromServer(new CloudSyncManager.SyncCallback() {
+        // @Override
+        // public void onSuccess() {
+        // Log.e("MainActivity", "Cloud Sync Success");
+        // }
 
-            @Override
-            public void onError(String message) {
-                Log.e("MainActivity", "Cloud Sync Error: " + message);
-            }
+        // @Override
+        // public void onError(String message) {
+        // Log.e("MainActivity", "Cloud Sync Error: " + message);
+        // }
 
-            @Override
-            public void onProgress(int progress, int total) {
+        // @Override
+        // public void onProgress(int progress, int total) {
 
-            }
-        });
+        // }
+        // });
 
         // ViewPager
         viewPager = findViewById(R.id.view_pager);
@@ -88,11 +88,16 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation.setOnItemSelectedListener(item -> {
             // Navigate to the corresponding fragment page when a tab is selected
             // 0: HomeFragment, 1: SubjectFragment, 2: TimeFragment, 3: AnalysisFragment
-            if (item.getItemId() == R.id.nav_home) viewPager.setCurrentItem(HOME_FRAGMENT, true);
-            else if (item.getItemId() == R.id.nav_subject) viewPager.setCurrentItem(SUBJECT_FRAGMENT, true);
-            else if (item.getItemId() == R.id.nav_time) viewPager.setCurrentItem(TIME_FRAGMENT, true);
-            else if (item.getItemId() == R.id.nav_analysis) viewPager.setCurrentItem(ANALYSIS_FRAGMENT, true);
-            else return false;
+            if (item.getItemId() == R.id.nav_home)
+                viewPager.setCurrentItem(HOME_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_subject)
+                viewPager.setCurrentItem(SUBJECT_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_time)
+                viewPager.setCurrentItem(TIME_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_analysis)
+                viewPager.setCurrentItem(ANALYSIS_FRAGMENT, true);
+            else
+                return false;
 
             Log.d("MainActivity", "test");
             return true;
