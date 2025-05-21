@@ -7,9 +7,9 @@ import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(
-        tableName = "subjects"
-)
+import java.time.LocalDateTime;
+
+@Entity(tableName = "subjects")
 public class SubjectEntity {
     public static final int REQUIRED_SUBJECT = 0;
     public static final int ELECTIVE_SUBJECT = 1;
@@ -20,6 +20,21 @@ public class SubjectEntity {
     @NonNull
     @ColumnInfo(name = "subject_id")
     public int subjectId = 0;
+
+    // 서버 ID
+    @Nullable
+    @ColumnInfo(name = "server_id")
+    public String serverId;
+
+    // 생성 시간
+    @Nullable
+    @ColumnInfo(name = "created_at")
+    public LocalDateTime createdAt;
+
+    // 업데이트 시간
+    @Nullable
+    @ColumnInfo(name = "updated_at")
+    public LocalDateTime updatedAt;
 
     // 과목명
     @ColumnInfo(name = "name")
@@ -65,7 +80,8 @@ public class SubjectEntity {
 
     private boolean isExpanded = false;
 
-    public SubjectEntity(String name, int credit, String color, int type, String midTermSchedule, String finalTermSchedule, EvaluationRatio ratio, TargetStudyTime time) {
+    public SubjectEntity(String name, int credit, String color, int type, String midTermSchedule,
+            String finalTermSchedule, EvaluationRatio ratio, TargetStudyTime time) {
         this.name = name;
         this.credit = credit;
         this.color = color;
@@ -74,6 +90,8 @@ public class SubjectEntity {
         this.finalTermSchedule = finalTermSchedule;
         this.ratio = ratio;
         this.time = time;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public boolean isExpanded() {
@@ -90,6 +108,33 @@ public class SubjectEntity {
 
     public void setSubjectId(int subjectId) {
         this.subjectId = subjectId;
+    }
+
+    @Nullable
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(@Nullable String serverId) {
+        this.serverId = serverId;
+    }
+
+    @Nullable
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(@Nullable LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Nullable
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(@Nullable LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public String getName() {
@@ -164,4 +209,3 @@ public class SubjectEntity {
         this.time = time;
     }
 }
-

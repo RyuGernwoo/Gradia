@@ -87,7 +87,6 @@ public class CloudSyncManagerTest {
         MockitoAnnotations.openMocks(this);
 
         // 조회용 DB 모킹
-
         when(mockDatabase.subjectDao()).thenReturn(mockSubjectDao);
         when(mockDatabase.studySessionDao()).thenReturn(mockStudySessionDao);
 
@@ -210,7 +209,9 @@ public class CloudSyncManagerTest {
         // 과목 모킹
         List<SubjectEntity> mockSubjects = createMockSubjectEntities();
         doReturn(Flowable.just(mockSubjects)).when(mockSubjectDao).getAll();
-        doReturn(Completable.complete()).when(mockSubjectDao).clearAll();
+
+        // 이 테스트는 업로드에 관한 것이므로 clearAll 메소드 호출은 필요하지 않음
+        // doReturn(Completable.complete()).when(mockSubjectDao).clearAll(); - 삭제
 
         // API 호출 모킹
         when(mockApiService.updateSubject(eq(AUTH_HEADER), anyString(), any(Subject.class)))
@@ -222,7 +223,9 @@ public class CloudSyncManagerTest {
         // 학습 세션 모킹
         List<StudySessionEntity> mockSessions = createMockStudySessionEntities();
         doReturn(Flowable.just(mockSessions)).when(mockStudySessionDao).getAll();
-        doReturn(Completable.complete()).when(mockStudySessionDao).clearAll();
+
+        // 이 테스트는 업로드에 관한 것이므로 clearAll 메소드 호출은 필요하지 않음
+        // doReturn(Completable.complete()).when(mockStudySessionDao).clearAll(); - 삭제
 
         // API 호출 모킹
         when(mockApiService.updateStudySession(eq(AUTH_HEADER), anyString(), any(StudySession.class)))
@@ -267,9 +270,13 @@ public class CloudSyncManagerTest {
         assertTrue("성공 콜백이 호출되어야 합니다", successCalled[0]);
         assertFalse("에러 콜백이 호출되면 안됩니다", errorCalled[0]);
 
-        // 각 API 메서드가 호출되었는지 확인
-        verify(mockSubjectCall, times(mockSubjects.size())).enqueue(any());
-        verify(mockSessionCall, times(mockSessions.size())).enqueue(any());
+        // API 메서드가 호출되었는지 확인
+        verify(mockApiService).getSubjects(AUTH_HEADER); // 서버 과목 조회 확인
+        verify(mockApiService).getStudySessions(eq(AUTH_HEADER), isNull()); // 서버 세션 조회 확인
+
+        // 과목 및 세션이 생성/업데이트되었는지 확인
+        verify(mockSubjectDao, atLeastOnce()).update(any(SubjectEntity.class)); // 과목 업데이트 확인
+        verify(mockStudySessionDao, atLeastOnce()).update(any(StudySessionEntity.class)); // 세션 업데이트 확인
     }
 
     /**
@@ -289,7 +296,7 @@ public class CloudSyncManagerTest {
         doReturn(Completable.complete()).when(mockStudySessionDao).clearAll();
         doReturn(Completable.complete()).when(mockStudySessionDao).insert(any(StudySessionEntity[].class));
 
-        // API 응답 모킹
+        // API 응답 모킹 - 테스트 데이터가 포함된 응답 생성
         mockApiResponsesForDownload();
 
         // When: 서버에서 다운로드 시도
@@ -333,10 +340,10 @@ public class CloudSyncManagerTest {
         verify(mockApiService).getStudySessions(eq(AUTH_HEADER), isNull());
 
         // DB 작업 확인
-        verify(mockSubjectDao).clearAll();
-        verify(mockSubjectDao).insert(any(SubjectEntity[].class));
-        verify(mockStudySessionDao).clearAll();
-        verify(mockStudySessionDao).insert(any(StudySessionEntity[].class));
+        verify(mockSubjectDao).clearAll(); // 기존 과목 데이터 삭제
+        verify(mockSubjectDao).insert(any(SubjectEntity[].class)); // 새 과목 데이터 삽입
+        verify(mockStudySessionDao).clearAll(); // 기존 세션 데이터 삭제
+        verify(mockStudySessionDao).insert(any(StudySessionEntity[].class)); // 새 세션 데이터 삽입
     }
 
     /**
@@ -398,6 +405,197 @@ public class CloudSyncManagerTest {
         assertEquals(15, (int) apiSession.getRest_time());
     }
 
+    /**
+     * 로컬과 서버 모두에 존재하는 데이터의 업데이트 시간을 비교하여
+     * 로컬 데이터가 더 최신일 때 서버 데이터를 업데이트하는지 테스트합니다.
+     */
+    @Test
+    public void testUploadToServer_WhenLocalDataIsNewer_ShouldUpdateServer() {
+        // Given: 로그인 상태 및 로컬과 서버 모두에 데이터가 존재
+        when(mockAuthManager.isLoggedIn()).thenReturn(true);
+
+        // 서버에 있는 데이터보다 최신 시간을 가진 로컬 데이터 생성
+        List<SubjectEntity> mockSubjects = new ArrayList<>();
+        SubjectEntity newerSubject = createSampleSubjectEntity();
+        newerSubject.setServerId("1"); // 서버와 동일한 ID를 가지지만
+        newerSubject.setUpdatedAt(java.time.LocalDateTime.now()); // 현재 시간으로 업데이트(서버보다 최신)
+        mockSubjects.add(newerSubject);
+
+        doReturn(Flowable.just(mockSubjects)).when(mockSubjectDao).getAll();
+
+        // API 호출 모킹 - 서버에 있는 과목 데이터 반환(더 오래된 업데이트 시간)
+        when(mockApiService.getSubjects(AUTH_HEADER)).thenReturn(mockSubjectsCall);
+
+        doAnswer(invocation -> {
+            Callback<SubjectsApiResponse> callback = invocation.getArgument(0);
+
+            SubjectsApiResponse response = new SubjectsApiResponse();
+            response.setMessage("Success");
+
+            List<Subject> subjects = new ArrayList<>();
+            Subject olderSubject = new Subject();
+            olderSubject.setId("1");
+            olderSubject.setName("테스트 과목");
+            olderSubject.setUpdated_at("2023-01-01T00:00:00Z"); // 오래된 업데이트 시간
+
+            subjects.add(olderSubject);
+            response.setSubjects(subjects);
+
+            callback.onResponse(mockSubjectsCall, Response.success(response));
+            return null;
+        }).when(mockSubjectsCall).enqueue(any());
+
+        // 과목 업데이트 API 모킹
+        when(mockApiService.updateSubject(eq(AUTH_HEADER), eq("1"), any(Subject.class)))
+                .thenReturn(mockSubjectCall);
+
+        doAnswer(invocation -> {
+            Callback<Subject> callback = invocation.getArgument(0);
+            Subject updatedSubject = new Subject();
+            updatedSubject.setId("1");
+            updatedSubject.setUpdated_at(
+                    java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ISO_DATE_TIME));
+
+            callback.onResponse(mockSubjectCall, Response.success(updatedSubject));
+            return null;
+        }).when(mockSubjectCall).enqueue(any());
+
+        // 학습 세션 모킹 - 빈 세션 목록
+        doReturn(Flowable.just(new ArrayList<>())).when(mockStudySessionDao).getAll();
+        when(mockApiService.getStudySessions(eq(AUTH_HEADER), isNull())).thenReturn(mockSessionsCall);
+
+        doAnswer(invocation -> {
+            Callback<StudySessionsApiResponse> callback = invocation.getArgument(0);
+            StudySessionsApiResponse response = new StudySessionsApiResponse();
+            response.setMessage("Success");
+            response.setSessions(new ArrayList<>());
+
+            callback.onResponse(mockSessionsCall, Response.success(response));
+            return null;
+        }).when(mockSessionsCall).enqueue(any());
+
+        // When: 서버 업로드 시도
+        final CountDownLatch latch = new CountDownLatch(1);
+        final boolean[] successCalled = { false };
+
+        cloudSyncManager.uploadToServer(new CloudSyncManager.SyncCallback() {
+            @Override
+            public void onSuccess() {
+                successCalled[0] = true;
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(String message) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onProgress(int progress, int total) {
+                // 진행 상황 무시
+            }
+        });
+
+        try {
+            latch.await(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            fail("테스트 타임아웃");
+        }
+
+        // Then: 성공 콜백이 호출되고 서버 업데이트 API가 호출되어야 함
+        assertTrue("성공 콜백이 호출되어야 합니다", successCalled[0]);
+        verify(mockApiService).updateSubject(eq(AUTH_HEADER), eq("1"), any(Subject.class));
+    }
+
+    /**
+     * 로컬과 서버 모두에 존재하는 데이터의 업데이트 시간을 비교하여
+     * 서버 데이터가 더 최신일 때 로컬 데이터가 업데이트되지 않는지 테스트합니다.
+     */
+    @Test
+    public void testUploadToServer_WhenServerDataIsNewer_ShouldNotUpdateServer() {
+        // Given: 로그인 상태 및 로컬과 서버 모두에 데이터가 존재
+        when(mockAuthManager.isLoggedIn()).thenReturn(true);
+
+        // 서버에 있는 데이터보다 오래된 시간을 가진 로컬 데이터 생성
+        List<SubjectEntity> mockSubjects = new ArrayList<>();
+        SubjectEntity olderSubject = createSampleSubjectEntity();
+        olderSubject.setServerId("1"); // 서버와 동일한 ID
+        olderSubject.setUpdatedAt(java.time.LocalDateTime.of(2023, 1, 1, 0, 0)); // 오래된 업데이트 시간
+        mockSubjects.add(olderSubject);
+
+        doReturn(Flowable.just(mockSubjects)).when(mockSubjectDao).getAll();
+
+        // API 호출 모킹 - 서버에 있는 과목 데이터 반환(더 최신 업데이트 시간)
+        when(mockApiService.getSubjects(AUTH_HEADER)).thenReturn(mockSubjectsCall);
+
+        doAnswer(invocation -> {
+            Callback<SubjectsApiResponse> callback = invocation.getArgument(0);
+
+            SubjectsApiResponse response = new SubjectsApiResponse();
+            response.setMessage("Success");
+
+            List<Subject> subjects = new ArrayList<>();
+            Subject newerSubject = new Subject();
+            newerSubject.setId("1");
+            newerSubject.setName("테스트 과목");
+            newerSubject.setUpdated_at(
+                    java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ISO_DATE_TIME)); // 최신 업데이트
+                                                                                                             // 시간
+
+            subjects.add(newerSubject);
+            response.setSubjects(subjects);
+
+            callback.onResponse(mockSubjectsCall, Response.success(response));
+            return null;
+        }).when(mockSubjectsCall).enqueue(any());
+
+        // 학습 세션 모킹 - 빈 세션 목록
+        doReturn(Flowable.just(new ArrayList<>())).when(mockStudySessionDao).getAll();
+        when(mockApiService.getStudySessions(eq(AUTH_HEADER), isNull())).thenReturn(mockSessionsCall);
+
+        doAnswer(invocation -> {
+            Callback<StudySessionsApiResponse> callback = invocation.getArgument(0);
+            StudySessionsApiResponse response = new StudySessionsApiResponse();
+            response.setMessage("Success");
+            response.setSessions(new ArrayList<>());
+
+            callback.onResponse(mockSessionsCall, Response.success(response));
+            return null;
+        }).when(mockSessionsCall).enqueue(any());
+
+        // When: 서버 업로드 시도
+        final CountDownLatch latch = new CountDownLatch(1);
+        final boolean[] successCalled = { false };
+
+        cloudSyncManager.uploadToServer(new CloudSyncManager.SyncCallback() {
+            @Override
+            public void onSuccess() {
+                successCalled[0] = true;
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(String message) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onProgress(int progress, int total) {
+                // 진행 상황 무시
+            }
+        });
+
+        try {
+            latch.await(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            fail("테스트 타임아웃");
+        }
+
+        // Then: 성공 콜백이 호출되고, 서버 업데이트 API가 호출되지 않아야 함
+        assertTrue("성공 콜백이 호출되어야 합니다", successCalled[0]);
+        verify(mockApiService, never()).updateSubject(eq(AUTH_HEADER), eq("1"), any(Subject.class));
+    }
+
     // Helper 메서드 - 테스트용 과목 엔티티 생성
     private List<SubjectEntity> createMockSubjectEntities() {
         List<SubjectEntity> subjects = new ArrayList<>();
@@ -456,26 +654,67 @@ public class CloudSyncManagerTest {
                 LocalTime.of(11, 0),
                 15);
         session.setSessionId(1);
+        session.setServerId("1");
 
         return session;
     }
 
     // Helper 메서드 - 과목 업로드 API 호출 모킹
     private void mockApiCallsForSubjectUpload() {
-        // 테스트에서 실제로 사용되는 스터빙만 유지
+        // 서버로부터 과목 조회 응답 모킹 추가
+        when(mockApiService.getSubjects(AUTH_HEADER)).thenReturn(mockSubjectsCall);
+
+        doAnswer(invocation -> {
+            Callback<SubjectsApiResponse> callback = invocation.getArgument(0);
+
+            SubjectsApiResponse response = new SubjectsApiResponse();
+            response.setMessage("Success");
+            response.setSubjects(new ArrayList<>()); // 빈 과목 목록 반환
+
+            callback.onResponse(mockSubjectsCall, Response.success(response));
+            return null;
+        }).when(mockSubjectsCall).enqueue(any());
+
+        // 과목 생성/업데이트 응답 모킹
         doAnswer(invocation -> {
             Callback<Subject> callback = invocation.getArgument(0);
-            callback.onResponse(mockSubjectCall, Response.success(new Subject()));
+
+            Subject responseSubject = new Subject();
+            responseSubject.setId("1");
+            responseSubject.setCreated_at("2023-05-20T09:00:00Z");
+            responseSubject.setUpdated_at("2023-05-20T09:00:00Z");
+
+            callback.onResponse(mockSubjectCall, Response.success(responseSubject));
             return null;
         }).when(mockSubjectCall).enqueue(any());
     }
 
     // Helper 메서드 - 학습 세션 업로드 API 호출 모킹
     private void mockApiCallsForSessionUpload() {
-        // 테스트에서 실제로 사용되는 스터빙만 유지
+        // 서버로부터 세션 조회 응답 모킹 추가
+        when(mockApiService.getStudySessions(eq(AUTH_HEADER), isNull())).thenReturn(mockSessionsCall);
+
+        doAnswer(invocation -> {
+            Callback<StudySessionsApiResponse> callback = invocation.getArgument(0);
+
+            StudySessionsApiResponse response = new StudySessionsApiResponse();
+            response.setMessage("Success");
+            response.setSessions(new ArrayList<>()); // 빈 세션 목록 반환
+
+            callback.onResponse(mockSessionsCall, Response.success(response));
+            return null;
+        }).when(mockSessionsCall).enqueue(any());
+
+        // 세션 생성/업데이트 응답 모킹
         doAnswer(invocation -> {
             Callback<StudySession> callback = invocation.getArgument(0);
-            callback.onResponse(mockSessionCall, Response.success(new StudySession()));
+
+            StudySession responseSession = new StudySession();
+            responseSession.setId("1");
+            responseSession.setCreated_at("2023-05-20T09:00:00Z");
+            responseSession.setUpdated_at("2023-05-20T09:00:00Z");
+
+            callback.onResponse(mockSessionCall, Response.success(responseSession));
             return null;
         }).when(mockSessionCall).enqueue(any());
     }
@@ -499,6 +738,8 @@ public class CloudSyncManagerTest {
             subject1.setCredit(3);
             subject1.setType(1);
             subject1.setColor("#FF0000");
+            subject1.setCreated_at("2023-05-20T09:00:00Z");
+            subject1.setUpdated_at("2023-05-20T09:00:00Z");
 
             EvaluationRatio ratio1 = new EvaluationRatio();
             ratio1.setMid_term_ratio(30);
@@ -540,6 +781,8 @@ public class CloudSyncManagerTest {
             session1.setStart_time("09:00:00");
             session1.setEnd_time("11:00:00");
             session1.setRest_time(15);
+            session1.setCreated_at("2023-05-20T09:00:00Z");
+            session1.setUpdated_at("2023-05-20T09:00:00Z");
 
             sessions.add(session1);
             response.setSessions(sessions);
