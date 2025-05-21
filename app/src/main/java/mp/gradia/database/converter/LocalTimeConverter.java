@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class LocalTimeConverter {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
 
     @TypeConverter
     public static LocalTime fromString(String value) {
@@ -14,7 +14,7 @@ public class LocalTimeConverter {
     }
 
     @TypeConverter
-    public static String localDateToString(LocalTime date) {
-        return date == null ? null : date.format(formatter);
+    public static String localTimeToString(LocalTime time) {
+        return time == null ? null : time.format(formatter);
     }
 }
