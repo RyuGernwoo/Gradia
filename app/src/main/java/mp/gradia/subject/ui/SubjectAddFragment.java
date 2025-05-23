@@ -110,11 +110,13 @@ public class SubjectAddFragment extends Fragment {
 
         // 저장 버튼 클릭 시
         v.findViewById(R.id.buttonSave).setOnClickListener(btn -> {
-            if (TextUtils.isEmpty(inputName.getText()))
-                return;
+                    if (TextUtils.isEmpty(inputName.getText()))
+                        return;
 
-        // 버튼 비활성화로 중복 클릭 방지
-        btn.setEnabled(false);
+                    // 버튼 비활성화로 중복 클릭 방지
+                    btn.setEnabled(false);
+                });
+
 
         buttonSave.setOnClickListener(btn -> { // buttonSave로 변경
             if (TextUtils.isEmpty(inputName.getText())) {
