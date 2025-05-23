@@ -1,11 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- Calendar Bar -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/calendar_bar_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Timeline" />
+        android:layout_margin="15dp"
+        android:elevation="5dp"
+        app:cardCornerRadius="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/calendar_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+
+            <ImageButton
+                android:id="@+id/navigate_before_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:background="@android:color/transparent"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/outline_navigate_before_black_24"
+                app:layout_constraintBottom_toBottomOf="@+id/divider"
+                app:layout_constraintStart_toStartOf="@+id/calendar_bar"
+                app:layout_constraintTop_toTopOf="@+id/calendar_bar" />
+
+            <TextView
+                android:id="@+id/month_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:text="NULL"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/divider"
+                app:layout_constraintEnd_toEndOf="@+id/calendar_bar"
+                app:layout_constraintStart_toStartOf="@+id/calendar_bar"
+                app:layout_constraintTop_toTopOf="@+id/calendar_bar" />
+
+            <ImageButton
+                android:id="@+id/navigate_next_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:background="@android:color/transparent"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/outline_navigate_next_black_24"
+                app:layout_constraintBottom_toBottomOf="@+id/divider"
+                app:layout_constraintEnd_toEndOf="@+id/calendar_bar"
+                app:layout_constraintTop_toTopOf="@+id/calendar_bar" />
+
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/divider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                app:layout_constraintBottom_toTopOf="@+id/calendar_item_container"
+                app:layout_constraintEnd_toEndOf="@+id/calendar_bar"
+                app:layout_constraintStart_toStartOf="@+id/calendar_bar"
+                app:layout_constraintTop_toBottomOf="@+id/month_textview" />
+
+            <include
+                android:id="@+id/calendar_item_container"
+                layout="@layout/item_weekly_calendar_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/calendar_bar"
+                app:layout_constraintEnd_toEndOf="@+id/calendar_bar"
+                app:layout_constraintStart_toStartOf="@+id/calendar_bar"
+                app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Session Statistical Data -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/session_statistical_data_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="15dp"
+        android:clickable="true"
+        android:elevation="5dp"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardCornerRadius="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.07"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar_bar_container">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/session_statistical_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="세션 통계 데이터 보기"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/session_statistical_data"
+                app:layout_constraintStart_toStartOf="@+id/session_statistical_data"
+                app:layout_constraintTop_toTopOf="@+id/session_statistical_data" />
+
+            <ImageView
+                android:id="@+id/show_session_statistical_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/outline_navigate_next_black_24"
+                app:layout_constraintBottom_toBottomOf="@+id/session_statistical_data"
+                app:layout_constraintEnd_toEndOf="@+id/session_statistical_data"
+                app:layout_constraintTop_toTopOf="@+id/session_statistical_data" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="15dp"
+        android:layout_marginTop="16dp"
+        android:elevation="5dp"
+        app:cardCornerRadius="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.68"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/session_statistical_data_container">
+
+        <ScrollView
+            android:id="@+id/schedule_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:overScrollMode="never">
+
+            <orion.gz.scheduleview.ScheduleView
+                android:id="@+id/schedule_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:event_text_color="@color/white"
+                app:show_duration="true"/>
+
+        </ScrollView>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

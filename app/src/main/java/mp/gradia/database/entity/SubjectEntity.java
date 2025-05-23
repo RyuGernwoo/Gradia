@@ -80,8 +80,8 @@ public class SubjectEntity {
 
     private boolean isExpanded = false;
 
-    public SubjectEntity(String name, int credit, String color, int type, String midTermSchedule,
-            String finalTermSchedule, EvaluationRatio ratio, TargetStudyTime time) {
+    // 생성자 정의
+    public SubjectEntity(String name, int credit, String color, int type, String midTermSchedule, String finalTermSchedule, EvaluationRatio ratio, TargetStudyTime time) {
         this.name = name;
         this.credit = credit;
         this.color = color;
@@ -94,6 +94,7 @@ public class SubjectEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // getter, setter 정의
     public boolean isExpanded() {
         return isExpanded;
     }
@@ -209,3 +210,4 @@ public class SubjectEntity {
         this.time = time;
     }
 }
+

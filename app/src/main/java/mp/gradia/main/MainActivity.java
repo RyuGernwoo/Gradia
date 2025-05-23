@@ -75,26 +75,6 @@ public class MainActivity extends AppCompatActivity {
         // DB에서 모든 과목 목록 관찰 시작
         observeAllSubjects();
 
-        // 클라우드 동기화
-        // 서버로부터 데이터를 다운로드 후 기기에 저장
-        cloudSyncManager = new CloudSyncManager(this);
-        cloudSyncManager.downloadFromServer(new CloudSyncManager.SyncCallback() {
-            @Override
-            public void onSuccess() {
-                Log.e("MainActivity", "Cloud Sync Success");
-            }
-
-            @Override
-            public void onError(String message) {
-                Log.e("MainActivity", "Cloud Sync Error: " + message);
-            }
-
-            @Override
-            public void onProgress(int progress, int total) {
-
-            }
-        });
-      
         // ViewPager
         viewPager = findViewById(R.id.view_pager);
         // Set ViewPager Adapter
@@ -167,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "사용자가 로그인되지 않은 상태입니다.");
         }
+    }
 
     // 모든 과목 목록을 DB에서 관찰하는 메소드
     private void observeAllSubjects() {

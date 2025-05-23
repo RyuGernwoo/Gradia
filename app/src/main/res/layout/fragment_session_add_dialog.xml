@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Full Screen Dialog : Add Session -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- App bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:elevation="5dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:paddingStart="6dp"
+            android:paddingEnd="16dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:navigationIcon="@drawable/outline_close_black_24"
+            app:title="@string/appbar_title_add_session" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Content Layout -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dialog_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Session : Session Review -->
+            <LinearLayout
+                android:id="@+id/session_review_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintTop_toTopOf="@+id/dialog_layout">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:text="@string/session_review"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/session_review_focus_level1"
+                        style="@style/session_review_layout_btn"
+                        android:background="@drawable/layout_button_selector">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_gravity="center"
+                            android:layout_margin="10dp"
+                            android:src="@drawable/sentiment_very_dissatisfied_48px" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/session_review_focus_level1"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/session_review_focus_level2"
+                        style="@style/session_review_layout_btn"
+                        android:background="@drawable/layout_button_selector">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_gravity="center"
+                            android:layout_margin="10dp"
+                            android:src="@drawable/sentiment_neutral_48px" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/session_review_focus_level2"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/session_review_focus_level3"
+                        style="@style/session_review_layout_btn"
+                        android:background="@drawable/layout_button_selector">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_gravity="center"
+                            android:layout_margin="10dp"
+                            android:src="@drawable/sentiment_satisfied_48px" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/session_review_focus_level3"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/session_review_focus_level4"
+                        style="@style/session_review_layout_btn"
+                        android:background="@drawable/layout_button_selector">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_gravity="center"
+                            android:layout_margin="10dp"
+                            android:src="@drawable/sentiment_excited_48px" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/session_review_focus_level4"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Session : Subject DropDown Menu -->
+            <ImageView
+                android:id="@+id/ic_subject"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/outline_menu_book_black_24"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintEnd_toStartOf="@+id/select_subject_dropdown"
+                app:layout_constraintTop_toBottomOf="@+id/session_review_layout"
+                app:layout_constraintBottom_toTopOf="@+id/divider1" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/select_subject_dropdown"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:hint="@string/dropdown_select_subject"
+                app:layout_constraintBottom_toTopOf="@+id/divider1"
+                app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                app:layout_constraintStart_toEndOf="@+id/ic_subject"
+                app:layout_constraintTop_toBottomOf="@+id/session_review_layout">
+
+                <AutoCompleteTextView
+                    android:id="@+id/dropdown_autocomplete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Divider -->
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/divider1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                app:dividerInsetEnd="15dp"
+                app:dividerInsetStart="15dp"
+                app:layout_constraintBottom_toTopOf="@+id/date_picker_textinput"
+                app:layout_constraintTop_toBottomOf="@+id/select_subject_dropdown" />
+
+            <ImageView
+                android:id="@+id/ic_date"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/outline_calendar_month_black_24"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintEnd_toStartOf="@+id/date_picker_textinput"
+                app:layout_constraintTop_toBottomOf="@+id/divider1"
+                app:layout_constraintBottom_toTopOf="@+id/ic_time"/>
+
+            <!-- Session : Date TextInput -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/date_picker_textinput"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:hint="@string/date_picker"
+                app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                app:layout_constraintStart_toEndOf="@+id/ic_date"
+                app:layout_constraintTop_toBottomOf="@+id/divider1">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/date_picker_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:inputType="none" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/ic_time"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/outline_timer_black_24"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintEnd_toStartOf="@+id/start_time_picker_textinput"
+                app:layout_constraintTop_toBottomOf="@+id/ic_date"
+                app:layout_constraintBottom_toTopOf="@+id/ic_duration"/>
+
+            <!-- Session : Start Time TextInput -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/start_time_picker_textinput"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:hint="@string/start_time_picker"
+                app:errorEnabled="true"
+                app:errorTextColor="@color/red"
+                app:boxStrokeErrorColor="@color/red"
+                app:layout_constraintEnd_toStartOf="@+id/right_arrow_imageview"
+                app:layout_constraintStart_toEndOf="@+id/ic_time"
+                app:layout_constraintTop_toBottomOf="@+id/date_picker_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/start_time_picker_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:inputType="none" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Right Arrow Image -->
+            <ImageView
+                android:id="@+id/right_arrow_imageview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/outline_arrow_right_alt_black_24"
+                app:layout_constraintBottom_toTopOf="@+id/duration_textinput"
+                app:layout_constraintEnd_toStartOf="@+id/end_time_picker_textinput"
+                app:layout_constraintStart_toEndOf="@+id/start_time_picker_textinput"
+                app:layout_constraintTop_toBottomOf="@+id/date_picker_textinput" />
+
+            <!-- Session : End Time TextInput -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/end_time_picker_textinput"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:hint="@string/end_time_picker"
+                app:errorEnabled="true"
+                app:errorTextColor="@color/red"
+                app:boxStrokeErrorColor="@color/red"
+                app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                app:layout_constraintStart_toEndOf="@+id/right_arrow_imageview"
+                app:layout_constraintTop_toBottomOf="@+id/date_picker_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/end_time_picker_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:inputType="none" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/ic_duration"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/outline_timelapse_black_24"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintEnd_toStartOf="@+id/duration_textinput"
+                app:layout_constraintTop_toBottomOf="@+id/ic_time"
+                app:layout_constraintBottom_toTopOf="@+id/divider2"/>
+            
+            <!-- Session : Duration Time TextInput -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/duration_textinput"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:hint="@string/duration_picker"
+                app:layout_constraintBottom_toTopOf="@+id/divider2"
+                app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                app:layout_constraintStart_toEndOf="@+id/ic_duration"
+                app:layout_constraintTop_toBottomOf="@+id/start_time_picker_textinput">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/duration_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:inputType="none" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Divider -->
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                app:dividerInsetEnd="15dp"
+                app:dividerInsetStart="15dp"
+                app:layout_constraintBottom_toTopOf="@+id/session_memo_textinput"
+                app:layout_constraintTop_toBottomOf="@+id/duration_textinput" />
+
+            <ImageView
+                android:id="@+id/ic_memo"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/outline_edit_note_black_24"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="35dp"
+                android:layout_marginBottom="15dp"
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintEnd_toStartOf="@+id/session_memo_textinput"
+                app:layout_constraintTop_toBottomOf="@+id/divider2" />
+
+            <!-- Session : Memo TextInput -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/session_memo_textinput"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="15dp"
+                app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                app:layout_constraintHeight_percent="0.22"
+                app:layout_constraintStart_toEndOf="@+id/ic_memo"
+                app:layout_constraintTop_toBottomOf="@+id/divider2">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/session_memo_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/session_memo_hint" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Session : Save Session Button -->
+            <Button
+                android:id="@+id/save_session_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/btn_session_save"
+                app:layout_constraintBottom_toBottomOf="@+id/dialog_layout"
+                app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintTop_toBottomOf="@+id/session_memo_textinput" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

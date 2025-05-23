@@ -9,11 +9,13 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.Flow;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 import mp.gradia.database.entity.StudySessionEntity;
 
 @Dao
@@ -22,7 +24,16 @@ public interface StudySessionDao {
     Flowable<List<StudySessionEntity>> getAll();
 
     @Query("SELECT * FROM study_session WHERE session_id = :id")
-    Flowable<StudySessionEntity> getById(int id);
+    Flowable<StudySessionEntity> getByIdFlowable(int id);
+
+    @Query("SELECT * FROM study_session WHERE session_id = :id")
+    Single<StudySessionEntity> getByIdSingle(int id);
+
+    @Query("SELECT * FROM study_session WHERE date = :date")
+    Flowable<List<StudySessionEntity>> getByDate(LocalDate date);
+
+    @Query("SELECT * FROM study_session WHERE date = :date")
+    Single<List<StudySessionEntity>> getByDateSingle(LocalDate date);
 
     @Query("DELETE FROM study_session")
     Completable clearAll();

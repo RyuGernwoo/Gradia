@@ -76,7 +76,7 @@ public class SubjectRepository {
     // 특정 ID로 과목 하나 조회
     public LiveData<SubjectEntity> getSubjectById(int id) {
         // LiveDataReactiveStreams.fromPublisher()를 사용하여 Flowable을 LiveData로 변환
-        return LiveDataReactiveStreams.fromPublisher(subjectDao.getById(id));
+        return LiveDataReactiveStreams.fromPublisher(subjectDao.getByIdFlowable(id));
     }
 
     /**

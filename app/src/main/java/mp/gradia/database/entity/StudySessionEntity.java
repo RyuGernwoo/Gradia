@@ -12,7 +12,15 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
-@Entity(tableName = "study_session", foreignKeys = @ForeignKey(entity = SubjectEntity.class, parentColumns = "subject_id", childColumns = "subject_id", onDelete = ForeignKey.CASCADE))
+@Entity(
+        tableName = "study_session",
+        foreignKeys = @ForeignKey(
+            entity = SubjectEntity.class,
+                parentColumns = "subject_id",
+                childColumns = "subject_id",
+                onDelete = ForeignKey.CASCADE
+        )
+)
 public class StudySessionEntity {
     // 세션 id
     @PrimaryKey(autoGenerate = true) // 자동으로 id 증가 (세션별로 오름차순)
@@ -40,10 +48,18 @@ public class StudySessionEntity {
     @ColumnInfo(name = "subject_id")
     public int subjectId;
 
+    @NonNull
+    @ColumnInfo(name = "subject_name")
+    public String subjectName;
+
     // 공부한 날짜
     @NonNull
     @ColumnInfo(name = "date")
     public LocalDate date;
+
+    @Nullable
+    @ColumnInfo(name = "end_date")
+    public LocalDate endDate;
 
     // 공부 시간
     @ColumnInfo(name = "study_time")
@@ -60,20 +76,35 @@ public class StudySessionEntity {
     // 휴식/중지 시간
     @Nullable
     @ColumnInfo(name = "rest_time")
-    public long restTime;
+    public long restTime = 0;
 
-    public StudySessionEntity(int subjectId, @NonNull LocalDate date, long studyTime, LocalTime startTime,
-            LocalTime endTime, long restTime) {
+    @Nullable
+    @ColumnInfo(name = "focus_level")
+    public int focusLevel = -1;
+
+    @Nullable
+    @ColumnInfo(name = "memo")
+    public String memo = "";
+
+
+    // 생성자 정의
+    public StudySessionEntity(int subjectId, @NonNull String subjectName, @NonNull LocalDate date, @Nullable LocalDate endDate, long studyTime, LocalTime startTime, LocalTime endTime,@Nullable long restTime,@Nullable int focusLevel, @Nullable String memo) {
         this.subjectId = subjectId;
+        this.subjectName = subjectName;
         this.date = date;
+        this.endDate = endDate;
         this.studyTime = studyTime;
         this.startTime = startTime;
         this.endTime = endTime;
         this.restTime = restTime;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.focusLevel = focusLevel;
+        this.memo = memo;
     }
 
+
+    // Getter, Setter 정의
     public int getSessionId() {
         return sessionId;
     }
@@ -118,12 +149,31 @@ public class StudySessionEntity {
     }
 
     @NonNull
+    public String getSubjectName() {
+        return subjectName;
+    }
+
+    public void setSubjectName(@NonNull String subjectName) {
+        this.subjectName = subjectName;
+    }
+
+    @NonNull
     public LocalDate getDate() {
         return date;
     }
 
     public void setDate(@NonNull LocalDate date) {
         this.date = date;
+    }
+
+    @Nullable
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    @Nullable
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     public long getStudyTime() {
@@ -156,5 +206,21 @@ public class StudySessionEntity {
 
     public void setRestTime(int restTime) {
         this.restTime = restTime;
+    }
+
+    public int getFocusLevel() {
+        return focusLevel;
+    }
+
+    public void setFocusLevel(int focusLevel) {
+        this.focusLevel = focusLevel;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 }

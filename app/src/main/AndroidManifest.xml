@@ -26,12 +26,18 @@
             android:value="0ae3bc452c369df08a11b5fd073d3df9" />
 
         <service
-            android:name=".time.inner.timer.TimerService"
+            android:name=".time.inner.record.timer.TimerService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <service
+            android:name=".time.inner.record.stopwatch.StopwatchService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
         <activity android:name=".home.ProfileActivity" android:exported="false"/>
         <activity android:name=".main.MainActivity" android:exported="false"/>
+        <activity android:name=".login.RegisterActivity" />
 
         <activity
             android:name=".login.LoginActivity"

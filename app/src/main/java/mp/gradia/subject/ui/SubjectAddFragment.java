@@ -48,7 +48,7 @@ public class SubjectAddFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_subject_add, container, false);
     }
 
@@ -113,8 +113,10 @@ public class SubjectAddFragment extends Fragment {
             if (TextUtils.isEmpty(inputName.getText()))
                 return;
 
-        // 버튼 비활성화로 중복 클릭 방지
-        btn.setEnabled(false);
+            // 버튼 비활성화로 중복 클릭 방지
+            btn.setEnabled(false);
+        });
+
 
         buttonSave.setOnClickListener(btn -> { // buttonSave로 변경
             if (TextUtils.isEmpty(inputName.getText())) {
@@ -141,7 +143,7 @@ public class SubjectAddFragment extends Fragment {
             String midScheduleStr = inputMid.getText().toString();
             String finalScheduleStr = inputFinal.getText().toString();
             Integer difficultyInt = TextUtils.isEmpty(inputDifficulty.getText()) ? null : parse(inputDifficulty);
-                  
+
             // 클라우드 동기화 콜백 생성
             SubjectRepository.CloudSyncCallback callback = new SubjectRepository.CloudSyncCallback() {
                 @Override
