@@ -1,5 +1,6 @@
 package mp.gradia.subject.ui;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -18,6 +20,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import java.util.Random;
+
 import mp.gradia.R;
 import mp.gradia.database.entity.EvaluationRatio;
 import mp.gradia.database.entity.SubjectEntity;
@@ -28,13 +32,15 @@ import mp.gradia.subject.viewmodel.SubjectViewModel;
 // 과목 추가 및 수정 화면 fragment
 public class SubjectAddFragment extends Fragment {
 
+    private static final String TAG = "SubjectAddFragment";
     private SubjectViewModel viewModel;
     private EditText inputName, inputCredit, inputDifficulty, inputMid, inputFinal;
     private EditText inputMidRatio, inputFinalRatio, inputQuizRatio, inputAssignmentRatio, inputAttendanceRatio;
     private EditText inputDaily, inputWeekly, inputMonthly;
     private Spinner inputType;
     private int editingId = -1;
-    private SubjectEntity currentSubject; // 현재 편집 중인 Subject 정보 저장
+    private SubjectEntity currentEditingSubject = null;
+    private Random random = new Random();
 
     public SubjectAddFragment() {
     }
@@ -49,6 +55,7 @@ public class SubjectAddFragment extends Fragment {
     // UI 초기화 및 버튼 동작 설정
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle s) {
+        super.onViewCreated(v, s);
         viewModel = new ViewModelProvider(this).get(SubjectViewModel.class);
 
         // XML에 정의된 UI 요소 연결
@@ -66,6 +73,7 @@ public class SubjectAddFragment extends Fragment {
         inputDaily = v.findViewById(R.id.inputDailyTarget);
         inputWeekly = v.findViewById(R.id.inputWeeklyTarget);
         inputMonthly = v.findViewById(R.id.inputMonthlyTarget);
+        Button buttonSave = v.findViewById(R.id.buttonSave);
 
         // 과목 유형 Spinner 설정
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -78,15 +86,26 @@ public class SubjectAddFragment extends Fragment {
         buttonBack.setOnClickListener(view -> Navigation.findNavController(v).popBackStack());
 
         // 수정 모드인지 확인(수정모드일 때 id가져옴)
-        editingId = getArguments() != null ? getArguments().getInt("subjectId", -1) : -1;
+        if (getArguments() != null) {
+            editingId = getArguments().getInt("subjectId", -1);
+        }
 
         if (editingId != -1) {
+            Log.d(TAG, "수정 모드 진입. Subject ID: " + editingId);
             viewModel.getSubjectById(editingId).observe(getViewLifecycleOwner(), subject -> {
                 if (subject != null) {
-                    currentSubject = subject; // 현재 Subject 정보 저장
+                    currentEditingSubject = subject; // 수정할 과목 정보 저장
                     fillForm(subject);
+                } else {
+                    Log.w(TAG, "Subject with ID " + editingId + " not found.");
+                    Toast.makeText(getContext(), "수정할 과목 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    Navigation.findNavController(v).popBackStack();
+
                 }
             });
+        } else {
+            Log.d(TAG, "새 과목 추가 모드 진입.");
+            currentEditingSubject = null; // 새 과목 추가 모드에서는 null로 초기화
         }
 
         // 저장 버튼 클릭 시
@@ -94,24 +113,35 @@ public class SubjectAddFragment extends Fragment {
             if (TextUtils.isEmpty(inputName.getText()))
                 return;
 
-            // 버튼 비활성화로 중복 클릭 방지
-            btn.setEnabled(false);
+        // 버튼 비활성화로 중복 클릭 방지
+        btn.setEnabled(false);
 
-            // 사용자 입력값
-            var ratio = new EvaluationRatio();
+        buttonSave.setOnClickListener(btn -> { // buttonSave로 변경
+            if (TextUtils.isEmpty(inputName.getText())) {
+                Toast.makeText(getContext(), "과목명을 입력해주세요.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            EvaluationRatio ratio = new EvaluationRatio();
             ratio.midTermRatio = parse(inputMidRatio);
             ratio.finalTermRatio = parse(inputFinalRatio);
             ratio.quizRatio = parse(inputQuizRatio);
             ratio.assignmentRatio = parse(inputAssignmentRatio);
             ratio.attendanceRatio = parse(inputAttendanceRatio);
 
-            var time = new TargetStudyTime(
+            TargetStudyTime time = new TargetStudyTime(
                     parse(inputDaily),
                     parse(inputWeekly),
-                    parse(inputMonthly));
+                    parse(inputMonthly)
+            );
 
-            SubjectEntity subject;
-
+            String subjectNameStr = inputName.getText().toString();
+            int creditInt = parse(inputCredit);
+            int typeInt = inputType.getSelectedItemPosition();
+            String midScheduleStr = inputMid.getText().toString();
+            String finalScheduleStr = inputFinal.getText().toString();
+            Integer difficultyInt = TextUtils.isEmpty(inputDifficulty.getText()) ? null : parse(inputDifficulty);
+                  
             // 클라우드 동기화 콜백 생성
             SubjectRepository.CloudSyncCallback callback = new SubjectRepository.CloudSyncCallback() {
                 @Override
@@ -135,47 +165,44 @@ public class SubjectAddFragment extends Fragment {
                 }
             };
 
-            // db에 삽입이나 업데이트
-            if (editingId == -1) {
-                // 새로운 과목 생성
-                subject = new SubjectEntity(
-                        inputName.getText().toString(),
-                        parse(inputCredit),
-                        "#dd3333", // 색상은 임시로 설정
-                        inputType.getSelectedItemPosition(),
-                        inputMid.getText().toString(),
-                        inputFinal.getText().toString(),
-                        ratio, time);
+            if (editingId == -1) { // 새 과목 추가
+                String randomColor = generateRandomHexColor(); // 무작위 색상 생성
+                Log.d(TAG, "새 과목 추가. 생성된 색상: " + randomColor);
+                SubjectEntity newSubject = new SubjectEntity(
+                        subjectNameStr,
+                        creditInt,
+                        randomColor, // 무작위 색상 사용
+                        typeInt,
+                        midScheduleStr,
+                        finalScheduleStr,
+                        ratio, time
+                );
+                if (difficultyInt != null) {
+                    newSubject.setDifficulty(difficultyInt);
+                }
+                viewModel.insert(newSubject, callback);
+                Log.d(TAG, "새 과목 '" + newSubject.getName() + "' 저장 완료.");
+            } else { // 기존 과목 수정
+                if (currentEditingSubject != null) {
+                    Log.d(TAG, "기존 과목 '" + currentEditingSubject.getName() + "' 수정 시작. 저장된 색상: " + currentEditingSubject.getColor());
+                    // currentEditingSubject의 필드를 UI 값으로 업데이트
+                    currentEditingSubject.setName(subjectNameStr);
+                    currentEditingSubject.setCredit(creditInt);
+                    // 색상은 기존 값 유지 (currentEditingSubject.color는 변경하지 않음)
+                    currentEditingSubject.setType(typeInt);
+                    currentEditingSubject.setMidTermSchedule(midScheduleStr);
+                    currentEditingSubject.setFinalTermSchedule(finalScheduleStr);
+                    currentEditingSubject.setRatio(ratio);
+                    currentEditingSubject.setTime(time);
+                    currentEditingSubject.setDifficulty(difficultyInt);
 
-                viewModel.insert(subject, callback);
-            } else {
-                // 기존 과목 수정 - 기존 정보를 보존하면서 업데이트
-                if (currentSubject != null) {
-                    // 기존 Subject를 복사하고 수정된 정보로 업데이트
-                    subject = currentSubject;
-
-                    // 디버깅용 로그 추가
-                    Log.d("SubjectAddFragment", "업데이트 전 serverId: " + currentSubject.getServerId());
-                    Log.d("SubjectAddFragment", "업데이트 전 createdAt: " + currentSubject.getCreatedAt());
-
-                    // 사용자가 수정한 정보로 업데이트
-                    subject.name = inputName.getText().toString();
-                    subject.credit = parse(inputCredit);
-                    subject.difficulty = parse(inputDifficulty);
-                    subject.type = inputType.getSelectedItemPosition();
-                    subject.midTermSchedule = inputMid.getText().toString();
-                    subject.finalTermSchedule = inputFinal.getText().toString();
-                    subject.ratio = ratio;
-                    subject.time = time;
-
-                    // serverId, createdAt, updatedAt은 기존 값 유지 (currentSubject에서 이미 가져온 상태)
-                    Log.d("SubjectAddFragment", "업데이트 후 serverId: " + subject.getServerId());
-
-                    viewModel.update(subject, callback);
+                    viewModel.update(currentEditingSubject, callback);
+                    Log.d(TAG, "기존 과목 '" + currentEditingSubject.getName() + "' 업데이트 완료.");
                 } else {
-                    // currentSubject가 null인 경우 (예외 상황)
-                    Toast.makeText(getActivity(), "과목 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "수정할 currentEditingSubject가 null입니다. 업데이트 실패.");
+                    Toast.makeText(getContext(), "과목 수정 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
                     btn.setEnabled(true);
+                    // 오류 처리 또는 사용자에게 알림
                 }
             }
         });
@@ -183,8 +210,8 @@ public class SubjectAddFragment extends Fragment {
 
     // 기존 데이터로 입력 필드 채우기
     private void fillForm(SubjectEntity subject) {
-        if (subject == null)
-            return;
+        if (subject == null) return;
+        Log.d(TAG, "fillForm 호출. 과목명: " + subject.getName() + ", 색상: " + subject.getColor());
 
         inputName.setText(subject.name);
         inputType.setSelection(subject.type);
@@ -221,6 +248,21 @@ public class SubjectAddFragment extends Fragment {
     }
 
     private int parse(EditText e) {
-        return TextUtils.isEmpty(e.getText()) ? 0 : Integer.parseInt(e.getText().toString());
+        try {
+            return TextUtils.isEmpty(e.getText()) ? 0 : Integer.parseInt(e.getText().toString());
+        } catch (NumberFormatException ex) {
+            Log.w(TAG, "EditText 파싱 오류: " + e.getText().toString() + " - 기본값 0으로 처리.", ex);
+            return 0;
+        }
+    }
+
+    // 무작위 HEX 색상 문자열 생성 메소드
+    private String generateRandomHexColor() {
+        // 너무 어둡거나 너무 밝은 색상을 피하기 위해 각 채널의 범위를 조절할 수 있습니다.
+        // 예: 각 채널을 50~200 사이로 제한하여 너무 극단적인 색 방지
+        int red = random.nextInt(151) + 50;   // 50-200
+        int green = random.nextInt(151) + 50; // 50-200
+        int blue = random.nextInt(151) + 50;  // 50-200
+        return String.format("#%02x%02x%02x", red, green, blue);
     }
 }

@@ -20,6 +20,7 @@ import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.database.entity.TodoEntity;
 import mp.gradia.database.entity.UserEntity;
 
+
 @Database(entities = { UserEntity.class, SubjectEntity.class, StudySessionEntity.class, TodoEntity.class }, version = 5)
 @TypeConverters({ LocalDateConverter.class, LocalTimeConverter.class, LocalDateTimeConverter.class,
         DateConverter.class })

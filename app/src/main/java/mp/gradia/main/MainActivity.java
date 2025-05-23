@@ -12,6 +12,13 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+
+// RxJava 및 Room 관련 import
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +26,8 @@ import mp.gradia.R;
 import mp.gradia.api.ApiHelper;
 import mp.gradia.api.AuthManager;
 import mp.gradia.api.models.AuthResponse;
+import mp.gradia.database.AppDatabase;
+import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.SubjectEntity;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,9 +38,16 @@ public class MainActivity extends AppCompatActivity {
     public static final int TIME_FRAGMENT = 2;
     public static final int ANALYSIS_FRAGMENT = 3;
 
-    private static boolean processInitialized = false;
+
     private ApiHelper apiHelper;
     private AuthManager authManager;
+
+    private static boolean processInitialized = false; // 사용 안하는 듯?
+
+    // SubjectDao 및 데이터 관찰용
+    private SubjectDao subjectDao;
+    private final CompositeDisposable disposables = new CompositeDisposable();
+    private List<SubjectEntity> currentSubjectsList = new ArrayList<>(); // DB에서 관찰한 최신 과목 목록
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +69,32 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // SubjectDao 인스턴스 가져오기
+        subjectDao = AppDatabase.getInstance(getApplicationContext()).subjectDao();
+
+        // DB에서 모든 과목 목록 관찰 시작
+        observeAllSubjects();
+
+        // 클라우드 동기화
+        // 서버로부터 데이터를 다운로드 후 기기에 저장
+        cloudSyncManager = new CloudSyncManager(this);
+        cloudSyncManager.downloadFromServer(new CloudSyncManager.SyncCallback() {
+            @Override
+            public void onSuccess() {
+                Log.e("MainActivity", "Cloud Sync Success");
+            }
+
+            @Override
+            public void onError(String message) {
+                Log.e("MainActivity", "Cloud Sync Error: " + message);
+            }
+
+            @Override
+            public void onProgress(int progress, int total) {
+
+            }
+        });
+      
         // ViewPager
         viewPager = findViewById(R.id.view_pager);
         // Set ViewPager Adapter
@@ -125,6 +167,54 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "사용자가 로그인되지 않은 상태입니다.");
         }
+
+    // 모든 과목 목록을 DB에서 관찰하는 메소드
+    private void observeAllSubjects() {
+        disposables.add(subjectDao.getAll() // SubjectDao의 getAll() 호출
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        subjects -> {
+                            Log.i("MainActivity", "Subjects list updated from DB. Count: " + subjects.size());
+                            currentSubjectsList.clear();
+                            currentSubjectsList.addAll(subjects);
+                            // HomeFragment가 현재 화면에 표시 중이라면, UI를 갱신하도록 알릴 수 있습니다.
+                            // 예를 들어, LocalBroadcastManager를 사용하거나,
+                            // ViewPager2의 현재 프래그먼트를 가져와 직접 메소드를 호출할 수 있습니다.
+                            // 가장 간단한 방법은 HomeFragment의 onResume에서 목록을 다시 로드하는 것입니다.
+                            // 만약 HomeFragment가 이미 활성화된 상태에서 이 콜백이 호출된다면,
+                            // HomeFragment에 수동으로 UI 업데이트를 트리거해야 할 수 있습니다.
+                            // 예: ((MainFragmentAdapter)viewPager.getAdapter()).getHomeFragmentInstance().refreshList();
+                            // (MainFragmentAdapter에 해당 메소드 및 HomeFragment 인스턴스 반환 로직 필요)
+                        },
+                        throwable -> {
+                            Log.e("MainActivity", "Error observing subjects from DB", throwable);
+                        }
+                ));
+    }
+
+    // MainActivity.java
+    public void navigateToFragment(int fragmentDestination, int subjectId) {
+        Bundle bundle = new Bundle();
+        bundle.putInt("subject_id_for_fragment", subjectId); // 전달할 데이터 키
+
+        // ViewPager2의 아이템으로 직접 이동
+        if (fragmentDestination == TIME_FRAGMENT) {
+            // TimeFragment로 이동하면서 Bundle 전달하는 로직 (Adapter나 FragmentFactory 사용 시)
+            // 또는 ViewPager2.setCurrentItem(TIME_FRAGMENT); 호출 후
+            // TimeFragment 내에서 Activity를 통해 Bundle을 받거나, SharedViewModel 사용
+            viewPager.setCurrentItem(TIME_FRAGMENT, true);
+            // TODO: TimeFragment가 Bundle을 받도록 MainFragmentAdapter 또는 TimeFragment 수정 필요
+            Log.d("MainActivity", "Navigating to TimeFragment with subject ID: " + subjectId);
+
+        } else if (fragmentDestination == ANALYSIS_FRAGMENT) {
+            viewPager.setCurrentItem(ANALYSIS_FRAGMENT, true);
+            // TODO: AnalysisFragment가 Bundle을 받도록 MainFragmentAdapter 또는 AnalysisFragment 수정 필요
+            Log.d("MainActivity", "Navigating to AnalysisFragment with subject ID: " + subjectId);
+        }
+        // 실제 데이터 전달은 ViewPager2 어댑터와 각 대상 Fragment의newInstance 패턴 또는 setArguments를 통해 이루어져야 합니다.
+        // 간단하게는 ViewPager 아이템 변경 후, 해당 프래그먼트가 Activity로부터 데이터를 가져가도록 할 수도 있습니다.
+
     }
 
     @Override
@@ -132,20 +222,21 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposables.clear(); // RxJava 구독 해제 (메모리 누수 방지)
+    }
+
     /* Home에 추가된 과목 없을 때 사용 */
     public void moveToSubjectPage() {
         viewPager.setCurrentItem(SUBJECT_FRAGMENT, true); // 1 = SubjectFragment 위치
     }
 
-    /* 과목 추가 (임시) */
-    private final List<SubjectEntity> selectedSubjects = new ArrayList<>();
-
-    public void addSubject(SubjectEntity subject) {
-        selectedSubjects.add(subject);
-        Log.d("MainActivity", "Subject 추가됨: " + subject.getName());
-    }
-
+    /* HomeFragment에서 사용할 과목 목록 반환 메소드 */
+    // 이전 addSubject 및 selectedSubjects 필드는 제거하고, DB에서 관찰하는 currentSubjectsList를 반환
     public List<SubjectEntity> getSelectedSubjects() {
-        return selectedSubjects;
+        Log.d("MainActivity", "getSelectedSubjects called. Returning " + currentSubjectsList.size() + " subjects.");
+        return new ArrayList<>(currentSubjectsList); // 방어적 복사본 반환
     }
 }
