@@ -11,6 +11,7 @@ import java.util.List;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 import mp.gradia.database.entity.SubjectEntity;
 
 @Dao
@@ -19,7 +20,13 @@ public interface SubjectDao {
     Flowable<List<SubjectEntity>> getAll();
 
     @Query("SELECT * FROM subjects WHERE subject_id = :id")
-    Flowable<SubjectEntity> getById(int id);
+    Flowable<SubjectEntity> getByIdFlowable(int id);
+
+    @Query("SELECT * FROM subjects WHERE subject_id = :id")
+    Single<SubjectEntity> getByIdSingle(int id);
+
+    @Query("SELECT * FROM subjects WHERE subject_id = :id")
+    SubjectEntity getById(int id);
 
     @Query("SELECT * FROM subjects WHERE name LIKE '%' || :keyword || '%'")
     Flowable<List<SubjectEntity>> searchByName(String keyword);

@@ -7,7 +7,6 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import mp.gradia.database.converter.DateConverter;
 import mp.gradia.database.converter.LocalDateConverter;
 import mp.gradia.database.converter.LocalDateTimeConverter;
 import mp.gradia.database.converter.LocalTimeConverter;
@@ -21,9 +20,13 @@ import mp.gradia.database.entity.TodoEntity;
 import mp.gradia.database.entity.UserEntity;
 
 
-@Database(entities = { UserEntity.class, SubjectEntity.class, StudySessionEntity.class, TodoEntity.class }, version = 5)
-@TypeConverters({ LocalDateConverter.class, LocalTimeConverter.class, LocalDateTimeConverter.class,
-        DateConverter.class })
+@Database(
+        entities = { UserEntity.class, SubjectEntity.class, StudySessionEntity.class, TodoEntity.class },
+        version = 9
+)
+@TypeConverters(
+        { LocalDateConverter.class, LocalTimeConverter.class, LocalDateTimeConverter.class}
+)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();
 
@@ -53,7 +56,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     /**
      * 테스트를 위한 임시 인스턴스 설정 메서드
-     * 
+     *
      * @param mockDatabase 테스트용 Mock AppDatabase 인스턴스
      */
     public static void setInstanceForTesting(AppDatabase mockDatabase) {

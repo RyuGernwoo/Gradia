@@ -42,6 +42,7 @@ android {
 
 dependencies {
     implementation(libs.core.ktx)
+    // implementation(files("../libs/ScheduleView.aar"))
 
     // Fragment
     val fragment_version = "1.8.3"
@@ -61,7 +62,12 @@ dependencies {
     val compose_runtime_version = "1.7.8"
     implementation("androidx.compose.runtime:runtime:$compose_runtime_version")
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Widget Library
     implementation("com.github.orion-gz:Pomodoro-Timer-Widget:1.0.7")
+    implementation("com.github.orion-gz:Android-Schedule-View-Widget:1.0.4")
+    implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
+
 
     implementation(libs.appcompat)
     implementation(libs.material)

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 // 복합 기본 키 정의: loginProvider와 providerId를 묶어서 PK로 사용
 @Entity(tableName = "User", primaryKeys = {"login_provider", "provider_id"})
