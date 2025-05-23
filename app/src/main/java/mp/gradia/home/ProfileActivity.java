@@ -26,9 +26,9 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import mp.gradia.R;
-import mp.gradia.api.AuthManager;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.UserDao;
+import mp.gradia.database.entity.UserEntity;
 import mp.gradia.login.LoginActivity;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -133,11 +133,6 @@ public class ProfileActivity extends AppCompatActivity {
     private void logoutUser() {
         Log.i(TAG, "로그아웃 시작. Provider: " + currentUserProvider);
 
-        // AuthManager 로그아웃
-        Runnable cloudSyncAndLogoutTask = () -> {
-            AuthManager.getInstance(this).logout();
-        };
-
         Runnable clearSessionAndGoToLogin = () -> {
             // SharedPreferences에서 세션 정보 삭제
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -162,7 +157,6 @@ public class ProfileActivity extends AppCompatActivity {
                 } else {
                     Log.w(TAG, "Google 계정 로그아웃 실패.", task.getException());
                 }
-                cloudSyncAndLogoutTask.run();
                 clearSessionAndGoToLogin.run(); // 성공/실패 여부와 관계없이 세션 정리 및 화면 이동
             });
         } else if (PROVIDER_KAKAO.equals(currentUserProvider)) {
@@ -173,14 +167,12 @@ public class ProfileActivity extends AppCompatActivity {
                 } else {
                     Log.i(TAG, "Kakao 로그아웃 성공.");
                 }
-                cloudSyncAndLogoutTask.run();
                 clearSessionAndGoToLogin.run(); // 성공/실패 여부와 관계없이 세션 정리 및 화면 이동
                 return null; // Unit 반환
             });
         } else {
             // 알 수 없는 Provider 또는 로그인 안 된 상태 (오류 케이스)
             Log.w(TAG, "알 수 없는 로그인 제공자 또는 로그인 상태 아님: " + currentUserProvider);
-            cloudSyncAndLogoutTask.run();
             clearSessionAndGoToLogin.run(); // 세션 정리 및 로그인 화면 이동
         }
     }

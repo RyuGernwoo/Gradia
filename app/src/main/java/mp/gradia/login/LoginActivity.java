@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageButton; // 카카오 로그인 버튼용
+// 카카오 로그인 버튼용
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -36,6 +37,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2; // Kakao SDK 콜백용
+// Kakao SDK 콜백용
 import mp.gradia.R;
 import mp.gradia.api.ApiHelper;
 import mp.gradia.api.models.AuthResponse;
@@ -85,6 +87,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.d("KeyHash", keyHash);
 
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        setContentView(R.layout.activity_login); // Google, Kakao 버튼 포함된 레이아웃
         db = AppDatabase.getInstance(getApplicationContext());
         userDao = db.userDao();
         apiHelper = new ApiHelper(this);
@@ -451,6 +454,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        disposables.clear();
+        Log.d(TAG, "LoginActivity onDestroy: Disposables cleared.");
         disposables.clear();
         Log.d(TAG, "LoginActivity onDestroy: Disposables cleared.");
     }
