@@ -35,6 +35,10 @@ public interface ApiService {
         @GET("auth/users/me")
         Call<UserInfo> getCurrentUser(@Header("Authorization") String token);
 
+        // 토큰 갱신
+        @GET("auth/refresh_token")
+        Call<AuthResponse> refreshToken(@Header("Authorization") String token);
+
         // 임시 사용자 생성
         @POST("auth/temp_user_for_test")
         Call<AuthResponse> getTempUser();

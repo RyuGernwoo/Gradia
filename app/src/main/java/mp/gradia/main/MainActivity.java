@@ -1,48 +1,37 @@
 package mp.gradia.main;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import mp.gradia.R;
 import mp.gradia.api.ApiHelper;
 import mp.gradia.api.AuthManager;
-import mp.gradia.api.CloudSyncManager;
-import mp.gradia.api.RetrofitClient;
 import mp.gradia.api.models.AuthResponse;
 import mp.gradia.database.entity.SubjectEntity;
-import mp.gradia.time.inner.timer.TimerService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
     private ViewPager2 viewPager;
-    private CloudSyncManager cloudSyncManager;
-//    private AuthManager authManager;
-
     public static final int HOME_FRAGMENT = 0;
     public static final int SUBJECT_FRAGMENT = 1;
     public static final int TIME_FRAGMENT = 2;
     public static final int ANALYSIS_FRAGMENT = 3;
 
     private static boolean processInitialized = false;
+    private ApiHelper apiHelper;
+    private AuthManager authManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,32 +39,19 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        // API Helper와 Auth Manager 초기화
+        apiHelper = new ApiHelper(this);
+        authManager = AuthManager.getInstance(this);
+
+        // 로그인 상태 확인 및 토큰 갱신
+        // 백엔드 로직 미구현으로 주석처리
+        // checkLoginStatusAndRefreshToken();
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, systemBars.top, 0, 0);
             return insets;
         });
-
-        // 클라우드 동기화
-        // 서버로부터 데이터를 다운로드 후 기기에 저장
-        // TODO: 사용자로 하여금 서버에서 가져오도록 요청할 수 있도록 구현 예정.
-         cloudSyncManager = new CloudSyncManager(this);
-        // cloudSyncManager.downloadFromServer(new CloudSyncManager.SyncCallback() {
-        // @Override
-        // public void onSuccess() {
-        // Log.e("MainActivity", "Cloud Sync Success");
-        // }
-
-        // @Override
-        // public void onError(String message) {
-        // Log.e("MainActivity", "Cloud Sync Error: " + message);
-        // }
-
-        // @Override
-        // public void onProgress(int progress, int total) {
-
-        // }
-        // });
 
         // ViewPager
         viewPager = findViewById(R.id.view_pager);
@@ -127,26 +103,33 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * 로그인 상태를 확인하고 로그인되어 있다면 토큰을 갱신합니다.
+     */
+    private void checkLoginStatusAndRefreshToken() {
+        if (authManager.isLoggedIn()) {
+            Log.d(TAG, "사용자가 로그인된 상태입니다. 토큰을 갱신합니다.");
+            apiHelper.refreshToken(new ApiHelper.ApiCallback<AuthResponse>() {
+                @Override
+                public void onSuccess(AuthResponse result) {
+                    Log.d(TAG, "토큰 갱신 성공");
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Log.e(TAG, "토큰 갱신 실패: " + errorMessage);
+                    // 토큰 갱신에 실패한 경우 로그아웃 처리할 수도 있습니다
+                    // authManager.logout();
+                }
+            });
+        } else {
+            Log.d(TAG, "사용자가 로그인되지 않은 상태입니다.");
+        }
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
-
-        cloudSyncManager.uploadToServer(new CloudSyncManager.SyncCallback() {
-            @Override
-            public void onSuccess() {
-                Log.e("MainActivity", "Cloud Sync Success");
-            }
-
-            @Override
-            public void onError(String message) {
-                Log.e("MainActivity", "Cloud Sync Error: " + message);
-            }
-
-            @Override
-            public void onProgress(int progress, int total) {
-
-            }
-        });
     }
 
     /* Home에 추가된 과목 없을 때 사용 */

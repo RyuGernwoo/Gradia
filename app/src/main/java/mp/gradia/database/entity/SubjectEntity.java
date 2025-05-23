@@ -24,7 +24,7 @@ public class SubjectEntity {
     // 서버 ID
     @Nullable
     @ColumnInfo(name = "server_id")
-    public String serverId;
+    public String serverId = null;
 
     // 생성 시간
     @Nullable

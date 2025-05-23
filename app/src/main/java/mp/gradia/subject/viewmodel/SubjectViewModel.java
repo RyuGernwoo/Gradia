@@ -17,9 +17,11 @@ public class SubjectViewModel extends AndroidViewModel {
     private String searchQuery = "";
     private final SubjectRepository repository;
     private final LiveData<List<SubjectEntity>> allSubjects;
+
     public int getSortType() {
         return sortType;
     }
+
     public void setSortType(int sortType) {
         this.sortType = sortType;
     }
@@ -27,6 +29,7 @@ public class SubjectViewModel extends AndroidViewModel {
     public int getFilterType() {
         return filterType;
     }
+
     public void setFilterType(int filterType) {
         this.filterType = filterType;
     }
@@ -34,9 +37,11 @@ public class SubjectViewModel extends AndroidViewModel {
     public String getSearchQuery() {
         return searchQuery;
     }
+
     public void setSearchQuery(String searchQuery) {
         this.searchQuery = searchQuery;
     }
+
     public SubjectViewModel(@NonNull Application application) {
         super(application);
         repository = new SubjectRepository(application);
@@ -62,5 +67,29 @@ public class SubjectViewModel extends AndroidViewModel {
     public void delete(SubjectEntity subject) {
         repository.delete(subject);
     }
-}
 
+    public void insert(SubjectEntity subject, SubjectRepository.CloudSyncCallback callback) {
+        repository.insert(subject, callback);
+    }
+
+    public void update(SubjectEntity subject, SubjectRepository.CloudSyncCallback callback) {
+        repository.update(subject, callback);
+    }
+
+    public void delete(SubjectEntity subject, SubjectRepository.CloudSyncCallback callback) {
+        repository.delete(subject, callback);
+    }
+
+    /**
+     * 로컬 DB 기준으로 클라우드 동기화 수행
+     */
+    public void syncLocalToCloud(SubjectRepository.CloudSyncCallback callback) {
+        repository.syncLocalToCloud(callback);
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        repository.dispose();
+    }
+}
