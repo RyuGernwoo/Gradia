@@ -1,6 +1,7 @@
 package mp.gradia.subject.repository;
 
 import android.app.Application;
+import android.content.Context;
 
 import androidx.lifecycle.LiveData;
 
@@ -17,8 +18,8 @@ public class TodoRepository {
     private final TodoDao todoDao;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public TodoRepository(Application application) {
-        AppDatabase db = AppDatabase.getInstance(application);
+    public TodoRepository(Context context) {
+        AppDatabase db = AppDatabase.getInstance(context);
         todoDao = db.todoDao();
     }
 

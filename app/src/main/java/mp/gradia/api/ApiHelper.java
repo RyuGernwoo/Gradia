@@ -67,7 +67,9 @@ public class ApiHelper {
                             authResponse.getAccess_token(),
                             authResponse.getUser_id(),
                             authResponse.getEmail(),
-                            authResponse.getName());
+                            authResponse.getName(),
+                            "google",
+                            "");
                     callback.onSuccess(authResponse);
                 } else {
                     callback.onError("로그인에 실패했습니다. 코드: " + response.code());
@@ -103,6 +105,36 @@ public class ApiHelper {
 
             @Override
             public void onFailure(Call<UserInfo> call, Throwable t) {
+                callback.onError("네트워크 오류: " + t.getMessage());
+                Log.e(TAG, "네트워크 오류", t);
+            }
+        });
+    }
+
+    /**
+     * 토큰을 갱신합니다.
+     */
+    public void refreshToken(final ApiCallback<AuthResponse> callback) {
+        apiService.refreshToken(authManager.getAuthHeader()).enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    AuthResponse authResponse = response.body();
+                    authManager.saveAuthInfo(
+                            authResponse.getAccess_token(),
+                            authResponse.getUser_id(),
+                            authResponse.getEmail(),
+                            authResponse.getName(),
+                            "google",
+                            "");
+                    callback.onSuccess(authResponse);
+                } else {
+                    callback.onError("토큰 갱신에 실패했습니다. 코드: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
                 callback.onError("네트워크 오류: " + t.getMessage());
                 Log.e(TAG, "네트워크 오류", t);
             }

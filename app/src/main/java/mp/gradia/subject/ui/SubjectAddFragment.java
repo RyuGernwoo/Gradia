@@ -26,6 +26,7 @@ import mp.gradia.R;
 import mp.gradia.database.entity.EvaluationRatio;
 import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.database.entity.TargetStudyTime;
+import mp.gradia.subject.repository.SubjectRepository;
 import mp.gradia.subject.viewmodel.SubjectViewModel;
 
 // 과목 추가 및 수정 화면 fragment
@@ -41,13 +42,13 @@ public class SubjectAddFragment extends Fragment {
     private SubjectEntity currentEditingSubject = null;
     private Random random = new Random();
 
-    public SubjectAddFragment() {}
-
+    public SubjectAddFragment() {
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_subject_add, container, false);
     }
 
@@ -99,6 +100,7 @@ public class SubjectAddFragment extends Fragment {
                     Log.w(TAG, "Subject with ID " + editingId + " not found.");
                     Toast.makeText(getContext(), "수정할 과목 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
                     Navigation.findNavController(v).popBackStack();
+
                 }
             });
         } else {
@@ -107,6 +109,13 @@ public class SubjectAddFragment extends Fragment {
         }
 
         // 저장 버튼 클릭 시
+        v.findViewById(R.id.buttonSave).setOnClickListener(btn -> {
+            if (TextUtils.isEmpty(inputName.getText()))
+                return;
+
+        // 버튼 비활성화로 중복 클릭 방지
+        btn.setEnabled(false);
+
         buttonSave.setOnClickListener(btn -> { // buttonSave로 변경
             if (TextUtils.isEmpty(inputName.getText())) {
                 Toast.makeText(getContext(), "과목명을 입력해주세요.", Toast.LENGTH_SHORT).show();
@@ -132,7 +141,29 @@ public class SubjectAddFragment extends Fragment {
             String midScheduleStr = inputMid.getText().toString();
             String finalScheduleStr = inputFinal.getText().toString();
             Integer difficultyInt = TextUtils.isEmpty(inputDifficulty.getText()) ? null : parse(inputDifficulty);
+                  
+            // 클라우드 동기화 콜백 생성
+            SubjectRepository.CloudSyncCallback callback = new SubjectRepository.CloudSyncCallback() {
+                @Override
+                public void onSuccess() {
+                    if (getActivity() != null) {
+                        Toast.makeText(getActivity(),
+                                editingId == -1 ? "과목이 성공적으로 추가되었습니다." : "과목이 성공적으로 업데이트되었습니다.",
+                                Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(v).popBackStack();
+                    }
+                }
 
+                @Override
+                public void onError(String message) {
+                    if (getActivity() != null) {
+                        Toast.makeText(getActivity(),
+                                "저장 중 오류가 발생했습니다: " + message,
+                                Toast.LENGTH_LONG).show();
+                        btn.setEnabled(true); // 버튼 다시 활성화
+                    }
+                }
+            };
 
             if (editingId == -1) { // 새 과목 추가
                 String randomColor = generateRandomHexColor(); // 무작위 색상 생성
@@ -149,7 +180,7 @@ public class SubjectAddFragment extends Fragment {
                 if (difficultyInt != null) {
                     newSubject.setDifficulty(difficultyInt);
                 }
-                viewModel.insert(newSubject);
+                viewModel.insert(newSubject, callback);
                 Log.d(TAG, "새 과목 '" + newSubject.getName() + "' 저장 완료.");
             } else { // 기존 과목 수정
                 if (currentEditingSubject != null) {
@@ -165,16 +196,15 @@ public class SubjectAddFragment extends Fragment {
                     currentEditingSubject.setTime(time);
                     currentEditingSubject.setDifficulty(difficultyInt);
 
-                    viewModel.update(currentEditingSubject);
+                    viewModel.update(currentEditingSubject, callback);
                     Log.d(TAG, "기존 과목 '" + currentEditingSubject.getName() + "' 업데이트 완료.");
                 } else {
                     Log.e(TAG, "수정할 currentEditingSubject가 null입니다. 업데이트 실패.");
                     Toast.makeText(getContext(), "과목 수정 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
+                    btn.setEnabled(true);
                     // 오류 처리 또는 사용자에게 알림
                 }
             }
-            // 저장 후 이전 화면으로
-            Navigation.findNavController(v).popBackStack();
         });
     }
 
@@ -236,4 +266,3 @@ public class SubjectAddFragment extends Fragment {
         return String.format("#%02x%02x%02x", red, green, blue);
     }
 }
-

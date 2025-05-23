@@ -106,15 +106,16 @@ public class ProfileActivity extends AppCompatActivity {
                                 String photoUrl = userEntity.photoUrl;
                                 RequestOptions glideOptions = new RequestOptions()
                                         .placeholder(R.drawable.ic_default_profile) // 로딩 중 기본 이미지
-                                        .error(R.drawable.ic_profile_error)      // 에러 시 이미지
-                                        .circleCrop();                          // 원형으로 자르기
+                                        .error(R.drawable.ic_profile_error) // 에러 시 이미지
+                                        .circleCrop(); // 원형으로 자르기
 
                                 if (photoUrl != null && !photoUrl.isEmpty()) {
                                     Log.d(TAG, "Glide 로드 시도: " + photoUrl);
                                     Glide.with(this).load(photoUrl).apply(glideOptions).into(imgProfilePicture);
                                 } else {
                                     Log.d(TAG, "프로필 사진 URL 없음. 기본 이미지 로드.");
-                                    Glide.with(this).load(R.drawable.ic_default_profile).apply(glideOptions).into(imgProfilePicture);
+                                    Glide.with(this).load(R.drawable.ic_default_profile).apply(glideOptions)
+                                            .into(imgProfilePicture);
                                 }
                             } else {
                                 Log.w(TAG, "DB에 사용자 정보 없음. Provider: " + loginProvider + ", ID: " + providerId);
@@ -126,9 +127,7 @@ public class ProfileActivity extends AppCompatActivity {
                         throwable -> {
                             Log.e(TAG, "사용자 정보 로드 중 DB 오류", throwable);
                             Toast.makeText(this, "오류가 발생하여 사용자 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show();
-                        }
-                )
-        );
+                        }));
     }
 
     private void logoutUser() {
@@ -187,7 +186,6 @@ public class ProfileActivity extends AppCompatActivity {
         editor.apply();
         goToLoginScreen();
     }
-
 
     private void goToLoginScreen() {
         Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);

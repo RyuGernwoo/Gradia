@@ -6,11 +6,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageButton; // 카카오 로그인 버튼용
+// 카카오 로그인 버튼용
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 // Google Sign-In
@@ -25,13 +25,11 @@ import com.google.android.gms.tasks.Task;
 
 // Kakao Sign-In
 import com.kakao.sdk.auth.model.OAuthToken;
-import com.kakao.sdk.common.KakaoSdk;
 import com.kakao.sdk.common.model.ClientError;
 import com.kakao.sdk.common.model.ClientErrorCause;
 import com.kakao.sdk.common.model.KakaoSdkError;
 import com.kakao.sdk.common.util.Utility;
 import com.kakao.sdk.user.UserApiClient;
-import com.kakao.sdk.user.model.User;
 
 // RxJava & Room
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -39,11 +37,15 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2; // Kakao SDK 콜백용
+// Kakao SDK 콜백용
 import mp.gradia.R;
+import mp.gradia.api.ApiHelper;
+import mp.gradia.api.models.AuthResponse;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.UserDao;
 import mp.gradia.database.entity.UserEntity;
 import mp.gradia.main.MainActivity;
+import mp.gradia.subject.repository.SubjectRepository;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -61,10 +63,15 @@ public class LoginActivity extends AppCompatActivity {
     // Google Sign-In Launcher
     private ActivityResultLauncher<Intent> googleSignInLauncher;
 
+    // api helper
+    private ApiHelper apiHelper;
+    // Subject Repository
+    private SubjectRepository subjectRepository;
+
     // SharedPreferences 키 정의 (복합키 대응)
     private static final String PREFS_NAME = "user_session";
     private static final String KEY_LOGIN_PROVIDER = "login_provider"; // "google" 또는 "kakao"
-    private static final String KEY_PROVIDER_ID = "provider_id";       // Google ID 또는 Kakao ID
+    private static final String KEY_PROVIDER_ID = "provider_id"; // Google ID 또는 Kakao ID
     private static final String KEY_USER_DISPLAY_NAME = "user_display_name";
 
     // Login Provider 상수
@@ -80,8 +87,11 @@ public class LoginActivity extends AppCompatActivity {
         Log.d("KeyHash", keyHash);
 
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        setContentView(R.layout.activity_login); // Google, Kakao 버튼 포함된 레이아웃
         db = AppDatabase.getInstance(getApplicationContext());
         userDao = db.userDao();
+        apiHelper = new ApiHelper(this);
+        subjectRepository = new SubjectRepository(this);
 
         // Google 로그인 옵션 설정
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -90,15 +100,13 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-
         // --- 자동 로그인 확인 ---
         if (isSignedIn()) {
-            Log.d(TAG, "저장된 세션 발견 ("+ prefs.getString(KEY_LOGIN_PROVIDER, "") +"). MainActivity로 이동합니다.");
+            Log.d(TAG, "저장된 세션 발견 (" + prefs.getString(KEY_LOGIN_PROVIDER, "") + "). MainActivity로 이동합니다.");
             goToMainActivity(
                     prefs.getString(KEY_USER_DISPLAY_NAME, "사용자"),
                     prefs.getString(KEY_LOGIN_PROVIDER, ""),
-                    prefs.getString(KEY_PROVIDER_ID, "")
-            );
+                    prefs.getString(KEY_PROVIDER_ID, ""));
             return; // 현재 액티비티 종료
         }
 
@@ -156,6 +164,7 @@ public class LoginActivity extends AppCompatActivity {
             if (account != null && account.getId() != null) {
                 Log.i(TAG, "Google Sign-In 성공. Email: " + account.getEmail() + ", Google ID: " + account.getId());
 
+                String idToken = account.getIdToken();
                 String googleId = account.getId();
                 String displayName = account.getDisplayName();
                 String email = account.getEmail();
@@ -164,17 +173,47 @@ public class LoginActivity extends AppCompatActivity {
 
                 // 이름이 없는 경우 기본값 설정
                 if (displayName == null || displayName.isEmpty()) {
-                    displayName = (email != null && !email.isEmpty()) ? email.split("@")[0] : ("GoogleUser_" + googleId.substring(0,5));
+                    displayName = (email != null && !email.isEmpty()) ? email.split("@")[0]
+                            : ("GoogleUser_" + googleId.substring(0, 5));
                 }
 
                 UserEntity googleUser = new UserEntity(
                         PROVIDER_GOOGLE, // loginProvider
-                        googleId,        // providerId
+                        googleId, // providerId
                         displayName,
                         email,
-                        photoUrlString
-                );
+                        photoUrlString);
                 saveOrUpdateUser(googleUser); // 공통 저장/업데이트 메소드 호출
+
+                // google 로그인 API 호출
+                apiHelper.loginWithGoogle(idToken, new ApiHelper.ApiCallback<AuthResponse>() {
+                    @Override
+                    public void onSuccess(AuthResponse authResponse) {
+                        Log.d(TAG, "Google 로그인 API 호출 성공: " + authResponse.getAccess_token());
+                        // authManager.saveAuthInfo()가 호출된 직후이므로 바로 subject 데이터 동기화 수행
+                        subjectRepository.downloadAndReplaceFromServer(new SubjectRepository.CloudSyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "Google 로그인 - Subject 데이터 동기화 성공");
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                Log.e(TAG, "Google 로그인 - Subject 데이터 동기화 오류: " + message);
+                                // 동기화 실패해도 계속 진행
+                                Toast.makeText(LoginActivity.this, "데이터 동기화에 실패했지만 계속 진행합니다.", Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Log.e(TAG, "Google 로그인 API 호출 실패: " + message);
+                        Toast.makeText(LoginActivity.this, "Google 로그인 처리 중 오류 발생", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             } else {
                 Log.e(TAG, "GoogleSignInAccount 또는 Google ID가 null입니다.");
                 Toast.makeText(this, "Google 계정 정보를 가져오지 못했습니다.", Toast.LENGTH_SHORT).show();
@@ -192,8 +231,12 @@ public class LoginActivity extends AppCompatActivity {
         Log.w(TAG, "Google Sign-In 실패, code=" + e.getStatusCode() + ", message=" + e.getMessage());
         String errorMessage = "Google 로그인 오류 (" + e.getStatusCode() + ")";
         switch (e.getStatusCode()) {
-            case GoogleSignInStatusCodes.SIGN_IN_CANCELLED: errorMessage = "로그인이 취소되었습니다."; break;
-            case GoogleSignInStatusCodes.NETWORK_ERROR: errorMessage = "네트워크 연결을 확인해주세요."; break;
+            case GoogleSignInStatusCodes.SIGN_IN_CANCELLED:
+                errorMessage = "로그인이 취소되었습니다.";
+                break;
+            case GoogleSignInStatusCodes.NETWORK_ERROR:
+                errorMessage = "네트워크 연결을 확인해주세요.";
+                break;
             // 기타 필요한 오류 코드 처리
         }
         Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
@@ -256,16 +299,16 @@ public class LoginActivity extends AppCompatActivity {
 
                 // 이름(닉네임)이 없는 경우 기본값 설정
                 if (nickname == null || nickname.isEmpty()) {
-                    nickname = (email != null && !email.isEmpty()) ? email.split("@")[0] : ("KakaoUser_" + kakaoId.substring(0,5));
+                    nickname = (email != null && !email.isEmpty()) ? email.split("@")[0]
+                            : ("KakaoUser_" + kakaoId.substring(0, 5));
                 }
 
                 UserEntity kakaoUser = new UserEntity(
-                        PROVIDER_KAKAO,  // loginProvider
-                        kakaoId,         // providerId
+                        PROVIDER_KAKAO, // loginProvider
+                        kakaoId, // providerId
                         nickname,
                         email,
-                        profileImageUrl
-                );
+                        profileImageUrl);
                 saveOrUpdateUser(kakaoUser); // 공통 저장/업데이트 메소드 호출
             } else {
                 Log.e(TAG, "Kakao User 객체 또는 ID가 null입니다.");
@@ -294,7 +337,8 @@ public class LoginActivity extends AppCompatActivity {
                 .subscribe(
                         existingUser -> {
                             // 사용자가 이미 존재함 - 정보 업데이트 확인
-                            Log.d(TAG, "기존 사용자 확인 (" + loginProvider + "): " + existingUser.name + " (ID: " + providerId + ")");
+                            Log.d(TAG, "기존 사용자 확인 (" + loginProvider + "): " + existingUser.name + " (ID: " + providerId
+                                    + ")");
                             boolean needsUpdate = false;
                             if (user.name != null && !user.name.equals(existingUser.name)) {
                                 existingUser.name = user.name;
@@ -312,7 +356,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (needsUpdate) {
                                 updateUserInDb(existingUser);
                             } else {
-                                // 변경사항 없으면 바로 세션 저장 및 메인 이동
+                                // 변경사항 없으면 바로 세션 저장 및 동기화 후 메인 이동
                                 saveUserSession(loginProvider, providerId, existingUser.name);
                                 goToMainActivity(existingUser.name, loginProvider, providerId);
                             }
@@ -323,11 +367,10 @@ public class LoginActivity extends AppCompatActivity {
                         },
                         () -> {
                             // 사용자가 존재하지 않음 - 새로 등록
-                            Log.d(TAG, "신규 사용자 등록 (" + loginProvider + "): " + displayName + " (ID: " + providerId + ")");
+                            Log.d(TAG,
+                                    "신규 사용자 등록 (" + loginProvider + "): " + displayName + " (ID: " + providerId + ")");
                             insertNewUserToDb(user);
-                        }
-                )
-        );
+                        }));
     }
 
     private void updateUserInDb(UserEntity userToUpdate) {
@@ -338,14 +381,15 @@ public class LoginActivity extends AppCompatActivity {
                         () -> {
                             Log.d(TAG, "사용자 정보 DB 업데이트 성공: " + userToUpdate.name);
                             saveUserSession(userToUpdate.loginProvider, userToUpdate.providerId, userToUpdate.name);
-                            goToMainActivity(userToUpdate.name, userToUpdate.loginProvider, userToUpdate.providerId);
+
+                            // 로그인 성공 후 subject 데이터 동기화
+                            goToMainActivity(userToUpdate.name, userToUpdate.loginProvider,
+                                    userToUpdate.providerId);
                         },
                         error -> {
                             Log.e(TAG, "사용자 정보 DB 업데이트 실패", error);
                             Toast.makeText(LoginActivity.this, "사용자 정보 업데이트에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                        }
-                )
-        );
+                        }));
     }
 
     private void insertNewUserToDb(UserEntity newUser) {
@@ -356,6 +400,8 @@ public class LoginActivity extends AppCompatActivity {
                         () -> {
                             Log.d(TAG, "신규 사용자 DB 등록 성공: " + newUser.name);
                             saveUserSession(newUser.loginProvider, newUser.providerId, newUser.name);
+
+                            // 로그인 성공 후 subject 데이터 동기화
                             goToMainActivity(newUser.name, newUser.loginProvider, newUser.providerId);
                         },
                         error -> {
@@ -363,9 +409,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "사용자 정보 저장에 실패했습니다.", Toast.LENGTH_SHORT).show();
                             // 등록 실패 시 소셜 로그아웃 처리 (선택적)
                             signOutSocialAccount(newUser.loginProvider);
-                        }
-                )
-        );
+                        }));
     }
 
     // --- 세션 저장 및 화면 이동 ---
@@ -394,11 +438,14 @@ public class LoginActivity extends AppCompatActivity {
     // --- 공통 소셜 로그아웃 (선택적) ---
     private void signOutSocialAccount(String provider) {
         if (PROVIDER_GOOGLE.equals(provider) && mGoogleSignInClient != null) {
-            mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> Log.d(TAG,"Google 계정 로그아웃 시도 완료 (등록 실패 후)"));
+            mGoogleSignInClient.signOut().addOnCompleteListener(this,
+                    task -> Log.d(TAG, "Google 계정 로그아웃 시도 완료 (등록 실패 후)"));
         } else if (PROVIDER_KAKAO.equals(provider)) {
             UserApiClient.getInstance().logout(error -> {
-                if (error == null) Log.d(TAG,"Kakao 계정 로그아웃 시도 완료 (등록 실패 후)");
-                else Log.e(TAG, "Kakao 로그아웃 실패 (등록 실패 후)", error);
+                if (error == null)
+                    Log.d(TAG, "Kakao 계정 로그아웃 시도 완료 (등록 실패 후)");
+                else
+                    Log.e(TAG, "Kakao 로그아웃 실패 (등록 실패 후)", error);
                 return null;
             });
         }
@@ -407,6 +454,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        disposables.clear();
+        Log.d(TAG, "LoginActivity onDestroy: Disposables cleared.");
         disposables.clear();
         Log.d(TAG, "LoginActivity onDestroy: Disposables cleared.");
     }

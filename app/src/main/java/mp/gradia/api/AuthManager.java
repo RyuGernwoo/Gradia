@@ -12,6 +12,8 @@ public class AuthManager {
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_NAME = "name";
+    private static final String KEY_LOGIN_PROVIDER = "login_provider";
+    private static final String PICTURE_URL = "picture_url";
 
     private SharedPreferences preferences;
     private static AuthManager instance;
@@ -30,12 +32,14 @@ public class AuthManager {
     /**
      * 인증 정보를 저장합니다.
      */
-    public void saveAuthInfo(String accessToken, String userId, String email, String name) {
+    public void saveAuthInfo(String accessToken, String userId, String email, String name, String loginProvider, String pictureUrl) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(KEY_ACCESS_TOKEN, accessToken);
         editor.putString(KEY_USER_ID, userId);
         editor.putString(KEY_EMAIL, email);
         editor.putString(KEY_NAME, name);
+        editor.putString(KEY_LOGIN_PROVIDER, loginProvider);
+        editor.putString(PICTURE_URL, pictureUrl);
         editor.apply();
     }
 
@@ -96,7 +100,7 @@ public class AuthManager {
 
     /**
      * 테스트를 위한 임시 인스턴스 설정 메서드
-     * 
+     *
      * @param mockInstance 테스트용 MockAuthManager 인스턴스
      */
     public static void setInstanceForTesting(AuthManager mockInstance) {

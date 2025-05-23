@@ -1,20 +1,17 @@
 package mp.gradia.main;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 
 // RxJava 및 Room 관련 import
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -28,26 +25,22 @@ import java.util.List;
 import mp.gradia.R;
 import mp.gradia.api.ApiHelper;
 import mp.gradia.api.AuthManager;
-import mp.gradia.api.CloudSyncManager;
-import mp.gradia.api.RetrofitClient;
 import mp.gradia.api.models.AuthResponse;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.SubjectEntity;
-import mp.gradia.time.inner.timer.TimerService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
     private ViewPager2 viewPager;
-    private CloudSyncManager cloudSyncManager;
-    private AuthManager authManager;
-
     public static final int HOME_FRAGMENT = 0;
     public static final int SUBJECT_FRAGMENT = 1;
     public static final int TIME_FRAGMENT = 2;
     public static final int ANALYSIS_FRAGMENT = 3;
+
+
+    private ApiHelper apiHelper;
+    private AuthManager authManager;
 
     private static boolean processInitialized = false; // 사용 안하는 듯?
 
@@ -61,6 +54,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // API Helper와 Auth Manager 초기화
+        apiHelper = new ApiHelper(this);
+        authManager = AuthManager.getInstance(this);
+
+        // 로그인 상태 확인 및 토큰 갱신
+        // 백엔드 로직 미구현으로 주석처리
+        // checkLoginStatusAndRefreshToken();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
+      
         // ViewPager
         viewPager = findViewById(R.id.view_pager);
         // Set ViewPager Adapter
@@ -105,11 +106,16 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation.setOnItemSelectedListener(item -> {
             // Navigate to the corresponding fragment page when a tab is selected
             // 0: HomeFragment, 1: SubjectFragment, 2: TimeFragment, 3: AnalysisFragment
-            if (item.getItemId() == R.id.nav_home) viewPager.setCurrentItem(HOME_FRAGMENT, true);
-            else if (item.getItemId() == R.id.nav_subject) viewPager.setCurrentItem(SUBJECT_FRAGMENT, true);
-            else if (item.getItemId() == R.id.nav_time) viewPager.setCurrentItem(TIME_FRAGMENT, true);
-            else if (item.getItemId() == R.id.nav_analysis) viewPager.setCurrentItem(ANALYSIS_FRAGMENT, true);
-            else return false;
+            if (item.getItemId() == R.id.nav_home)
+                viewPager.setCurrentItem(HOME_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_subject)
+                viewPager.setCurrentItem(SUBJECT_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_time)
+                viewPager.setCurrentItem(TIME_FRAGMENT, true);
+            else if (item.getItemId() == R.id.nav_analysis)
+                viewPager.setCurrentItem(ANALYSIS_FRAGMENT, true);
+            else
+                return false;
 
             Log.d("MainActivity", "test");
             return true;
@@ -138,6 +144,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    /**
+     * 로그인 상태를 확인하고 로그인되어 있다면 토큰을 갱신합니다.
+     */
+    private void checkLoginStatusAndRefreshToken() {
+        if (authManager.isLoggedIn()) {
+            Log.d(TAG, "사용자가 로그인된 상태입니다. 토큰을 갱신합니다.");
+            apiHelper.refreshToken(new ApiHelper.ApiCallback<AuthResponse>() {
+                @Override
+                public void onSuccess(AuthResponse result) {
+                    Log.d(TAG, "토큰 갱신 성공");
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Log.e(TAG, "토큰 갱신 실패: " + errorMessage);
+                    // 토큰 갱신에 실패한 경우 로그아웃 처리할 수도 있습니다
+                    // authManager.logout();
+                }
+            });
+        } else {
+            Log.d(TAG, "사용자가 로그인되지 않은 상태입니다.");
+        }
 
     // 모든 과목 목록을 DB에서 관찰하는 메소드
     private void observeAllSubjects() {
@@ -185,28 +214,12 @@ public class MainActivity extends AppCompatActivity {
         }
         // 실제 데이터 전달은 ViewPager2 어댑터와 각 대상 Fragment의newInstance 패턴 또는 setArguments를 통해 이루어져야 합니다.
         // 간단하게는 ViewPager 아이템 변경 후, 해당 프래그먼트가 Activity로부터 데이터를 가져가도록 할 수도 있습니다.
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
-        cloudSyncManager.uploadToServer(new CloudSyncManager.SyncCallback() {
-            @Override
-            public void onSuccess() {
-                Log.e("MainActivity", "Cloud Sync Success");
-            }
-
-            @Override
-            public void onError(String message) {
-                Log.e("MainActivity", "Cloud Sync Error: " + message);
-            }
-
-            @Override
-            public void onProgress(int progress, int total) {
-
-            }
-        });
     }
 
     @Override

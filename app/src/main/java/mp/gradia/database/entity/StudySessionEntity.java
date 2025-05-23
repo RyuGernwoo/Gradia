@@ -8,24 +8,32 @@ import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
-@Entity(
-        tableName = "study_session",
-        foreignKeys = @ForeignKey(
-            entity = SubjectEntity.class,
-                parentColumns = "subject_id",
-                childColumns = "subject_id",
-                onDelete = ForeignKey.CASCADE
-        )
-)
+@Entity(tableName = "study_session", foreignKeys = @ForeignKey(entity = SubjectEntity.class, parentColumns = "subject_id", childColumns = "subject_id", onDelete = ForeignKey.CASCADE))
 public class StudySessionEntity {
     // 세션 id
     @PrimaryKey(autoGenerate = true) // 자동으로 id 증가 (세션별로 오름차순)
     @NonNull
     @ColumnInfo(name = "session_id")
     public int sessionId = 0;
+
+    // 서버 ID
+    @Nullable
+    @ColumnInfo(name = "server_id")
+    public String serverId;
+
+    // 생성 시간
+    @Nullable
+    @ColumnInfo(name = "created_at")
+    public LocalDateTime createdAt;
+
+    // 업데이트 시간
+    @Nullable
+    @ColumnInfo(name = "updated_at")
+    public LocalDateTime updatedAt;
 
     // 과목명
     @NonNull
@@ -54,20 +62,51 @@ public class StudySessionEntity {
     @ColumnInfo(name = "rest_time")
     public long restTime;
 
-    public StudySessionEntity(int subjectId, @NonNull LocalDate date, long studyTime, LocalTime startTime, LocalTime endTime, long restTime) {
+    public StudySessionEntity(int subjectId, @NonNull LocalDate date, long studyTime, LocalTime startTime,
+            LocalTime endTime, long restTime) {
         this.subjectId = subjectId;
         this.date = date;
         this.studyTime = studyTime;
         this.startTime = startTime;
         this.endTime = endTime;
         this.restTime = restTime;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
+
     public int getSessionId() {
         return sessionId;
     }
 
     public void setSessionId(int sessionId) {
         this.sessionId = sessionId;
+    }
+
+    @Nullable
+    public String getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(@Nullable String serverId) {
+        this.serverId = serverId;
+    }
+
+    @Nullable
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(@Nullable LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Nullable
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(@Nullable LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public int getSubjectId() {
