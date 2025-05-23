@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
         // DB에서 모든 과목 목록 관찰 시작
         observeAllSubjects();
-
         // ViewPager
         viewPager = findViewById(R.id.view_pager);
         // Set ViewPager Adapter
