@@ -13,7 +13,7 @@
         android:id="@+id/img_main_icon"
         android:layout_width="54dp"
         android:layout_height="54dp"
-        android:src="@drawable/ic_main_logo"
+        android:src="@drawable/ic_main_logo_removebg"
         android:contentDescription="Main_Icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
@@ -25,7 +25,7 @@
         android:layout_height="40dp"
         android:layout_marginEnd="20dp"
         android:contentDescription="Profile"
-        android:src="@drawable/ic_profile"
+        android:src="@drawable/outline_account_circle_black_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

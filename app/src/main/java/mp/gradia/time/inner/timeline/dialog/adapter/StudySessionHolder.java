@@ -42,7 +42,7 @@ public class StudySessionHolder extends RecyclerView.ViewHolder {
     public void bind(StudySessionEntity session, int color, long totalTime) {
         long p = (session.getStudyTime() * 100 ) / totalTime;
         String percentStr = p + "%";
-        String minuteStr = session.getStudyTime() + "분";
+        String minuteStr = session.getStudyTime() + "분 / " + totalTime + "분";
 
         subjectName.setText(session.getSubjectName());
         percent.setText(percentStr);

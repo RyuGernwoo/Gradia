@@ -50,7 +50,7 @@ import orion.gz.scheduleview.OnScheduleTouchListener;
 import orion.gz.scheduleview.ScheduleEventItem;
 import orion.gz.scheduleview.ScheduleView;
 
-public class TimeTimelineFragment extends Fragment {
+public class TimeTimelineFragment extends Fragment implements SessionAddDialog.SessionDeleteListener {
     private static final String TAG = "TimeTimelineFragment";
     private static final int DAYS_OF_WEEK = 7;
     private ScheduleView scheduleView;
@@ -68,7 +68,7 @@ public class TimeTimelineFragment extends Fragment {
     private LocalDate currentSelectedDate;
     private boolean isScheduleEmpty = false;
     private int currentSelectedIdx = -1;
-    List<ScheduleEventItem> scheduleEventItems;
+    private List<ScheduleEventItem> scheduleEventItems;
     private AppDatabase db;
     private StudySessionDao sessionDao;
     private SubjectDao subjectDao;
@@ -128,6 +128,7 @@ public class TimeTimelineFragment extends Fragment {
 
     /**
      * 현재 선택된 날짜를 반환합니다.
+     *
      * @return 현재 선택된 LocalDate 객체입니다.
      */
     public LocalDate getCurrentSelectedDate() {
@@ -136,6 +137,7 @@ public class TimeTimelineFragment extends Fragment {
 
     /**
      * UI 컴포넌트들을 초기화합니다.
+     *
      * @param v 뷰 계층 구조의 루트 뷰입니다.
      */
     private void initViews(View v) {
@@ -240,6 +242,7 @@ public class TimeTimelineFragment extends Fragment {
 
     /**
      * 캘린더 셀의 선택 상태를 업데이트합니다. 선택된 셀은 강조 표시됩니다.
+     *
      * @param idx 선택된 셀의 인덱스입니다.
      */
     private void updateCalendarCellSelection(int idx) {
@@ -297,6 +300,10 @@ public class TimeTimelineFragment extends Fragment {
      * ScheduleView를 설정하고 스케줄 아이템 변경을 관찰합니다.
      */
     private void setupScheduleView() {
+        // SchdeuleView 초기화
+        if (currentSelectedDate != null)
+            studySessionViewModel.loadScheduleItemsByDate(currentSelectedDate);
+
         // ScheduleItem LiveData 관찰
         studySessionViewModel.scheduleItemLiveData.observe(getViewLifecycleOwner(),
                 eventItems -> {
@@ -310,43 +317,37 @@ public class TimeTimelineFragment extends Fragment {
                     }
                 });
 
-        // SchdeuleView 초기화
-        if (currentSelectedDate != null)
-            studySessionViewModel.loadScheduleItemsByDate(currentSelectedDate);
+        studySessionViewModel.selectedSessionLiveData.observe(getViewLifecycleOwner(),
+                session -> {
+                    if (session != null) {
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(SessionAddDialog.KEY_SESSION_ID, session.getSessionId());
+                        bundle.putInt(SessionAddDialog.KEY_SESSION_MODE, SessionAddDialog.MODE_EDIT);
+                        bundle.putInt(SessionAddDialog.KEY_SESSION_FOCUS_LEVEL, session.getFocusLevel());
+                        bundle.putInt(SessionAddDialog.KEY_SUBJECT_ID, session.getSubjectId());
+                        bundle.putString(SessionAddDialog.KEY_SUBJECT_NAME, session.getSubjectName());
+                        bundle.putInt(SessionAddDialog.KEY_START_HOUR, session.getStartTime().getHour());
+                        bundle.putInt(SessionAddDialog.KEY_START_MINUTE, session.getStartTime().getMinute());
+                        bundle.putInt(SessionAddDialog.KEY_END_HOUR, session.getEndTime().getHour());
+                        bundle.putInt(SessionAddDialog.KEY_END_MINUTE, session.getEndTime().getMinute());
+                        bundle.putLong(SessionAddDialog.KEY_START_DATE, getUtcMillis(session.getDate()));
+                        bundle.putLong(SessionAddDialog.KEY_END_DATE, getUtcMillis(session.getEndDate()));
+                        bundle.putString(SessionAddDialog.KEY_SESSION_MEMO, session.getMemo());
 
+                        if (getParentFragmentManager().findFragmentByTag("SessionAddDialog") == null) {
+                            SessionAddDialog dialog = SessionAddDialog.newInstance(bundle);
+                            dialog.setSessionDeleteListener(this);
+                            dialog.show(getParentFragmentManager(), "SessionAddDialog");
+                        }
+                    }
+                }
+        );
         // Listener
         scheduleView.setOnScheduleTouchListener(new OnScheduleTouchListener() {
             @Override
             public void onEventClick(ScheduleEventItem scheduleEventItem) {
                 int sessionId = scheduleEventItem.getId();
-
-                Bundle bundle = new Bundle();
                 studySessionViewModel.selectSessionById(sessionId);
-                studySessionViewModel.getSelectedSession().observe(getViewLifecycleOwner(),
-                        event -> {
-                            if (event != null) {
-                                StudySessionEntity session = event.getContentIfNotHandled();
-                                if (session != null) {
-                                    Log.d(TAG, "수정 호출됨 " + currentSelectedDate.toString());
-                                    bundle.putInt(SessionAddDialog.KEY_SESSION_ID, sessionId);
-                                    bundle.putInt(SessionAddDialog.KEY_SESSION_MODE, SessionAddDialog.MODE_EDIT);
-                                    bundle.putInt(SessionAddDialog.KEY_SESSION_FOCUS_LEVEL, session.getFocusLevel());
-                                    bundle.putInt(SessionAddDialog.KEY_SUBJECT_ID, session.getSubjectId());
-                                    bundle.putString(SessionAddDialog.KEY_SUBJECT_NAME, session.getSubjectName());
-                                    bundle.putInt(SessionAddDialog.KEY_START_HOUR, session.getStartTime().getHour());
-                                    bundle.putInt(SessionAddDialog.KEY_START_MINUTE, session.getStartTime().getMinute());
-                                    bundle.putInt(SessionAddDialog.KEY_END_HOUR, session.getEndTime().getHour());
-                                    bundle.putInt(SessionAddDialog.KEY_END_MINUTE, session.getEndTime().getMinute());
-                                    bundle.putLong(SessionAddDialog.KEY_START_DATE, getUtcMillis(session.getDate()));
-                                    bundle.putLong(SessionAddDialog.KEY_END_DATE, getUtcMillis(session.getEndDate()));
-                                    bundle.putString(SessionAddDialog.KEY_SESSION_MEMO, session.getMemo());
-
-                                    SessionAddDialog dialog = SessionAddDialog.newInstance(bundle);
-                                    dialog.show(getParentFragmentManager(), "SessionAddDialog");
-                                }
-                            }
-                        }
-                );
             }
 
             // 빈 공간 클릭으로 추가 이벤트 구현할 수 있음
@@ -355,6 +356,12 @@ public class TimeTimelineFragment extends Fragment {
 
             }
         });
+    }
+
+    @Override
+    public void onSessionDeleted(int sessionId) {
+        Log.d("SessionAdd", "콜백 호출됨");
+        updateSchedule();
     }
 
     /**
@@ -370,6 +377,7 @@ public class TimeTimelineFragment extends Fragment {
 
     /**
      * 스케줄 뷰를 맨 위로 스크롤합니다. 만약 이벤트가 있다면 가장 빠른 이벤트 시간으로 스크롤합니다.
+     *
      * @param items 스케줄 이벤트 아이템 목록입니다.
      */
     private void scrollToTop(List<ScheduleEventItem> items) {
@@ -393,6 +401,7 @@ public class TimeTimelineFragment extends Fragment {
 
     /**
      * LocalDate 객체를 UTC 밀리초로 변환합니다.
+     *
      * @param date 변환할 LocalDate 객체입니다.
      * @return UTC 밀리초 값입니다.
      */
@@ -402,6 +411,7 @@ public class TimeTimelineFragment extends Fragment {
 
     /**
      * UTC 밀리초를 LocalDate 객체로 변환합니다.
+     *
      * @param utcMillis 변환할 UTC 밀리초 값입니다.
      * @return 변환된 LocalDate 객체입니다.
      */
@@ -410,6 +420,8 @@ public class TimeTimelineFragment extends Fragment {
         ZoneId utcZone = ZoneId.of("UTC");
         return instant.atZone(utcZone).toLocalDate();
     }
+
+
 
     /**
      * 프래그먼트가 소멸될 때 호출됩니다.

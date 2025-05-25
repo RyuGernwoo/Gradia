@@ -31,7 +31,8 @@
             android:layout_height="120dp"
             android:layout_marginBottom="16dp"
             android:contentDescription="@string/profile_image_description"
-            android:src="@mipmap/ic_launcher_round" />
+            android:src="@drawable/ic_main_logo_removebg" />
+
         <TextView
             android:id="@+id/tv_profile_name"
             android:layout_width="wrap_content"

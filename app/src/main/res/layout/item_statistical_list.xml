@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
+    android:layout_marginBottom="15dp"
     android:orientation="vertical">
 
     <GridLayout
@@ -28,8 +30,8 @@
             android:layout_row="0"
             android:layout_rowWeight="1"
             android:layout_column="2"
-            android:layout_columnWeight="1.5"
-            android:gravity="center"
+            android:layout_columnWeight="2"
+            android:gravity="end"
             android:padding="10dp"
             android:text="33%"
             android:textColor="@color/gray"
@@ -42,10 +44,10 @@
             android:layout_row="0"
             android:layout_rowWeight="1"
             android:layout_column="3"
-            android:layout_columnWeight="1.5"
-            android:gravity="center"
+            android:layout_columnWeight="4"
+            android:gravity="end"
             android:padding="10dp"
-            android:text="50분"
+            android:text="50분 / 100분"
             android:textColor="@color/gray"
             android:textSize="15sp"
             android:textStyle="bold" />

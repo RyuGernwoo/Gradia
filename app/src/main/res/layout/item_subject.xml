@@ -1,38 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:elevation="4dp"
-    android:padding="12dp">
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
+    android:layout_marginBottom="15dp"
+    android:elevation="5dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="15dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/textSubjectName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
             android:text="과목명"
             android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textSubjectType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
             android:text="전공필수 / 3학점"
-            android:textSize="14sp"
-            android:textColor="#888888"/>
+            android:textColor="#888888"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/textSubjectTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="주간 목표: 5시간"
-            android:textSize="14sp"
-            android:textColor="#888888"/>
+            android:textColor="#888888"
+            android:textSize="14sp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
