@@ -9,6 +9,7 @@ import mp.gradia.api.models.AuthResponse;
 import mp.gradia.api.models.GoogleLoginRequest;
 import mp.gradia.api.models.GradePredictionRequest;
 import mp.gradia.api.models.GradePredictionResponse;
+import mp.gradia.api.models.KakaoLoginRequest;
 import mp.gradia.api.models.StudySession;
 import mp.gradia.api.models.StudySessionsApiResponse;
 import mp.gradia.api.models.Subject;
@@ -69,6 +70,37 @@ public class ApiHelper {
                             authResponse.getEmail(),
                             authResponse.getName(),
                             "google",
+                            "");
+                    callback.onSuccess(authResponse);
+                } else {
+                    callback.onError("로그인에 실패했습니다. 코드: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
+                callback.onError("네트워크 오류: " + t.getMessage());
+                Log.e(TAG, "네트워크 오류", t);
+            }
+        });
+    }
+
+    /**
+     * Kakao 계정으로 로그인합니다.
+     */
+    public void loginWithKakao(String accessToken, final ApiCallback<AuthResponse> callback) {
+        KakaoLoginRequest kakaoLoginRequest = new KakaoLoginRequest(accessToken);
+        apiService.loginWithKakao(kakaoLoginRequest).enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    AuthResponse authResponse = response.body();
+                    authManager.saveAuthInfo(
+                            authResponse.getAccess_token(),
+                            authResponse.getUser_id(),
+                            authResponse.getEmail(),
+                            authResponse.getName(),
+                            "kakao",
                             "");
                     callback.onSuccess(authResponse);
                 } else {

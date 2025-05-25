@@ -6,6 +6,7 @@ import mp.gradia.api.models.AuthResponse;
 import mp.gradia.api.models.GoogleLoginRequest;
 import mp.gradia.api.models.GradePredictionRequest;
 import mp.gradia.api.models.GradePredictionResponse;
+import mp.gradia.api.models.KakaoLoginRequest;
 import mp.gradia.api.models.StudySession;
 import mp.gradia.api.models.StudySessionsApiResponse;
 import mp.gradia.api.models.Subject;
@@ -30,6 +31,10 @@ public interface ApiService {
         // Google 계정으로 로그인
         @POST("auth/google")
         Call<AuthResponse> loginWithGoogle(@Body GoogleLoginRequest request);
+
+        // Kakao 계정으로 로그인
+        @POST("auth/kakao")
+        Call<AuthResponse> loginWithKakao(@Body KakaoLoginRequest request);
 
         // 현재 사용자 정보 조회
         @GET("auth/users/me")
