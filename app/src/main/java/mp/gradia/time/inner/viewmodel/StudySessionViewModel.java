@@ -7,20 +7,31 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.anychart.charts.Sunburst;
+
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import mp.gradia.Event;
+import mp.gradia.api.models.StudySession;
 import mp.gradia.database.dao.StudySessionDao;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.StudySessionEntity;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.database.entity.TargetStudyTime;
 import orion.gz.scheduleview.ScheduleEventItem;
 
 public class StudySessionViewModel extends ViewModel {
@@ -33,16 +44,20 @@ public class StudySessionViewModel extends ViewModel {
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     // LiveData for Study Session Data
-    private final MutableLiveData<Event<StudySessionEntity>> selectedSessionMutableLiveData = new MutableLiveData<>();
+    private final MutableLiveData<StudySessionEntity> selectedSessionMutableLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<StudySessionEntity>> sessionListMutableLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<StudySessionEntity>> sessionListByDateMutableLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<StudySessionEntity>> scheduleSessionMutableLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<StudySessionEntity>> scheduleWeeklySessionMutableLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<StudySessionEntity>> scheduleMonthlySessionMutableLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<ScheduleEventItem>> scheduleItemMutableLiveData = new MutableLiveData<>();
     private final MutableLiveData<ScheduleDataBundle> scheduleDataBundleMutableLiveData = new MutableLiveData<>();
-    public LiveData<Event<StudySessionEntity>> selectedSessionLiveData = selectedSessionMutableLiveData;
+    public LiveData<StudySessionEntity> selectedSessionLiveData = selectedSessionMutableLiveData;
     public LiveData<List<StudySessionEntity>> sessionListLiveData = sessionListMutableLiveData;
     public LiveData<List<StudySessionEntity>> sessionListByDateLiveData = sessionListByDateMutableLiveData;
     public LiveData<List<StudySessionEntity>> scheduleSessionLiveData = scheduleSessionMutableLiveData;
+    public LiveData<List<StudySessionEntity>> scheduleWeeklySessionLiveData = scheduleWeeklySessionMutableLiveData;
+    public LiveData<List<StudySessionEntity>> scheduleMonthlySessionLiveData = scheduleMonthlySessionMutableLiveData;
     public LiveData<List<ScheduleEventItem>> scheduleItemLiveData = scheduleItemMutableLiveData;
     public LiveData<ScheduleDataBundle> scheduleDataBundleLiveData = scheduleDataBundleMutableLiveData;
 
@@ -67,7 +82,7 @@ public class StudySessionViewModel extends ViewModel {
      * 데이터베이스에서 모든 세션 목록을 로드합니다.
      */
     public void loadAllSessions() {
-        compositeDisposable.add(sessionDao.getAll()
+        compositeDisposable.add(sessionDao.getAllFlowable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -93,22 +108,41 @@ public class StudySessionViewModel extends ViewModel {
                 .subscribeOn(Schedulers.io());
         Single<List<StudySessionEntity>> sessionEndDate = sessionDao.getByDateSingle(date.minusDays(1))
                 .subscribeOn(Schedulers.io());
+        Single<List<StudySessionEntity>> allSessions = sessionDao.getAllSingle()
+                .subscribeOn(Schedulers.io());
         List<StudySessionEntity> scheduleSession = new ArrayList<>();
 
         compositeDisposable.add(
-                Single.zip(sessionDate, sessionEndDate,
-                                (sessionsToday, sessionsYesterday) -> {
-                                    List<ScheduleEventItem> items = new ArrayList<>();
-
+                Single.zip(sessionDate, sessionEndDate, allSessions,
+                                (sessionsToday, sessionsYesterday, sessions) -> {
+                                    Log.d("SessionStatisticalDialog", "loadScheduleItemsByDate");
                                     for (StudySessionEntity session : sessionsToday) {
-                                        SubjectEntity subject = subjectDao.getById(session.getSubjectId());
+                                        Log.d("SessionStatisticalDialog", session.getSubjectName() + " " + session.getDate() + " " + session.getStartTime());
+                                    }
+
+                                    List<ScheduleEventItem> items = new ArrayList<>();
+                                    List<StudySessionEntity> weeklySession = new ArrayList<>();
+                                    List<StudySessionEntity> monthlySession = new ArrayList<>();
+                                    Map<Integer, TargetStudyTime> targetStudyTimes = new HashMap();
+                                    int[] subjectIds = new int[sessionsToday.size()];
+
+                                    // weekly
+                                    LocalDate monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                                    LocalDate sunday = monday.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
+                                    // monthly
+                                    LocalDate startOfMonth = date.withDayOfMonth(1);
+                                    LocalDate endOfMonth = date.with(TemporalAdjusters.lastDayOfMonth());
+
+                                    for (int i = 0; i < sessionsToday.size(); i++) {
+                                        SubjectEntity subject = subjectDao.getById(sessionsToday.get(i).getSubjectId());
                                         int eventColor = Color.parseColor(subject.getColor());
 
-                                        LocalDate startDate = session.getDate();
-                                        LocalDate endDate = session.getEndDate();
+                                        LocalDate startDate = sessionsToday.get(i).getDate();
+                                        LocalDate endDate = sessionsToday.get(i).getEndDate();
 
-                                        LocalTime startTime = session.getStartTime();
-                                        LocalTime endTime = session.getEndTime();
+                                        LocalTime startTime = sessionsToday.get(i).getStartTime();
+                                        LocalTime endTime = sessionsToday.get(i).getEndTime();
                                         LocalTime displayTime = startTime;
                                         LocalTime displayEndTime = endTime;
 
@@ -117,9 +151,10 @@ public class StudySessionViewModel extends ViewModel {
                                         if (endDate.isAfter(startDate)) {
                                             displayEndTime = LocalTime.MAX;
                                         }
-                                        addEventItem(items, session, displayTime, displayEndTime, eventColor);
-                                        scheduleSession.add(session);
-                                        Log.d("SessionStatisticalDialog", session.getSubjectName());
+                                        subjectIds[i] = sessionsToday.get(i).getSubjectId();
+                                        addEventItem(items, sessionsToday.get(i), displayTime, displayEndTime, eventColor);
+                                        scheduleSession.add(sessionsToday.get(i));
+                                        targetStudyTimes.put(sessionsToday.get(i).getSubjectId(), subjectDao.getById(sessionsToday.get(i).getSubjectId()).getTime());
                                     }
 
                                     for (StudySessionEntity session : sessionsYesterday) {
@@ -134,22 +169,50 @@ public class StudySessionViewModel extends ViewModel {
                                             LocalTime endTime = session.getEndTime();
                                             addEventItem(items, session, LocalTime.MIN, endTime, eventColor);
                                             scheduleSession.add(session);
-                                            Log.d("SessionStatisticalDialog", session.getSubjectName());
+                                            targetStudyTimes.put(session.getSubjectId(), subjectDao.getById(session.getSubjectId()).getTime());
                                         }
                                     }
-                                    return new ScheduleDataBundle(items, scheduleSession);
+
+                                    // Weekly
+                                    for (int i = 0; i < sessions.size(); i++) {
+                                        for (int j = 0; j < subjectIds.length; j++) {
+                                            if (sessions.get(i).getSubjectId() == subjectIds[j]) {
+                                                LocalDate d = sessions.get(i).getDate();
+                                                if (d.equals(monday) || d.equals(sunday) || (d.isAfter(monday) && d.isBefore(sunday)))
+                                                    weeklySession.add(sessions.get(i));
+                                            }
+                                        }
+                                    }
+
+                                    // Monthly
+                                    for (int i = 0; i < sessions.size(); i++) {
+                                        for (int j = 0; j < subjectIds.length; j++) {
+                                            if (sessions.get(i).getSubjectId() == subjectIds[j]) {
+                                                LocalDate d = sessions.get(i).getDate();
+                                                if (d.equals(startOfMonth) || d.equals(endOfMonth) || (d.isAfter(startOfMonth) && d.isBefore(endOfMonth)))
+                                                    monthlySession.add(sessions.get(i));
+                                            }
+                                        }
+                                    }
+
+                                    return new ScheduleDataBundle(items, scheduleSession, targetStudyTimes, weeklySession, monthlySession);
                                 })
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 scheduleDataBundle -> {
                                     List<ScheduleEventItem> scheduleEventList = scheduleDataBundle.getEventItemList();
                                     List<StudySessionEntity> scheduleSessionList = scheduleDataBundle.getEventSessionList();
+                                    List<StudySessionEntity> weeklySessionList = scheduleDataBundle.getWeeklySessionList();
+                                    List<StudySessionEntity> monthlySessionList = scheduleDataBundle.getMonthlySessionList();
 
                                     scheduleDataBundleMutableLiveData.setValue(scheduleDataBundle);
                                     scheduleItemMutableLiveData.setValue(scheduleEventList);
                                     scheduleSessionMutableLiveData.setValue(scheduleSessionList);
+                                    scheduleWeeklySessionMutableLiveData.setValue(weeklySessionList);
+                                    scheduleMonthlySessionMutableLiveData.setValue(monthlySessionList);
+
                                     for (StudySessionEntity session : scheduleSession) {
-                                        Log.d("SessionStatisticalDialog", session.getSubjectName() + " " + session.getDate());
+                                        Log.d("SessionStatisticalDialog", session.getSubjectName() + " " + session.getDate() + " " + session.getDate() + " " + session.getStartTime());
                                     }
                                     Log.d("SessionStatisticalDialog", "save complete");
                                 },
@@ -158,6 +221,30 @@ public class StudySessionViewModel extends ViewModel {
                                     scheduleSessionMutableLiveData.setValue(new ArrayList<>());
                                 }
                         )
+        );
+    }
+
+    public void loadScheduleItemsByWeek(final LocalDate monday, LocalDate sunday, int[] subjectId) {
+        List<StudySessionEntity> weeklySession = new ArrayList<>();
+        compositeDisposable.add(sessionDao.getAllFlowable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        sessionList -> {
+                            for (int i = 0; i < sessionList.size(); i++) {
+                                for (int j = 0; j < subjectId.length; j++) {
+                                    if (sessionList.get(i).getSubjectId() == subjectId[j]) {
+                                        if ((sessionList.get(i).getDate().isAfter(monday) && sessionList.get(i).getDate().isBefore(sunday)) || sessionList.get(i).getDate().equals(monday) || sessionList.get(i).getDate().equals(sunday))
+                                            weeklySession.add(sessionList.get(i));
+                                    }
+                                }
+                            }
+                            scheduleWeeklySessionMutableLiveData.setValue(weeklySession);
+                        },
+                        throwable -> {
+                            // 예외 처리
+                        }
+                )
         );
     }
 
@@ -189,7 +276,7 @@ public class StudySessionViewModel extends ViewModel {
      * @param session 선택된 StudySessionEntity
      */
     public void selectSession(StudySessionEntity session) {
-        selectedSessionMutableLiveData.setValue(new Event<>(session));
+        selectedSessionMutableLiveData.setValue(session);
     }
 
     /**
@@ -203,7 +290,7 @@ public class StudySessionViewModel extends ViewModel {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 session -> {
-                                    selectedSessionMutableLiveData.setValue(new Event<>(session));
+                                    selectedSessionMutableLiveData.setValue(session);
                                 },
                                 throwable -> {
                                     Log.e("StudySessionViewModel", "Error loading session by ID", throwable);
@@ -216,7 +303,7 @@ public class StudySessionViewModel extends ViewModel {
      * 선택된 세션 LiveData를 반환합니다.
      * @return 선택된 세션 LiveData
      */
-    public LiveData<Event<StudySessionEntity>> getSelectedSession() {
+    public LiveData<StudySessionEntity> getSelectedSession() {
         return selectedSessionLiveData;
     }
 
@@ -268,6 +355,21 @@ public class StudySessionViewModel extends ViewModel {
         );
     }
 
+    public void deleteSessionById(int id) {
+        compositeDisposable.add(
+                sessionDao.deleteById(id)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                () -> {
+                                    Log.d("SessionAddDialog", "Session deleted successfully");
+                                },
+                                throwable -> {
+                                    Log.e("SessionAddDialog", "Error deleting session", throwable);
+                                }
+                        )
+        );
+    }
     /**
      * ViewModel이 더 이상 사용되지 않을 때 호출됩니다. RxJava Disposables를 해제합니다.
      */
@@ -283,15 +385,21 @@ public class StudySessionViewModel extends ViewModel {
     public static class ScheduleDataBundle {
         final List<ScheduleEventItem> eventItemList;
         final List<StudySessionEntity> eventSessionList;
+        final Map<Integer, TargetStudyTime> targetStudyTimes;
+        final List<StudySessionEntity> weeklySessionList;
+        final List<StudySessionEntity> monthlySessionList;
 
         /**
          * ScheduleDataBundle의 생성자입니다.
          * @param eventItemList 스케줄 이벤트 아이템 목록
          * @param eventSessionList 스터디 세션 엔티티 목록
          */
-        ScheduleDataBundle(List<ScheduleEventItem> eventItemList, List<StudySessionEntity> eventSessionList) {
+        ScheduleDataBundle(List<ScheduleEventItem> eventItemList, List<StudySessionEntity> eventSessionList, Map<Integer, TargetStudyTime> targetStudyTimes, List<StudySessionEntity> weeklySessionList, List<StudySessionEntity> monthlySessionList) {
             this.eventItemList = eventItemList;
             this.eventSessionList = eventSessionList;
+            this.targetStudyTimes = targetStudyTimes;
+            this.weeklySessionList = weeklySessionList;
+            this.monthlySessionList = monthlySessionList;
         }
 
         /**
@@ -309,5 +417,10 @@ public class StudySessionViewModel extends ViewModel {
         public List<StudySessionEntity> getEventSessionList() {
             return eventSessionList;
         }
+
+        public Map<Integer, TargetStudyTime> getTargetStudyTimes() {return targetStudyTimes; }
+
+        public List<StudySessionEntity> getWeeklySessionList() { return weeklySessionList; }
+        public List<StudySessionEntity> getMonthlySessionList() { return monthlySessionList; }
     }
 }

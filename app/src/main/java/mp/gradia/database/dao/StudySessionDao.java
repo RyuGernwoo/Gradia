@@ -1,4 +1,4 @@
-package mp.gradia.database.dao;
+    package mp.gradia.database.dao;
 
 import android.database.Observable;
 
@@ -24,7 +24,10 @@ import mp.gradia.database.entity.SubjectStudyTime;
 @Dao
 public interface StudySessionDao {
     @Query("SELECT * FROM study_session")
-    Flowable<List<StudySessionEntity>> getAll();
+    Flowable<List<StudySessionEntity>> getAllFlowable();
+
+    @Query("SELECT * FROM study_session")
+    Single<List<StudySessionEntity>> getAllSingle();
 
     @Query("SELECT * FROM study_session WHERE session_id = :id")
     Flowable<StudySessionEntity> getByIdFlowable(int id);
@@ -38,6 +41,9 @@ public interface StudySessionDao {
     @Query("SELECT * FROM study_session WHERE date = :date")
     Single<List<StudySessionEntity>> getByDateSingle(LocalDate date);
 
+    @Query("DELETE FROM study_session WHERE session_id = :id")
+    Completable deleteById(int id);
+
     @Query("DELETE FROM study_session")
     Completable clearAll();
 
@@ -49,6 +55,7 @@ public interface StudySessionDao {
 
     @Delete
     Completable delete(StudySessionEntity... session);
+
     @Query("SELECT * FROM study_session")
     LiveData<List<StudySessionEntity>> getAllSessions();
 

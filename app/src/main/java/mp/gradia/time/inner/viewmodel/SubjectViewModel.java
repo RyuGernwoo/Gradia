@@ -4,13 +4,19 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.database.entity.TargetStudyTime;
+import mp.gradia.subject.Subject;
 
 public class SubjectViewModel extends ViewModel {
     // 로깅 태그
@@ -23,8 +29,10 @@ public class SubjectViewModel extends ViewModel {
     // 과목 데이터 LiveData
     private final MutableLiveData<SubjectEntity> selectedSubjectMutableLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<SubjectEntity>> subjectListMutableLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Map<Integer, TargetStudyTime>> subjectTargetStudyTimeMutableLiveData = new MutableLiveData<>();
     public LiveData<List<SubjectEntity>> subjectListLiveData = subjectListMutableLiveData;
     public LiveData<SubjectEntity> selectedSubjectLiveData = selectedSubjectMutableLiveData;
+    public LiveData<Map<Integer, TargetStudyTime>> subjectTargetStudyTimeLiveData = subjectTargetStudyTimeMutableLiveData;
 
     /**
      * SubjectViewModel의 생성자입니다. SubjectDao를 인자로 받아 과목 목록을 로드합니다.
@@ -78,6 +86,26 @@ public class SubjectViewModel extends ViewModel {
                 )
         );
     }
+
+    public void loadSubjectTargetStudyTime() {
+        compositeDisposable.add(subjectDao.getAll()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        subjectList -> {
+                            Map<Integer, TargetStudyTime> targetStudyTimeMap = new HashMap<>();
+                            for (SubjectEntity subject : subjectList) {
+                                targetStudyTimeMap.put(subject.getSubjectId(), subject.getTime());
+                            }
+                            subjectTargetStudyTimeMutableLiveData.setValue(targetStudyTimeMap);
+                        },
+                        throwable -> {
+                            // 예외 처리
+                        }
+                )
+        );
+    }
+
     /**
      * ViewModel이 더 이상 사용되지 않을 때 호출됩니다. RxJava Disposables를 해제합니다.
      */
