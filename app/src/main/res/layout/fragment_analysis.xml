@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,28 +17,66 @@
             android:textSize="20sp"
             android:textStyle="bold"/>
 
+        <!-- 통계 전환 탭 -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabIndicatorColor="@android:color/black"
+            app:tabSelectedTextColor="@android:color/black"
+            app:tabTextColor="@android:color/darker_gray"
+            android:layout_marginTop="8dp" />
+
         <!-- 통계 그래프 -->
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/chartStudyTime"
             android:layout_width="match_parent"
-            android:layout_height="300dp"/>
+            android:layout_height="300dp"
+            android:layout_marginTop="12dp" />
 
         <TextView
-            android:text="학습 달성률"
+            android:text="\n학습 달성률"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:layout_marginTop="20dp"
             android:textStyle="bold"/>
 
-        <!-- 달성률 ProgressBar 등 -->
+        <!-- 전체 과목 총합 목표시간 기준으로 학습 달성률 계산-->
+        <!-- 일일 달성률 텍스트 -->
+        <TextView
+            android:id="@+id/tvDailyProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="오늘의 학습 달성률"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp" />
+        <!-- 달성률 ProgressBar -->
         <ProgressBar
-            android:id="@+id/progressGoal"
+            android:id="@+id/progressGoal_daily"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="20dp"
             android:max="100"
-            android:progress="70"/>
+            android:progress="0" />
+
+        <!-- 월간 달성률 텍스트 -->
+        <TextView
+            android:id="@+id/tvMonthlyProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="이번 달 평균 달성률"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp" />
+
+        <!-- 달성률 ProgressBar -->
+        <ProgressBar
+            android:id="@+id/progressGoal_monthly"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:max="100"
+            android:progress="0" />
+
 
         <TextView
             android:text="성적 예측 및 추천"
@@ -52,7 +91,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="예상 성적: A / 우선순위 추천: OO"
-            android:textSize="16sp"/>
+            android:textSize="16sp" />
 
     </LinearLayout>
 </ScrollView>
+

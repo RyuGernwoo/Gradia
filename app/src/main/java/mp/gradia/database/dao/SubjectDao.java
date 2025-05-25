@@ -1,5 +1,6 @@
 package mp.gradia.database.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -12,6 +13,7 @@ import java.util.List;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
+import mp.gradia.database.SubjectIdName;
 import mp.gradia.database.entity.SubjectEntity;
 
 @Dao
@@ -42,4 +44,8 @@ public interface SubjectDao {
 
     @Delete
     Completable delete(SubjectEntity... subject);
+
+    @Query("SELECT subject_id, name FROM subjects")
+    LiveData<List<SubjectIdName>> getAllSubjectIdNamePairs();
+
 }

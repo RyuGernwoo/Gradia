@@ -2,6 +2,7 @@ package mp.gradia.database.dao;
 
 import android.database.Observable;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -16,7 +17,9 @@ import java.util.concurrent.Flow;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
+import mp.gradia.database.entity.DayStudyTime;
 import mp.gradia.database.entity.StudySessionEntity;
+import mp.gradia.database.entity.SubjectStudyTime;
 
 @Dao
 public interface StudySessionDao {
@@ -46,5 +49,21 @@ public interface StudySessionDao {
 
     @Delete
     Completable delete(StudySessionEntity... session);
+    @Query("SELECT * FROM study_session")
+    LiveData<List<StudySessionEntity>> getAllSessions();
+
+
+    @Query("SELECT subject_id AS subjectId, SUM(study_time) AS totalTime " +
+            "FROM study_session " +
+            "GROUP BY subject_id")
+    LiveData<List<SubjectStudyTime>> getTotalStudyTimePerSubject();
+
+    @Query("SELECT SUM(study_time) FROM study_session WHERE date = :today")
+    LiveData<Long> getTodayStudyTime(LocalDate today);
+
+    @Query("SELECT date, SUM(study_time) as total FROM study_session WHERE strftime('%Y-%m', date) = :month GROUP BY date")
+    LiveData<List<DayStudyTime>> getMonthlyStudyTime(String month);
+
+
 
 }
