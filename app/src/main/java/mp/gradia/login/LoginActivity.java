@@ -251,6 +251,35 @@ public class LoginActivity extends AppCompatActivity {
             if (error != null) {
                 handleKakaoLoginError(error);
             } else if (token != null) {
+
+                apiHelper.loginWithKakao(token.getAccessToken(), new ApiHelper.ApiCallback<AuthResponse>() {
+                    @Override
+                    public void onSuccess(AuthResponse authResponse) {
+                        Log.d(TAG, "Kakao 로그인 API 호출 성공: " + authResponse.getAccess_token());
+                        // authManager.saveAuthInfo()가 호출된 직후이므로 바로 subject 데이터 동기화 수행
+                        subjectRepository.downloadAndReplaceFromServer(new SubjectRepository.CloudSyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "Kakao 로그인 - Subject 데이터 동기화 성공");
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                Log.e(TAG, "Kakao 로그인 - Subject 데이터 동기화 오류: " + message);
+                                // 동기화 실패해도 계속 진행
+                                Toast.makeText(LoginActivity.this, "데이터 동기화에 실패했지만 계속 진행합니다.", Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Log.e(TAG, "Kakao 로그인 API 호출 실패: " + message);
+                        Toast.makeText(LoginActivity.this, "Kakao 로그인 처리 중 오류 발생", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
                 Log.i(TAG, "Kakao 로그인 성공. AccessToken: " + token.getAccessToken());
                 fetchKakaoUserInfo();
             }
