@@ -221,8 +221,7 @@ public class SessionAddDialog extends DialogFragment {
     }
 
     /**
-     * 뷰가 생성된 후 호출됩니다. 툴바, 드롭다운, DatePicker, TimePicker, DurationPicker, 메모 입력 필드,
-     * 저장 버튼을 설정합니다.
+     * 뷰가 생성된 후 호출됩니다. 툴바, 드롭다운, DatePicker, TimePicker, DurationPicker, 메모 입력 필드, 저장 버튼을 설정합니다.
      */
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -245,7 +244,7 @@ public class SessionAddDialog extends DialogFragment {
 
     /**
      * 새로운 SessionAddDialog 객체를 생성하고 Bundle 데이터를 설정합니다.
-     * 
+     *
      * @param bundle 다이얼로그에 전달할 데이터가 담긴 Bundle 객체입니다.
      * @return 생성된 SessionAddDialog 인스턴스입니다.
      */
@@ -260,9 +259,10 @@ public class SessionAddDialog extends DialogFragment {
      */
     private void initViews() {
         toolbar = v.findViewById(R.id.toolbar);
-        if (sessionMode == MODE_EDIT)
+        if (sessionMode == MODE_EDIT) {
             toolbar.setTitle(R.string.appbar_title_edit_session);
-
+            setupToolbarMenu();
+        }
         dropdown = v.findViewById(R.id.dropdown_autocomplete);
         dateEditText = v.findViewById(R.id.date_picker_edittext);
         startTimeInputLayout = v.findViewById(R.id.start_time_picker_textinput);
@@ -282,6 +282,22 @@ public class SessionAddDialog extends DialogFragment {
         sessionReviewFocusLevel2 = v.findViewById(R.id.session_review_focus_level2);
         sessionReviewFocusLevel3 = v.findViewById(R.id.session_review_focus_level3);
         sessionReviewFocusLevel4 = v.findViewById(R.id.session_review_focus_level4);
+    }
+
+    private void setupToolbarMenu() {
+        toolbar.inflateMenu(R.menu.session_add_dialog_menu);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_delete_session) {
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("세션 삭제")
+                        .setMessage("이 세션을 정말 삭제하시겠습니까?")
+                        .setNegativeButton("취소", null)
+                        .setPositiveButton("삭제", (dialog, which) -> deleteSession())
+                        .show();
+                return true;
+            }
+            return false;
+        });
     }
 
     /**
@@ -382,7 +398,6 @@ public class SessionAddDialog extends DialogFragment {
 
     /**
      * 선택된 날짜 (UTC 밀리초)를 "yyyy-MM-dd" 형식의 문자열로 변환하여 DateEditText에 업데이트합니다.
-     * 
      * @param utcMillis 선택된 날짜의 UTC 밀리초 배열입니다.
      */
     private void updateDateEditText(long[] utcMillis) {
@@ -472,7 +487,7 @@ public class SessionAddDialog extends DialogFragment {
 
     /**
      * 선택된 시간을 지정된 형식의 문자열로 변환하여 해당 TimeEditText에 업데이트합니다.
-     * 
+     *
      * @param clockFormat 시간 형식 (12시간 또는 24시간).
      * @param type        업데이트할 시간 유형 (시작 시간 또는 종료 시간).
      */
@@ -542,8 +557,7 @@ public class SessionAddDialog extends DialogFragment {
             durationMinute = diffMinutes % 60;
 
             String durationText = String.format(Locale.getDefault(), "%02d시간 %02d분", durationHour, durationMinute);
-            if (durationEditText != null)
-                durationEditText.setText(durationText);
+            if (durationEditText != null) durationEditText.setText(durationText);
         }
     }
 
@@ -612,9 +626,11 @@ public class SessionAddDialog extends DialogFragment {
 
     /**
      * 중복되는 세션이 있을 경우 Snackbar를 표시합니다.
-     * 
+     *
      * @param overlappingSession 중복되는 StudySessionEntity 객체입니다. null이면 중복이 없음을
      *                           의미합니다.
+     *
+     * @param overlappingSession 중복되는 StudySessionEntity 객체입니다. null이면 중복이 없음을 의미합니다.
      */
     private void showOverlappingSesison(StudySessionEntity overlappingSession) {
         if (overlappingSession == null) {
@@ -654,8 +670,7 @@ public class SessionAddDialog extends DialogFragment {
     public interface TimeValidationCallback {
         /**
          * 시간 유효성 검사 결과가 반환될 때 호출됩니다.
-         * 
-         * @param isValid            시간이 유효한지 여부입니다.
+         * @param isValid 시간이 유효한지 여부입니다.
          * @param overlappingSession 중복되는 세션이 있을 경우 해당 세션 객체입니다.
          */
         void onValidationResult(boolean isValid, @Nullable StudySessionEntity overlappingSession);
@@ -740,7 +755,7 @@ public class SessionAddDialog extends DialogFragment {
 
     /**
      * 주어진 시간 슬롯이 기존 세션과 겹치는지 유효성 검사를 수행합니다.
-     * 
+     *
      * @param date     새 세션의 날짜입니다.
      * @param endDate  새 세션의 종료 날짜입니다 (선택 사항).
      * @param start    새 세션의 시작 시간입니다.
@@ -826,7 +841,7 @@ public class SessionAddDialog extends DialogFragment {
 
     /**
      * UTC 밀리초를 LocalDate 객체로 변환합니다.
-     * 
+     *
      * @param utcMillis 변환할 UTC 밀리초 값입니다.
      * @return 변환된 LocalDate 객체입니다.
      */

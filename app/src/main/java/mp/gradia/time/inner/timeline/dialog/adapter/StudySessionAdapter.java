@@ -19,6 +19,7 @@ public class StudySessionAdapter extends RecyclerView.Adapter<StudySessionHolder
     private int[] colors;
     private Context context;
     private long totalTime = 0;
+    private long[] targetTime;
 
     /**
      * StudySessionAdapter의 생성자입니다.
@@ -32,6 +33,13 @@ public class StudySessionAdapter extends RecyclerView.Adapter<StudySessionHolder
         this.sessionList = sessionList;
         this.colors = colors;
         this.totalTime = totalTime;
+    }
+
+    public StudySessionAdapter(Context context, List<StudySessionEntity> sessionList, int[] colors, long[] targetTime) {
+        this.context = context;
+        this.sessionList = sessionList;
+        this.colors = colors;
+        this.targetTime = targetTime;
     }
 
     /**
@@ -56,7 +64,10 @@ public class StudySessionAdapter extends RecyclerView.Adapter<StudySessionHolder
     public void onBindViewHolder(@NonNull StudySessionHolder holder, int position) {
         StudySessionEntity session = sessionList.get(position);
         int color = colors[position];
-        holder.bind(session, color, totalTime);
+        if (targetTime == null)
+            holder.bind(session, color, totalTime);
+        else if (targetTime != null)
+            holder.bind(session, color, targetTime[position]);
     }
 
     /**

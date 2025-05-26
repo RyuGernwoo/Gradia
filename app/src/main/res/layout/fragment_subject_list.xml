@@ -1,11 +1,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
     <!-- 검색창 + 정렬 -->
     <LinearLayout
+        android:padding="15dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -26,6 +26,7 @@
 
     <!-- 정렬 기준 텍스트 -->
     <TextView
+        android:padding="15dp"
         android:id="@+id/sortTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,6 +59,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_margin="16dp"
+        android:layout_margin="30dp"
         android:src="@drawable/ic_add" />
 </LinearLayout>

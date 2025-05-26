@@ -30,360 +30,467 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/dialog_layout"
+        <ScrollView
+            android:id="@+id/schedule_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:overScrollMode="never">
 
-            <!-- Session : Focus Time -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/focus_time_container"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/dialog_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:elevation="5dp"
-                app:cardCornerRadius="15dp"
-                app:layout_constraintBottom_toTopOf="@id/session_review_container"
-                app:layout_constraintEnd_toEndOf="@id/dialog_layout"
-                app:layout_constraintStart_toStartOf="@id/dialog_layout"
-                app:layout_constraintTop_toTopOf="@id/dialog_layout">
+                android:layout_height="match_parent">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/focus_time_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp"
-                    android:gravity="center">
-
-                    <LinearLayout
-                        android:id="@+id/container1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:orientation="vertical"
-                        app:layout_constraintBottom_toBottomOf="@id/focus_time_layout"
-                        app:layout_constraintEnd_toStartOf="@+id/container2"
-                        app:layout_constraintStart_toStartOf="@id/focus_time_layout"
-                        app:layout_constraintTop_toTopOf="@id/focus_time_layout">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/total_focus_time"
-                            android:textColor="@color/gray"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/total_focus_time_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:text="50min"
-                            android:textSize="20sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/container2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:orientation="vertical"
-                        app:layout_constraintBottom_toBottomOf="@id/focus_time_layout"
-                        app:layout_constraintEnd_toStartOf="@id/container3"
-                        app:layout_constraintStart_toEndOf="@id/container1"
-                        app:layout_constraintTop_toTopOf="@id/focus_time_layout">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/avg_focus_time"
-                            android:textColor="@color/gray"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/avg_focus_time_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:text="50min"
-                            android:textSize="20sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/container3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:orientation="vertical"
-                        app:layout_constraintBottom_toBottomOf="@id/focus_time_layout"
-                        app:layout_constraintEnd_toEndOf="@+id/focus_time_layout"
-                        app:layout_constraintStart_toEndOf="@+id/container2"
-                        app:layout_constraintTop_toTopOf="@id/focus_time_layout">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="5dp"
-                            android:text="@string/most_focus_time"
-                            android:textColor="@color/gray"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/most_focus_time_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:text="저녁"
-                            android:textSize="20sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </androidx.cardview.widget.CardView>
-            <!-- Session : Focus Time -->
-
-            <!-- Session : Session Review -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/session_review_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:elevation="5dp"
-                app:cardCornerRadius="15dp"
-                app:layout_constraintEnd_toEndOf="@id/dialog_layout"
-                app:layout_constraintStart_toStartOf="@id/dialog_layout"
-                app:layout_constraintTop_toBottomOf="@id/focus_time_container">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/session_review_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp">
-
-                    <LinearLayout
-                        android:id="@+id/session_review_focus_level1"
-                        style="@style/session_review_layout_btn"
-                        android:background="@drawable/layout_button_selector"
-                        app:layout_constraintBottom_toBottomOf="@id/session_review_layout"
-                        app:layout_constraintEnd_toStartOf="@id/session_review_focus_level2"
-                        app:layout_constraintStart_toStartOf="@id/session_review_layout"
-                        app:layout_constraintTop_toTopOf="@id/session_review_layout">
-
-                        <ImageView
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:src="@drawable/sentiment_very_dissatisfied_48px" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/session_review_focus_level1"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/focus_level1_count_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="5dp"
-                            android:text="3"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/session_review_focus_level2"
-                        style="@style/session_review_layout_btn"
-                        android:background="@drawable/layout_button_selector"
-                        app:layout_constraintBottom_toBottomOf="@id/session_review_layout"
-                        app:layout_constraintEnd_toStartOf="@id/session_review_focus_level3"
-                        app:layout_constraintStart_toEndOf="@id/session_review_focus_level1"
-                        app:layout_constraintTop_toTopOf="@id/session_review_layout">
-
-                        <ImageView
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:src="@drawable/sentiment_neutral_48px" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/session_review_focus_level2"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/focus_level2_count_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="5dp"
-                            android:text="3"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/session_review_focus_level3"
-                        style="@style/session_review_layout_btn"
-                        android:background="@drawable/layout_button_selector"
-                        app:layout_constraintBottom_toBottomOf="@id/session_review_layout"
-                        app:layout_constraintEnd_toStartOf="@id/session_review_focus_level4"
-                        app:layout_constraintStart_toEndOf="@id/session_review_focus_level2"
-                        app:layout_constraintTop_toTopOf="@id/session_review_layout">
-
-                        <ImageView
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:src="@drawable/sentiment_satisfied_48px" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/session_review_focus_level3"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/focus_level3_count_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="5dp"
-                            android:text="3"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/session_review_focus_level4"
-                        style="@style/session_review_layout_btn"
-                        android:background="@drawable/layout_button_selector"
-                        app:layout_constraintBottom_toBottomOf="@id/session_review_layout"
-                        app:layout_constraintEnd_toEndOf="@id/session_review_layout"
-                        app:layout_constraintStart_toEndOf="@id/session_review_focus_level3"
-                        app:layout_constraintTop_toTopOf="@id/session_review_layout">
-
-                        <ImageView
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:src="@drawable/sentiment_excited_48px" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="@string/session_review_focus_level4"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/focus_level4_count_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="5dp"
-                            android:text="3"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
-            <!-- Session : Session Review -->
-
-            <!-- Session : Time Distribution -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/focus_time_distribution_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:elevation="5dp"
-                app:cardCornerRadius="15dp"
-                app:layout_constraintEnd_toEndOf="@id/dialog_layout"
-                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
-                app:layout_constraintTop_toBottomOf="@id/session_review_container"
-                app:layout_constraintBottom_toTopOf="@+id/target_study_time_container">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/time_distribution_list"
+                <!-- Session : Focus Time -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/focus_time_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:scrollbars="vertical">
+                    android:layout_margin="15dp"
+                    android:elevation="5dp"
+                    app:cardCornerRadius="15dp"
+                    app:layout_constraintBottom_toTopOf="@id/session_review_container"
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toStartOf="@id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@id/dialog_layout">
 
-                </androidx.recyclerview.widget.RecyclerView>
-            </androidx.cardview.widget.CardView>
-            <!-- Session : Time Distribution -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/focus_time_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="10dp"
+                        android:gravity="center">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/target_study_time_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:elevation="5dp"
-                app:cardCornerRadius="15dp"
-                app:layout_constraintEnd_toEndOf="@id/dialog_layout"
-                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
-                app:layout_constraintTop_toBottomOf="@id/focus_time_distribution_container">
+                        <LinearLayout
+                            android:id="@+id/container1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="@id/focus_time_layout"
+                            app:layout_constraintEnd_toStartOf="@+id/container2"
+                            app:layout_constraintStart_toStartOf="@id/focus_time_layout"
+                            app:layout_constraintTop_toTopOf="@id/focus_time_layout">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/target_study_time_list"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_marginBottom="5dp"
+                                android:text="@string/total_focus_time"
+                                android:textColor="@color/gray"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/total_focus_time_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginTop="5dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:text="50min"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/container2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="@id/focus_time_layout"
+                            app:layout_constraintEnd_toStartOf="@id/container3"
+                            app:layout_constraintStart_toEndOf="@id/container1"
+                            app:layout_constraintTop_toTopOf="@id/focus_time_layout">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_marginBottom="5dp"
+                                android:text="@string/avg_focus_time"
+                                android:textColor="@color/gray"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/avg_focus_time_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginTop="5dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:text="50min"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/container3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="@id/focus_time_layout"
+                            app:layout_constraintEnd_toEndOf="@+id/focus_time_layout"
+                            app:layout_constraintStart_toEndOf="@+id/container2"
+                            app:layout_constraintTop_toTopOf="@id/focus_time_layout">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_marginBottom="5dp"
+                                android:text="@string/most_focus_time"
+                                android:textColor="@color/gray"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/most_focus_time_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginTop="5dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:text="저녁"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.cardview.widget.CardView>
+                <!-- Session : Focus Time -->
+
+                <!-- Session : Session Review -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/session_review_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:scrollbars="vertical">
+                    android:layout_margin="15dp"
+                    android:elevation="5dp"
+                    app:cardCornerRadius="15dp"
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toStartOf="@id/dialog_layout"
+                    app:layout_constraintTop_toBottomOf="@id/focus_time_container">
 
-                </androidx.recyclerview.widget.RecyclerView>
-            </androidx.cardview.widget.CardView>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/session_review_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="10dp">
+
+                        <LinearLayout
+                            android:id="@+id/session_review_focus_level1"
+                            style="@style/session_review_layout"
+                            android:background="@drawable/layout_button_selector"
+                            app:layout_constraintBottom_toBottomOf="@id/session_review_layout"
+                            app:layout_constraintEnd_toStartOf="@id/session_review_focus_level2"
+                            app:layout_constraintStart_toStartOf="@id/session_review_layout"
+                            app:layout_constraintTop_toTopOf="@id/session_review_layout">
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_gravity="center"
+                                android:layout_margin="5dp"
+                                android:src="@drawable/sentiment_very_dissatisfied_48px" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/session_review_focus_level1"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/focus_level1_count_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="5dp"
+                                android:text="3"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/session_review_focus_level2"
+                            style="@style/session_review_layout"
+                            android:background="@drawable/layout_button_selector"
+                            app:layout_constraintBottom_toBottomOf="@id/session_review_layout"
+                            app:layout_constraintEnd_toStartOf="@id/session_review_focus_level3"
+                            app:layout_constraintStart_toEndOf="@id/session_review_focus_level1"
+                            app:layout_constraintTop_toTopOf="@id/session_review_layout">
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_gravity="center"
+                                android:layout_margin="5dp"
+                                android:src="@drawable/sentiment_neutral_48px" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/session_review_focus_level2"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/focus_level2_count_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="5dp"
+                                android:text="3"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/session_review_focus_level3"
+                            style="@style/session_review_layout"
+                            app:layout_constraintBottom_toBottomOf="@id/session_review_layout"
+                            app:layout_constraintEnd_toStartOf="@id/session_review_focus_level4"
+                            app:layout_constraintStart_toEndOf="@id/session_review_focus_level2"
+                            app:layout_constraintTop_toTopOf="@id/session_review_layout">
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_gravity="center"
+                                android:layout_margin="5dp"
+                                android:src="@drawable/sentiment_satisfied_48px" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/session_review_focus_level3"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/focus_level3_count_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="5dp"
+                                android:text="3"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/session_review_focus_level4"
+                            style="@style/session_review_layout"
+                            android:background="@drawable/layout_button_selector"
+                            app:layout_constraintBottom_toBottomOf="@id/session_review_layout"
+                            app:layout_constraintEnd_toEndOf="@id/session_review_layout"
+                            app:layout_constraintStart_toEndOf="@id/session_review_focus_level3"
+                            app:layout_constraintTop_toTopOf="@id/session_review_layout">
+
+                            <ImageView
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_gravity="center"
+                                android:layout_margin="5dp"
+                                android:src="@drawable/sentiment_excited_48px" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/session_review_focus_level4"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/focus_level4_count_textview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="5dp"
+                                android:text="3"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+                <!-- Session : Session Review -->
+
+                <!-- Session : Time Distribution -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/focus_time_distribution_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:elevation="5dp"
+                    app:cardCornerRadius="15dp"
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toBottomOf="@id/session_review_container">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="15dp"
+                            android:text="@string/session_distribution_ratio"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/time_distribution_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="vertical">
+
+                        </androidx.recyclerview.widget.RecyclerView>
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+                <!-- Session : Time Distribution -->
+
+                <!-- Session : Daily Target Study Time -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/daily_target_study_time_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:elevation="5dp"
+                    app:cardCornerRadius="15dp"
+
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toBottomOf="@id/focus_time_distribution_container">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="15dp"
+                            android:text="@string/daily_target_time"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/daily_target_study_time_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="vertical">
+
+                        </androidx.recyclerview.widget.RecyclerView>
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Session : Weekly Target Study Time -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/weekly_target_study_time_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:elevation="5dp"
+                    app:cardCornerRadius="15dp"
+                    app:layout_constraintBottom_toTopOf="@id/monthly_target_study_time_container"
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toBottomOf="@+id/daily_target_study_time_container">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="15dp"
+                            android:text="@string/weekly_target_time"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/weekly_target_study_time_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="vertical">
+
+                        </androidx.recyclerview.widget.RecyclerView>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Session : Monthly Target Study Time -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/monthly_target_study_time_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:elevation="5dp"
+                    app:cardCornerRadius="15dp"
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toBottomOf="@id/weekly_target_study_time_container">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="15dp"
+                            android:text="@string/monthly_target_time"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/monthly_target_study_time_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="vertical">
+
+                        </androidx.recyclerview.widget.RecyclerView>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

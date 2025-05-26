@@ -2,6 +2,7 @@ package mp.gradia.time.inner.timeline.dialog;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.view.Window;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -18,21 +20,30 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.AppBarLayout;
 
+import java.lang.annotation.Target;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import mp.gradia.R;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.StudySessionDao;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.StudySessionEntity;
+import mp.gradia.database.entity.TargetStudyTime;
 import mp.gradia.time.inner.timeline.dialog.adapter.StudySessionAdapter;
 import mp.gradia.time.inner.viewmodel.StudySessionViewModel;
 import mp.gradia.time.inner.viewmodel.StudySessionViewModelFactory;
+import mp.gradia.time.inner.viewmodel.SubjectViewModel;
+import mp.gradia.time.inner.viewmodel.SubjectViewModelFactory;
 import orion.gz.scheduleview.ScheduleEventItem;
 
 public class SessionStatisticalDialog extends DialogFragment {
@@ -46,7 +57,12 @@ public class SessionStatisticalDialog extends DialogFragment {
     // View Component
     private Toolbar toolbar;
     private RecyclerView timeDistributionRecyclerView;
-    private RecyclerView targetStudyTimeRecyclerView;
+    private RecyclerView dailyTargetStudyTimeRecyclerView;
+    private RecyclerView weeklyTargetStudyTimeRecyclerView;
+    private RecyclerView monthlyTargetStudyTimeRecyclerView;
+    private CardView dailyTargetStudyTimeContainer;
+    private CardView weeklyTargetStudyTimeContainer;
+    private CardView monthlyTargetStudyTimeContainer;
     private TextView totalFocusTimeTextView;
     private TextView avgFocusTimeTextView;
     private TextView mostFocusTimeTextView;
@@ -65,13 +81,26 @@ public class SessionStatisticalDialog extends DialogFragment {
     private long[] focusTime;
     private int mostFocusTime;
     private int[] eventColors;
+    private int[] integratedColorArray;
+    private int[] subjectIds;
+    private long[] dailyTargetTime;
+    private long[] weeklyTargetTime;
+    private long[] monthlyTargetTime;
+    private IntegratedDataBundle bundle;
+    private IntegratedDataBundle weeklyBundle;
+    private IntegratedDataBundle monthlyBundle;
     private List<StudySessionEntity> sessions;
+    private List<StudySessionEntity> weeklySession;
+    private List<StudySessionEntity> monthlySession;
+    private List<ScheduleEventItem> eventList;
+    private Map<Integer, TargetStudyTime> targetStudyTimes;
     // Database
     private AppDatabase db;
     private StudySessionDao sessionDao;
     private SubjectDao subjectDao;
     // ViewModel
     private StudySessionViewModel sessionViewModel;
+    private SubjectViewModel subjectViewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,10 +110,14 @@ public class SessionStatisticalDialog extends DialogFragment {
         db = AppDatabase.getInstance(requireContext());
         sessionDao = db.studySessionDao();
         subjectDao = db.subjectDao();
+
         StudySessionViewModelFactory sessionFactory = new StudySessionViewModelFactory(
                 requireActivity().getApplication(), sessionDao, subjectDao);
         sessionViewModel = new ViewModelProvider(requireParentFragment(), sessionFactory)
                 .get(StudySessionViewModel.class);
+        SubjectViewModelFactory subjectFactory = new SubjectViewModelFactory(subjectDao);
+        subjectViewModel = new ViewModelProvider(requireParentFragment(),subjectFactory).get(SubjectViewModel.class);
+        subjectViewModel.loadSubjectTargetStudyTime();
     }
 
     /**
@@ -132,9 +165,10 @@ public class SessionStatisticalDialog extends DialogFragment {
         toolbar.setNavigationOnClickListener(v -> dismiss());
     }
 
+
     /**
      * 새로운 SessionStatisticalDialog 객체를 생성하고 Bundle 데이터를 설정합니다.
-     * 
+     *
      * @param bundle 다이얼로그에 전달할 데이터가 담긴 Bundle 객체입니다.
      * @return 생성된 SessionStatisticalDialog 인스턴스입니다.
      */
@@ -146,13 +180,18 @@ public class SessionStatisticalDialog extends DialogFragment {
 
     /**
      * UI 컴포넌트들을 초기화합니다.
-     * 
+     *
      * @param v 뷰 계층 구조의 루트 뷰입니다.
      */
     private void initViews(View v) {
         toolbar = v.findViewById(R.id.toolbar);
         timeDistributionRecyclerView = v.findViewById(R.id.time_distribution_list);
-        targetStudyTimeRecyclerView = v.findViewById(R.id.target_study_time_list);
+        dailyTargetStudyTimeRecyclerView = v.findViewById(R.id.daily_target_study_time_list);
+        weeklyTargetStudyTimeRecyclerView = v.findViewById(R.id.weekly_target_study_time_list);
+        monthlyTargetStudyTimeRecyclerView = v.findViewById(R.id.monthly_target_study_time_list);
+        dailyTargetStudyTimeContainer = v.findViewById(R.id.daily_target_study_time_container);
+        weeklyTargetStudyTimeContainer = v.findViewById(R.id.weekly_target_study_time_container);
+        monthlyTargetStudyTimeContainer = v.findViewById(R.id.monthly_target_study_time_container);
         totalFocusTimeTextView = v.findViewById(R.id.total_focus_time_textview);
         avgFocusTimeTextView = v.findViewById(R.id.avg_focus_time_textview);
         mostFocusTimeTextView = v.findViewById(R.id.most_focus_time_textview);
@@ -170,7 +209,11 @@ public class SessionStatisticalDialog extends DialogFragment {
                 scheduleDataBundle -> {
                     if (scheduleDataBundle != null) {
                         sessions = scheduleDataBundle.getEventSessionList();
-                        List<ScheduleEventItem> eventList = scheduleDataBundle.getEventItemList();
+                        targetStudyTimes = scheduleDataBundle.getTargetStudyTimes();
+                        eventList = scheduleDataBundle.getEventItemList();
+                        weeklySession = scheduleDataBundle.getWeeklySessionList();
+                        monthlySession = scheduleDataBundle.getMonthlySessionList();
+
                         focusTime = new long[MAX_TIME_CLASS];
                         eventColors = new int[eventList.size()];
 
@@ -181,8 +224,13 @@ public class SessionStatisticalDialog extends DialogFragment {
                                 countMostFocusTime(sessions.get(i));
                                 eventColors[i] = eventList.get(i).getColor();
                             }
+
                             setupTimeStatsData();
                             setupFocusStatsData();
+
+                            loadBundle();
+
+                            loadTargetStudyTime();
                             setupProgressData();
                         }
                     }
@@ -191,7 +239,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
     /**
      * 주어진 세션의 집중 레벨을 카운트합니다.
-     * 
+     *
      * @param session 카운트할 StudySessionEntity 객체입니다.
      */
     private void countFocusLevel(StudySessionEntity session) {
@@ -211,9 +259,20 @@ public class SessionStatisticalDialog extends DialogFragment {
         }
     }
 
+    private void loadBundle() {
+        if (sessions != null)
+            bundle = integrateSessions(sessions);
+
+        if (weeklySession != null)
+            weeklyBundle = integrateSessions(weeklySession);
+
+        if (monthlySession != null)
+            monthlyBundle = integrateSessions(monthlySession);
+    }
+
     /**
      * 가장 집중한 시간대를 계산합니다.
-     * 
+     *
      * @param session 계산에 사용할 StudySessionEntity 객체입니다.
      */
     private void countMostFocusTime(StudySessionEntity session) {
@@ -334,60 +393,115 @@ public class SessionStatisticalDialog extends DialogFragment {
      * 시간 분포 및 목표 학습 시간 RecyclerView를 설정하고 어댑터를 바인딩합니다.
      */
     private void setupProgressData() {
+        // time distribution data (세션 시간 분포)
         timeDistributionRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        IntegratedDataBundle bundle = integrateSessions();
         StudySessionAdapter timeDistribution = new StudySessionAdapter(requireContext(), bundle.getIntegratedList(),
                 bundle.getIntegratedColorArray(), totalFocusTime);
         timeDistributionRecyclerView.setAdapter(timeDistribution);
 
-        // targetStudyTimeRecyclerView.setLayoutManager(new
-        // LinearLayoutManager(getContext()));
-        // StudySessionAdapter targetStudyTime = new
-        // StudySessionAdapter(requireContext(), sessions, eventColors, (int)
-        // targetStudyTime);
-        // targetStudyTimeRecyclerView.setAdapter(targetStudyTime);
+        for (int i = 0; i < dailyTargetTime.length; i++) {
+            if (dailyTargetTime[i] == 0) dailyTargetStudyTimeContainer.setVisibility(View.GONE);
+            if (weeklyTargetTime[i] == 0) weeklyTargetStudyTimeContainer.setVisibility(View.GONE);
+            if (monthlyTargetTime[i] == 0) monthlyTargetStudyTimeContainer.setVisibility(View.GONE);
+        }
+
+        // daily target study time data
+        if (dailyTargetStudyTimeContainer.getVisibility() == View.VISIBLE) {
+            dailyTargetStudyTimeRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            StudySessionAdapter dailyTarget = new StudySessionAdapter(requireContext(), bundle.getIntegratedList(), bundle.getIntegratedColorArray(), dailyTargetTime);
+            dailyTargetStudyTimeRecyclerView.setAdapter(dailyTarget);
+        }
+
+        // weekly target study time data
+        if (weeklyTargetStudyTimeContainer.getVisibility() == View.VISIBLE) {
+            weeklyTargetStudyTimeRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            StudySessionAdapter weeklyTarget = new StudySessionAdapter(requireContext(), weeklyBundle.getIntegratedList(), weeklyBundle.getIntegratedColorArray(), weeklyTargetTime);
+            weeklyTargetStudyTimeRecyclerView.setAdapter(weeklyTarget);
+        }
+
+        // monthly target study time data
+        if (monthlyTargetStudyTimeContainer.getVisibility() == View.VISIBLE) {
+            monthlyTargetStudyTimeRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            StudySessionAdapter monthlyTarget = new StudySessionAdapter(requireContext(), monthlyBundle.getIntegratedList(), monthlyBundle.getIntegratedColorArray(), monthlyTargetTime);
+            monthlyTargetStudyTimeRecyclerView.setAdapter(monthlyTarget);
+        }
     }
 
     /**
      * 중복되는 세션을 통합하여 StudySessionEntity 목록과 해당 색상 배열을 반환합니다.
-     * 
+     *
      * @return 통합된 세션 데이터와 색상 배열을 포함하는 IntegratedDataBundle 객체입니다.
      */
-    private IntegratedDataBundle integrateSessions() {
+    private IntegratedDataBundle integrateSessions(List<StudySessionEntity> sessionList) {
         Map<Integer, StudySessionEntity> integratedMap = new LinkedHashMap<>();
         Map<Integer, Integer> integratedColorMap = new LinkedHashMap<>();
 
-        for (int i = 0; i < sessions.size(); i++) {
-            if (integratedMap.containsKey(sessions.get(i).getSubjectId())) {
-                StudySessionEntity existingSession = integratedMap.get(sessions.get(i).getSubjectId());
+        for (int i = 0; i < sessionList.size(); i++) {
+            if (integratedMap.containsKey(sessionList.get(i).getSubjectId())) {
+                StudySessionEntity existingSession = integratedMap.get(sessionList.get(i).getSubjectId());
                 if (existingSession != null)
-                    existingSession.setStudyTime(sessions.get(i).getStudyTime() + existingSession.getStudyTime());
+                    existingSession.setStudyTime(sessionList.get(i).getStudyTime() + existingSession.getStudyTime());
             } else {
-                integratedMap.put(sessions.get(i).getSubjectId(), new StudySessionEntity(
-                        sessions.get(i).getSubjectId(),
-                        sessions.get(i).getServerSubjectId(),
-                        sessions.get(i).getSubjectName(),
-                        sessions.get(i).getDate(),
-                        sessions.get(i).getEndDate(),
-                        sessions.get(i).getStudyTime(),
-                        sessions.get(i).getStartTime(),
-                        sessions.get(i).getEndTime(),
+                integratedMap.put(sessionList.get(i).getSubjectId(), new StudySessionEntity(
+                        sessionList.get(i).getSubjectId(),
+                        sessionList.get(i).getServerSubjectId(),
+                        sessionList.get(i).getSubjectName(),
+                        sessionList.get(i).getDate(),
+                        sessionList.get(i).getEndDate(),
+                        sessionList.get(i).getStudyTime(),
+                        sessionList.get(i).getStartTime(),
+                        sessionList.get(i).getEndTime(),
                         0,
                         0,
                         ""));
-                integratedColorMap.put(sessions.get(i).getSubjectId(), eventColors[i]);
+                if (integratedColorArray == null) {
+                    integratedColorMap.put(sessionList.get(i).getSubjectId(), eventColors[i]);
+                }
             }
         }
 
         List<StudySessionEntity> integratedList = new ArrayList<>(integratedMap.values());
-        List<Integer> integratedColorList = new ArrayList<>(integratedColorMap.values());
-        int[] integratedColorArray = new int[integratedColorMap.size()];
+        if (subjectIds == null)
+            subjectIds = integratedMap.keySet().stream().mapToInt(Integer::intValue).toArray();
 
-        for (int i = 0; i < integratedColorMap.size(); i++) {
-            integratedColorArray[i] = integratedColorList.get(i);
-        }
+        if (integratedColorArray == null)
+            integratedColorArray = integratedColorMap.values().stream().mapToInt(Integer::intValue).toArray();
 
         return new IntegratedDataBundle(integratedList, integratedColorArray);
+    }
+
+    private void loadTargetStudyTime() {
+
+        dailyTargetTime = Arrays.stream(subjectIds)
+                .mapToLong(id -> {
+                    TargetStudyTime t = targetStudyTimes.get(id);
+                    if (t != null) {
+                        return t.getDailyTargetStudyTime() * 60;
+                    } else {
+                        return 0;
+                    }
+                })
+                .toArray();
+        weeklyTargetTime = Arrays.stream(subjectIds)
+                .mapToLong(id -> {
+                    TargetStudyTime t = targetStudyTimes.get(id);
+                    if (t != null) {
+                        return t.getWeeklyTargetStudyTime() * 60;
+                    } else {
+                        return 0;
+                    }
+                })
+                .toArray();
+        monthlyTargetTime = Arrays.stream(subjectIds)
+                .mapToLong(id -> {
+                    TargetStudyTime t = targetStudyTimes.get(id);
+                    if (t != null) {
+                        return t.getMonthlyTargetStudyTime() * 60;
+                    } else {
+                        return 0;
+                    }
+                })
+                .toArray();
     }
 
     /**
@@ -399,7 +513,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
         /**
          * IntegratedDataBundle의 생성자입니다.
-         * 
+         *
          * @param integratedList       통합된 StudySessionEntity 목록입니다.
          * @param integratedColorArray 통합된 세션의 색상 배열입니다.
          */
@@ -410,7 +524,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
         /**
          * 통합된 세션 목록을 반환합니다.
-         * 
+         *
          * @return 통합된 StudySessionEntity 목록입니다.
          */
         public List<StudySessionEntity> getIntegratedList() {
@@ -419,7 +533,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
         /**
          * 통합된 세션의 색상 배열을 반환합니다.
-         * 
+         *
          * @return 통합된 세션의 색상 배열입니다.
          */
         public int[] getIntegratedColorArray() {
