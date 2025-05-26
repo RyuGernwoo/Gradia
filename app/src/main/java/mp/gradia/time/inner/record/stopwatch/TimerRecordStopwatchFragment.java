@@ -352,6 +352,7 @@ public class TimerRecordStopwatchFragment extends Fragment {
      */
     private void addSession() {
         int subjectId = selectedSubjectViewModel.selectedSubjectLiveData.getValue().getSubjectId();
+        String serverSubjectId = selectedSubjectViewModel.selectedSubjectLiveData.getValue().getServerId();
         String subjectName = selectedSubjectViewModel.selectedSubjectLiveData.getValue().getName();
         LocalDate date = LocalDate.now();
         Duration duration = Duration.between(startTime, endTime);
@@ -361,9 +362,12 @@ public class TimerRecordStopwatchFragment extends Fragment {
             restTime = 0;
         }
 
+        Log.d("TimerRecordStopwatchFragment", "server subject id: " + serverSubjectId);
+
         Bundle bundle = new Bundle();
         bundle.putInt(SessionAddDialog.KEY_SESSION_MODE, SessionAddDialog.MODE_ADD);
         bundle.putInt(SessionAddDialog.KEY_SUBJECT_ID, subjectId);
+        bundle.putString(SessionAddDialog.KEY_SERVER_SUBJECT_ID, serverSubjectId);
         bundle.putString(SessionAddDialog.KEY_SUBJECT_NAME, subjectName);
         bundle.putInt(SessionAddDialog.KEY_START_HOUR, startTime.getHour());
         bundle.putInt(SessionAddDialog.KEY_START_MINUTE, startTime.getMinute());

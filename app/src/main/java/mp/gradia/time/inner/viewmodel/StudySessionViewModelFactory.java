@@ -1,5 +1,6 @@
 package mp.gradia.time.inner.viewmodel;
 
+import android.app.Application;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,23 +10,27 @@ import androidx.lifecycle.ViewModelProvider;
 import mp.gradia.database.dao.StudySessionDao;
 import mp.gradia.database.dao.SubjectDao;
 
-public class StudySessionViewModelFactory  implements ViewModelProvider.Factory {
-    // DAO Instance
+public class StudySessionViewModelFactory implements ViewModelProvider.Factory {
+    // Application과 DAO Instance
+    private final Application application;
     private final StudySessionDao sessionDao;
     private final SubjectDao subjectDao;
 
     /**
-     * StudySessionViewModelFactory의 생성자입니다. StudySessionDao를 인자로 받습니다.
+     * StudySessionViewModelFactory의 생성자입니다. Application과 StudySessionDao를 인자로 받습니다.
      */
-    public StudySessionViewModelFactory(StudySessionDao sessionDao) {
+    public StudySessionViewModelFactory(Application application, StudySessionDao sessionDao) {
+        this.application = application;
         this.sessionDao = sessionDao;
         this.subjectDao = null;
     }
 
     /**
-     * StudySessionViewModelFactory의 생성자입니다. StudySessionDao과 SubjectDao를 인자로 받습니다.
+     * StudySessionViewModelFactory의 생성자입니다. Application, StudySessionDao과
+     * SubjectDao를 인자로 받습니다.
      */
-    public StudySessionViewModelFactory(StudySessionDao sessionDao, SubjectDao subjectDao) {
+    public StudySessionViewModelFactory(Application application, StudySessionDao sessionDao, SubjectDao subjectDao) {
+        this.application = application;
         this.sessionDao = sessionDao;
         this.subjectDao = subjectDao;
     }
@@ -41,9 +46,9 @@ public class StudySessionViewModelFactory  implements ViewModelProvider.Factory 
                 Log.d("VIEWMODEL", "Initialize Success");
 
                 if (subjectDao == null)
-                    return (T) new StudySessionViewModel(sessionDao);
+                    return (T) new StudySessionViewModel(application, sessionDao);
                 else
-                    return (T) new StudySessionViewModel(sessionDao, subjectDao);
+                    return (T) new StudySessionViewModel(application, sessionDao, subjectDao);
 
             } catch (Exception e) {
                 Log.e("ERROR", "CANNOT Initialize Viemodel");

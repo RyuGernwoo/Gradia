@@ -48,6 +48,9 @@ public class StudySessionEntity {
     @ColumnInfo(name = "subject_id")
     public int subjectId;
 
+    @ColumnInfo(name = "server_subject_id")
+    public String serverSubjectId;
+
     @NonNull
     @ColumnInfo(name = "subject_name")
     public String subjectName;
@@ -88,8 +91,9 @@ public class StudySessionEntity {
 
 
     // 생성자 정의
-    public StudySessionEntity(int subjectId, @NonNull String subjectName, @NonNull LocalDate date, @Nullable LocalDate endDate, long studyTime, LocalTime startTime, LocalTime endTime,@Nullable long restTime,@Nullable int focusLevel, @Nullable String memo) {
+    public StudySessionEntity(int subjectId, String serverSubjectId, @NonNull String subjectName, @NonNull LocalDate date, @Nullable LocalDate endDate, long studyTime, LocalTime startTime, LocalTime endTime, @Nullable long restTime, @Nullable int focusLevel, @Nullable String memo) {
         this.subjectId = subjectId;
+        this.serverSubjectId = serverSubjectId;
         this.subjectName = subjectName;
         this.date = date;
         this.endDate = endDate;
@@ -113,7 +117,6 @@ public class StudySessionEntity {
         this.sessionId = sessionId;
     }
 
-    @Nullable
     public String getServerId() {
         return serverId;
     }
@@ -146,6 +149,14 @@ public class StudySessionEntity {
 
     public void setSubjectId(int subjectId) {
         this.subjectId = subjectId;
+    }
+
+    public String getServerSubjectId() {
+        return serverSubjectId;
+    }
+
+    public void setServerSubjectId(String serverSubjectId) {
+        this.serverSubjectId = serverSubjectId;
     }
 
     @NonNull

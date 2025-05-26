@@ -83,7 +83,8 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
         sessionDao = db.studySessionDao();
         subjectDao = db.subjectDao();
 
-        StudySessionViewModelFactory sessionFactory = new StudySessionViewModelFactory(sessionDao, subjectDao);
+        StudySessionViewModelFactory sessionFactory = new StudySessionViewModelFactory(
+                requireActivity().getApplication(), sessionDao, subjectDao);
         studySessionViewModel = new ViewModelProvider(this, sessionFactory).get(StudySessionViewModel.class);
         SubjectViewModelFactory subjectFactory = new SubjectViewModelFactory(subjectDao);
         subjectViewModel = new ViewModelProvider(this, subjectFactory).get(SubjectViewModel.class);
@@ -128,7 +129,6 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
     /**
      * 현재 선택된 날짜를 반환합니다.
-     *
      * @return 현재 선택된 LocalDate 객체입니다.
      */
     public LocalDate getCurrentSelectedDate() {
@@ -137,7 +137,6 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
     /**
      * UI 컴포넌트들을 초기화합니다.
-     *
      * @param v 뷰 계층 구조의 루트 뷰입니다.
      */
     private void initViews(View v) {
@@ -154,9 +153,12 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
         weeklyCalendarItemContainer = new LinearLayout[DAYS_OF_WEEK];
 
         for (int i = 0; i < DAYS_OF_WEEK; i++) {
-            weeklyCalendarDOMTextView[i] = v.findViewById(getResources().getIdentifier("weekly_calendar_DOM" + (i + 1), "id", getContext().getPackageName()));
-            weeklyCalendarDayTextView[i] = v.findViewById(getResources().getIdentifier("weekly_calendar_day" + (i + 1), "id", getContext().getPackageName()));
-            weeklyCalendarItemContainer[i] = v.findViewById(getResources().getIdentifier("weekly_calendar_item_container" + (i + 1), "id", getContext().getPackageName()));
+            weeklyCalendarDOMTextView[i] = v.findViewById(
+                    getResources().getIdentifier("weekly_calendar_DOM" + (i + 1), "id", getContext().getPackageName()));
+            weeklyCalendarDayTextView[i] = v.findViewById(
+                    getResources().getIdentifier("weekly_calendar_day" + (i + 1), "id", getContext().getPackageName()));
+            weeklyCalendarItemContainer[i] = v.findViewById(getResources()
+                    .getIdentifier("weekly_calendar_item_container" + (i + 1), "id", getContext().getPackageName()));
         }
     }
 
@@ -173,7 +175,8 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
         DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("d");
         YearMonth targetYearMonth;
 
-        if (monday.getMonth().equals(sunday.getMonth())) targetYearMonth = YearMonth.from(monday);
+        if (monday.getMonth().equals(sunday.getMonth()))
+            targetYearMonth = YearMonth.from(monday);
         else {
             int daysInMonthOfMonday = 0;
             for (int i = 0; i < DAYS_OF_WEEK; i++) {
@@ -184,7 +187,8 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
             if (daysInMonthOfMonday >= (DAYS_OF_WEEK / 2) + 1)
                 targetYearMonth = YearMonth.from(monday);
-            else targetYearMonth = YearMonth.from(sunday);
+            else
+                targetYearMonth = YearMonth.from(sunday);
         }
         DateTimeFormatter monthYearFormatter = DateTimeFormatter.ofPattern("yyyy년 M월");
         String formattedYearNMonth = targetYearMonth.format(monthYearFormatter);
@@ -242,7 +246,6 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
     /**
      * 캘린더 셀의 선택 상태를 업데이트합니다. 선택된 셀은 강조 표시됩니다.
-     *
      * @param idx 선택된 셀의 인덱스입니다.
      */
     private void updateCalendarCellSelection(int idx) {
@@ -319,30 +322,34 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
         studySessionViewModel.selectedSessionLiveData.observe(getViewLifecycleOwner(),
                 session -> {
-                    if (session != null) {
-                        Bundle bundle = new Bundle();
-                        bundle.putInt(SessionAddDialog.KEY_SESSION_ID, session.getSessionId());
+
+                                if (session != null) {
+                                    Bundle bundle = new Bundle();
+//                        Log.d(TAG, "세션 ID: " + sessionId);
+                                    bundle.putInt(SessionAddDialog.KEY_SESSION_ID, session.getSessionId());
+                                    bundle.putString(SessionAddDialog.KEY_SERVER_SESSION_ID, session.getServerId());
                         bundle.putInt(SessionAddDialog.KEY_SESSION_MODE, SessionAddDialog.MODE_EDIT);
                         bundle.putInt(SessionAddDialog.KEY_SESSION_FOCUS_LEVEL, session.getFocusLevel());
                         bundle.putInt(SessionAddDialog.KEY_SUBJECT_ID, session.getSubjectId());
-                        bundle.putString(SessionAddDialog.KEY_SUBJECT_NAME, session.getSubjectName());
-                        bundle.putInt(SessionAddDialog.KEY_START_HOUR, session.getStartTime().getHour());
-                        bundle.putInt(SessionAddDialog.KEY_START_MINUTE, session.getStartTime().getMinute());
-                        bundle.putInt(SessionAddDialog.KEY_END_HOUR, session.getEndTime().getHour());
-                        bundle.putInt(SessionAddDialog.KEY_END_MINUTE, session.getEndTime().getMinute());
-                        bundle.putLong(SessionAddDialog.KEY_START_DATE, getUtcMillis(session.getDate()));
-                        bundle.putLong(SessionAddDialog.KEY_END_DATE, getUtcMillis(session.getEndDate()));
-                        bundle.putString(SessionAddDialog.KEY_SESSION_MEMO, session.getMemo());
+                        bundle.putString(SessionAddDialog.KEY_SERVER_SUBJECT_ID,
+                                            session.getServerSubjectId());
+                                    bundle.putString(SessionAddDialog.KEY_SUBJECT_NAME, session.getSubjectName());
+                                    bundle.putInt(SessionAddDialog.KEY_START_HOUR, session.getStartTime().getHour());
+                                    bundle.putInt(SessionAddDialog.KEY_START_MINUTE,
+                                            session.getStartTime().getMinute());
+                                    bundle.putInt(SessionAddDialog.KEY_END_HOUR, session.getEndTime().getHour());
+                                    bundle.putInt(SessionAddDialog.KEY_END_MINUTE, session.getEndTime().getMinute());
+                                    bundle.putLong(SessionAddDialog.KEY_START_DATE, getUtcMillis(session.getDate()));
+                                    bundle.putLong(SessionAddDialog.KEY_END_DATE, getUtcMillis(session.getEndDate()));
+                                    bundle.putString(SessionAddDialog.KEY_SESSION_MEMO, session.getMemo());
 
                         if (getParentFragmentManager().findFragmentByTag("SessionAddDialog") == null) {
                             SessionAddDialog dialog = SessionAddDialog.newInstance(bundle);
                             dialog.setSessionDeleteListener(this);
-                            dialog.show(getParentFragmentManager(), "SessionAddDialog");
-                        }
-                    }
-                }
-        );
-        // Listener
+                                    dialog.show(getParentFragmentManager(), "SessionAddDialog");
+                                }
+                            }
+                        });// Listener
         scheduleView.setOnScheduleTouchListener(new OnScheduleTouchListener() {
             @Override
             public void onEventClick(ScheduleEventItem scheduleEventItem) {
@@ -377,7 +384,6 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
     /**
      * 스케줄 뷰를 맨 위로 스크롤합니다. 만약 이벤트가 있다면 가장 빠른 이벤트 시간으로 스크롤합니다.
-     *
      * @param items 스케줄 이벤트 아이템 목록입니다.
      */
     private void scrollToTop(List<ScheduleEventItem> items) {
@@ -401,7 +407,6 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
     /**
      * LocalDate 객체를 UTC 밀리초로 변환합니다.
-     *
      * @param date 변환할 LocalDate 객체입니다.
      * @return UTC 밀리초 값입니다.
      */
@@ -411,7 +416,6 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
     /**
      * UTC 밀리초를 LocalDate 객체로 변환합니다.
-     *
      * @param utcMillis 변환할 UTC 밀리초 값입니다.
      * @return 변환된 LocalDate 객체입니다.
      */

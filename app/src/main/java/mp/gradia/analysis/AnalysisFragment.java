@@ -96,11 +96,12 @@ public class AnalysisFragment extends Fragment {
             if (tabLayout.getSelectedTabPosition() == 1) tryShowBarChartByDay();
         });
 
-        viewModel.getTodayStudyTime().observe(getViewLifecycleOwner(), minutes -> {
-            int percent = (int) Math.min((minutes * 100.0 / DAILY_GOAL_MINUTES), 100);
-            tvDailyProgress.setText("오늘의 학습 달성률: " + percent + "%");
-            progressBarDaily.setProgress(percent);
-        });
+        // TODO: 크래시 발생하는 부분
+//        viewModel.getTodayStudyTime().observe(getViewLifecycleOwner(), minutes -> {
+//            int percent = (int) Math.min((minutes * 100.0 / DAILY_GOAL_MINUTES), 100);
+//            tvDailyProgress.setText("오늘의 학습 달성률: " + percent + "%");
+//            progressBarDaily.setProgress(percent);
+//        });
 
         viewModel.getMonthlyStudyTime().observe(getViewLifecycleOwner(), list -> {
             if (list == null || list.isEmpty()) return;

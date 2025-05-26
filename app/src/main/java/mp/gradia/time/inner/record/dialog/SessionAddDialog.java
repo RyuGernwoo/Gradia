@@ -75,8 +75,12 @@ public class SessionAddDialog extends DialogFragment {
     public static final String REQUEST_KEY = "requestKey";
     // Bundle로 부터 값을 가져오기 위한 KEY 값
     public static final String KEY_SESSION_ID = "sessionID";
+
+    public static final String KEY_SERVER_SESSION_ID = "serverSessionId";
     public static final String KEY_SESSION_MODE = "sessionMode";
     public static final String KEY_SUBJECT_ID = "subjectId";
+
+    public static final String KEY_SERVER_SUBJECT_ID = "serverSubjectId";
     public static final String KEY_SUBJECT_NAME = "subjectName";
     public static final String KEY_SESSION_FOCUS_LEVEL = "sessionFocusLevel";
     public static final String KEY_START_HOUR = "startHour";
@@ -108,8 +112,10 @@ public class SessionAddDialog extends DialogFragment {
 
     // 세션의 정보들을 저장 할 변수
     private boolean isYesterday = false;
-    private final long[] selectedDateMillis = {MaterialDatePicker.todayInUtcMilliseconds(), -1};
+    private final long[] selectedDateMillis = { MaterialDatePicker.todayInUtcMilliseconds(), -1 };
     private int sessionId = -1;
+
+    private String serverSessionId;
     private int sessionMode = MODE_ADD;
     private int clockFormat;
     private int selectedStartHour = -1;
@@ -121,6 +127,8 @@ public class SessionAddDialog extends DialogFragment {
     private int restTime = -1;
     private int focusLevel = -1;
     private int subjectId = -1;
+
+    private String serverSubjectId;
     private String subjectName;
     private String sessionMemo;
     private List<String> subjects;
@@ -151,16 +159,20 @@ public class SessionAddDialog extends DialogFragment {
         SubjectViewModelFactory subjectFactory = new SubjectViewModelFactory(subjectDao);
         subjectViewModel = new ViewModelProvider(requireParentFragment(), subjectFactory).get(SubjectViewModel.class);
 
-        StudySessionViewModelFactory sessionFactory = new StudySessionViewModelFactory(sessionDao);
-        sessionViewModel = new ViewModelProvider(requireParentFragment(), sessionFactory).get(StudySessionViewModel.class);
+        StudySessionViewModelFactory sessionFactory = new StudySessionViewModelFactory(
+                requireActivity().getApplication(), sessionDao);
+        sessionViewModel = new ViewModelProvider(requireParentFragment(), sessionFactory)
+                .get(StudySessionViewModel.class);
         sessionViewModel.loadAllSessions();
 
         // getInstance를 통해 정적으로 호출된 경우, 전달받은 데이터들을 멤버변수와 초기화 해주어야 함
         Bundle args = getArguments();
         if (args != null) {
             sessionId = args.getInt(KEY_SESSION_ID);
+            serverSessionId = args.getString(KEY_SERVER_SESSION_ID);
             sessionMode = args.getInt(KEY_SESSION_MODE);
             subjectId = args.getInt(KEY_SUBJECT_ID);
+            serverSubjectId = args.getString(KEY_SERVER_SUBJECT_ID);
             subjectName = args.getString(KEY_SUBJECT_NAME);
             focusLevel = args.getInt(KEY_SESSION_FOCUS_LEVEL);
             selectedDateMillis[0] = args.getLong(KEY_START_DATE);
@@ -346,6 +358,7 @@ public class SessionAddDialog extends DialogFragment {
                 selectedSubject -> {
                     if (selectedSubject != null) {
                         subjectId = selectedSubject.getSubjectId();
+                        serverSubjectId = selectedSubject.getServerId();
                         subjectName = selectedSubject.getName();
                         dropdown.setText(selectedSubject.getName(), false);
                     }
@@ -355,6 +368,7 @@ public class SessionAddDialog extends DialogFragment {
         dropdown.setOnItemClickListener((parent, view, position, id) -> {
             subjectId = subjectIds.get(position);
             subjectName = subjects.get(position);
+            serverSubjectId = subjectViewModel.subjectListLiveData.getValue().get(position).getServerId();
         });
     }
 
@@ -384,7 +398,6 @@ public class SessionAddDialog extends DialogFragment {
 
     /**
      * 선택된 날짜 (UTC 밀리초)를 "yyyy-MM-dd" 형식의 문자열로 변환하여 DateEditText에 업데이트합니다.
-     *
      * @param utcMillis 선택된 날짜의 UTC 밀리초 배열입니다.
      */
     private void updateDateEditText(long[] utcMillis) {
@@ -569,8 +582,7 @@ public class SessionAddDialog extends DialogFragment {
                         sessionMemoInputLayout.setHint(R.string.session_memo);
                     else
                         sessionMemoInputLayout.setHint(R.string.session_memo_hint);
-                }
-        );
+                });
     }
 
     /**
@@ -615,6 +627,9 @@ public class SessionAddDialog extends DialogFragment {
     /**
      * 중복되는 세션이 있을 경우 Snackbar를 표시합니다.
      *
+     * @param overlappingSession 중복되는 StudySessionEntity 객체입니다. null이면 중복이 없음을
+     *                           의미합니다.
+     *
      * @param overlappingSession 중복되는 StudySessionEntity 객체입니다. null이면 중복이 없음을 의미합니다.
      */
     private void showOverlappingSesison(StudySessionEntity overlappingSession) {
@@ -629,7 +644,8 @@ public class SessionAddDialog extends DialogFragment {
         LocalTime overlappingStartTime = overlappingSession.getStartTime();
         LocalTime overlappingEndTime = overlappingSession.getEndTime();
         String subjectName = subjects.get(overlappingSubjectId);
-        String errorMsg = "중복되는 세션입니다.\n" + subjectName + " " + overlappingDate + " " + overlappingStartTime + " - " + overlappingEndTime;
+        String errorMsg = "중복되는 세션입니다.\n" + subjectName + " " + overlappingDate + " " + overlappingStartTime + " - "
+                + overlappingEndTime;
         Snackbar errorSnackBar = Snackbar.make(v, errorMsg, Snackbar.LENGTH_INDEFINITE).setAnchorView(saveSessionBtn);
         errorSnackBar.setAction("확인", v -> errorSnackBar.dismiss());
         errorSnackBar.show();
@@ -640,14 +656,12 @@ public class SessionAddDialog extends DialogFragment {
                 v -> {
                     errorSnackBar.setAction("수정", view -> showStartTimePicker());
                     errorSnackBar.show();
-                }
-        );
+                });
         endTimeInputLayout.setErrorIconOnClickListener(
                 v -> {
                     errorSnackBar.setAction("수정", view -> showStartTimePicker());
                     errorSnackBar.show();
-                }
-        );
+                });
     }
 
     /**
@@ -656,8 +670,7 @@ public class SessionAddDialog extends DialogFragment {
     public interface TimeValidationCallback {
         /**
          * 시간 유효성 검사 결과가 반환될 때 호출됩니다.
-         *
-         * @param isValid            시간이 유효한지 여부입니다.
+         * @param isValid 시간이 유효한지 여부입니다.
          * @param overlappingSession 중복되는 세션이 있을 경우 해당 세션 객체입니다.
          */
         void onValidationResult(boolean isValid, @Nullable StudySessionEntity overlappingSession);
@@ -682,22 +695,31 @@ public class SessionAddDialog extends DialogFragment {
 
             Bundle result = new Bundle();
 
-            String log = "SubjectId : " + String.valueOf(subjectId) + "\n" + "SubjectName : " + subjectName + "\n" + "Date : " + date.toString() + "\n" + "endDate : " + "\n" + "minutes : " + minutes + "\n" + "StartTime : " + startTime.toString() + "\n" + "EndTime : " + endTime.toString() + "\n" + "Memo : " + sessionMemo + "\n";
+            String log = "SubjectId : " + String.valueOf(subjectId) + "\n" + "serverSubjectId: " + serverSubjectId + "\n" + "SubjectName : " + subjectName + "\n"
+                    + "Date : " + date.toString() + "\n" + "endDate : " + "\n" + "minutes : " + minutes + "\n"
+                    + "StartTime : " + startTime.toString() + "\n" + "EndTime : " + endTime.toString() + "\n"
+                    + "Memo : " + sessionMemo + "\n";
             Log.i("SessionAddDialog", log);
 
             validateTimeSlot(date, endDate, startTime, endTime, (isValid, overlappingSession) -> {
                 if (isValid) {
                     showOverlappingSesison(null);
-                    StudySessionEntity session = new StudySessionEntity(subjectId, subjectName, date, endDate, minutes, startTime, endTime, 0, focusLevel, sessionMemo);
+                    StudySessionEntity session = new StudySessionEntity(subjectId, serverSubjectId, subjectName, date, endDate, minutes,
+                            startTime, endTime, 0, focusLevel, sessionMemo);
 
                     if (sessionMode == MODE_EDIT) {
                         session.setSessionId(sessionId);
+                        session.setServerId(serverSessionId);
+                        Log.d("SessionAddDialog", "Updating serverSessionId: " + serverSessionId);
                         sessionViewModel.updateSession(session);
                         result.putInt(KEY_SESSION_MODE, MODE_EDIT);
                     } else {
                         sessionViewModel.saveSession(session);
                         result.putInt(KEY_SESSION_MODE, MODE_EDIT);
-                        String log2 = "SubjectId : " + String.valueOf(subjectId) + "\n" + "SubjectName : " + subjectName + "\n" + "Date : " + date.toString() + "\n" + "endDate : " + "\n" + "minutes : " + minutes + "\n" + "StartTime : " + startTime.toString() + "\n" + "EndTime : " + endTime.toString() + "\n" + "Memo : " + sessionMemo + "\n";
+                        String log2 = "SubjectId : " + String.valueOf(subjectId) + "\n" + "SubjectName : " + subjectName
+                                + "\n" + "Date : " + date.toString() + "\n" + "endDate : " + "\n" + "minutes : "
+                                + minutes + "\n" + "StartTime : " + startTime.toString() + "\n" + "EndTime : "
+                                + endTime.toString() + "\n" + "Memo : " + sessionMemo + "\n";
                         Log.i("SessionAddDialog", log2);
                     }
 
@@ -740,9 +762,11 @@ public class SessionAddDialog extends DialogFragment {
      * @param end      새 세션의 종료 시간입니다.
      * @param callback 유효성 검사 결과를 반환할 콜백입니다.
      */
-    private void validateTimeSlot(LocalDate date, @Nullable LocalDate endDate, LocalTime start, LocalTime end, TimeValidationCallback callback) {
+    private void validateTimeSlot(LocalDate date, @Nullable LocalDate endDate, LocalTime start, LocalTime end,
+            TimeValidationCallback callback) {
         if (date == null || start == null || end == null || callback == null) {
-            if (callback != null) callback.onValidationResult(false, null);
+            if (callback != null)
+                callback.onValidationResult(false, null);
             return;
         }
 
@@ -752,10 +776,10 @@ public class SessionAddDialog extends DialogFragment {
         // 세션 시작 날짜보다 뒤인 경우
         if (endDate != null && endDate.isAfter(date))
             newSessionEndDateTime = LocalDateTime.of(endDate, end);
-            // 세션 종료 시간이 세션 시작 시간보다 앞서 있을 때 (즉, 자정을 넘어갈때)
+        // 세션 종료 시간이 세션 시작 시간보다 앞서 있을 때 (즉, 자정을 넘어갈때)
         else if (end.isBefore(start))
             newSessionEndDateTime = LocalDateTime.of(date.plusDays(1), end);
-            // 일반적인 상황(시작과 종료의 날짜가 같음)
+        // 일반적인 상황(시작과 종료의 날짜가 같음)
         else
             newSessionEndDateTime = LocalDateTime.of(date, end);
 
@@ -779,19 +803,23 @@ public class SessionAddDialog extends DialogFragment {
                     if (sessionId == existingSession.getSessionId())
                         continue;
 
-                    LocalDateTime existingSessionStartDateTime = LocalDateTime.of(existingSession.getDate(), existingSession.getStartTime());
+                    LocalDateTime existingSessionStartDateTime = LocalDateTime.of(existingSession.getDate(),
+                            existingSession.getStartTime());
                     LocalDateTime existingSessionEndDateTime;
                     LocalDate existingSessionEndDate = existingSession.getEndDate();
 
                     // 가져온 세션의 데이터가 endDate를 가지고 있을 경우
                     if (existingSessionEndDate != null && existingSessionEndDate.isAfter(existingSession.getDate()))
-                        existingSessionEndDateTime = LocalDateTime.of(existingSessionEndDate, existingSession.getEndTime());
-                        // 세션의 endTime이 startTime보다 앞설 경우
+                        existingSessionEndDateTime = LocalDateTime.of(existingSessionEndDate,
+                                existingSession.getEndTime());
+                    // 세션의 endTime이 startTime보다 앞설 경우
                     else if (existingSession.getEndTime().isBefore(existingSession.getStartTime()))
-                        existingSessionEndDateTime = LocalDateTime.of(existingSession.getDate().plusDays(1), existingSession.getEndTime());
-                        // 일반적인 상황
+                        existingSessionEndDateTime = LocalDateTime.of(existingSession.getDate().plusDays(1),
+                                existingSession.getEndTime());
+                    // 일반적인 상황
                     else
-                        existingSessionEndDateTime = LocalDateTime.of(existingSession.getDate(), existingSession.getEndTime());
+                        existingSessionEndDateTime = LocalDateTime.of(existingSession.getDate(),
+                                existingSession.getEndTime());
 
                     // endDate가 startDate보다 빠른 경우
                     if (!existingSessionEndDateTime.isAfter(existingSessionStartDateTime))
@@ -829,7 +857,6 @@ public class SessionAddDialog extends DialogFragment {
         Toast.makeText(requireContext(), R.string.toast_message_session_deleted, Toast.LENGTH_SHORT).show();
         dismiss();
     }
-
 
     /**
      * UTC 밀리초를 LocalDate 객체로 변환합니다.

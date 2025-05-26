@@ -21,8 +21,9 @@ public class SubjectViewModelFactory implements ViewModelProvider.Factory {
 
     /**
      * 지정된 Class의 ViewModel 인스턴스를 생성합니다. SubjectViewModel만 생성 가능합니다.
+     * 
      * @param modelClass 생성할 ViewModel의 Class 객체
-     * @param <T> ViewModel 타입
+     * @param <T>        ViewModel 타입
      * @return 생성된 ViewModel 인스턴스
      * @throws IllegalArgumentException 알 수 없는 ViewModel 클래스인 경우
      */

@@ -3,6 +3,7 @@ package mp.gradia.time;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +11,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import mp.gradia.R;
+import mp.gradia.subject.repository.StudySessionRepository;
+import mp.gradia.subject.repository.SubjectRepository;
 
 public class TimeFragment extends Fragment {
     // Page Constants
@@ -25,6 +30,9 @@ public class TimeFragment extends Fragment {
     private ViewPager2 viewPager;
     private ToggleViewHolder recordToggle;
     private ToggleViewHolder timelineToggle;
+
+    // repository
+    private StudySessionRepository studySessionRepository;
 
     /**
      * 프래그먼트의 UI를 생성하고 초기화합니다.
@@ -38,7 +46,39 @@ public class TimeFragment extends Fragment {
         setupToggleListeners();
         setupViewPagerCallback();
 
+        // repository 초기화
+        studySessionRepository = new StudySessionRepository(requireActivity().getApplication());
+
         return v;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        performSync();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        performSync();
+    }
+
+    private void performSync() {
+        // 서버와 동기화 작업을 수행합니다.
+        studySessionRepository.syncLocalToCloud(
+            new StudySessionRepository.CloudSyncCallback() {
+                @Override
+                public void onSuccess() {
+                    Log.d("TimeFragment", "Study sessions synced successfully.");
+                }
+
+                @Override
+                public void onError(String m) {
+                    Log.e("TimeFragment", "Failed to sync study sessions: " + m);
+                }
+            }
+        );
     }
 
     /**
