@@ -839,6 +839,25 @@ public class SessionAddDialog extends DialogFragment {
         sessionViewModel.sessionListLiveData.observe(getViewLifecycleOwner(), observer);
     }
 
+    // Session Delete Callback Interface //
+    public interface SessionDeleteListener {
+        void onSessionDeleted(int sessionId);
+    }
+
+    private SessionDeleteListener listener;
+
+    public void setSessionDeleteListener(SessionDeleteListener listener) {
+        this.listener = listener;
+    }
+    // Session Delete Callback Interface //
+
+    private void deleteSession() {
+        sessionViewModel.deleteSessionById(sessionId);
+        listener.onSessionDeleted(sessionId);
+        Toast.makeText(requireContext(), R.string.toast_message_session_deleted, Toast.LENGTH_SHORT).show();
+        dismiss();
+    }
+
     /**
      * UTC 밀리초를 LocalDate 객체로 변환합니다.
      *

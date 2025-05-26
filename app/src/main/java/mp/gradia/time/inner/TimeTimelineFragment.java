@@ -325,7 +325,7 @@ public class TimeTimelineFragment extends Fragment implements SessionAddDialog.S
 
                                 if (session != null) {
                                     Bundle bundle = new Bundle();
-                        Log.d(TAG, "세션 ID: " + sessionId);
+//                        Log.d(TAG, "세션 ID: " + sessionId);
                                     bundle.putInt(SessionAddDialog.KEY_SESSION_ID, session.getSessionId());
                                     bundle.putString(SessionAddDialog.KEY_SERVER_SESSION_ID, session.getServerId());
                         bundle.putInt(SessionAddDialog.KEY_SESSION_MODE, SessionAddDialog.MODE_EDIT);

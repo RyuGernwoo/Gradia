@@ -546,7 +546,7 @@ public class StudySessionRepository {
         }
 
         // 로컬 학습 세션들을 가져와서 동기화 수행
-        studySessionDao.getAll()
+        studySessionDao.getAllFlowable()
                 .firstElement()
                 .subscribeOn(Schedulers.from(executorService))
                 .observeOn(AndroidSchedulers.mainThread())
@@ -566,7 +566,8 @@ public class StudySessionRepository {
                             if (callback != null) {
                                 callback.onError("로컬 데이터 조회 실패: " + throwable.getMessage());
                             }
-                        });
+                        }
+                );
     }
 
     /**
