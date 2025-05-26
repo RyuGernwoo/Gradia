@@ -47,13 +47,12 @@ public class SubjectViewModel extends ViewModel {
                         },
                         throwable -> {
                             // 예외 처리
-                        }
-                )
-        );
+                        }));
     }
 
     /**
      * 선택된 과목을 설정하고 LiveData를 업데이트합니다.
+     * 
      * @param subject 선택된 SubjectEntity
      */
     public void selectSubject(SubjectEntity subject) {
@@ -62,6 +61,7 @@ public class SubjectViewModel extends ViewModel {
 
     /**
      * ID를 통해 과목을 로드하고 LiveData를 업데이트합니다.
+     * 
      * @param id 로드할 과목의 ID
      */
     public void loadSubjectById(int id) {
@@ -74,10 +74,9 @@ public class SubjectViewModel extends ViewModel {
                         },
                         throwable -> {
                             // 예외 처리
-                        }
-                )
-        );
+                        }));
     }
+
     /**
      * ViewModel이 더 이상 사용되지 않을 때 호출됩니다. RxJava Disposables를 해제합니다.
      */

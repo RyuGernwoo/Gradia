@@ -45,6 +45,7 @@ import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.UserDao;
 import mp.gradia.database.entity.UserEntity;
 import mp.gradia.main.MainActivity;
+import mp.gradia.subject.repository.StudySessionRepository;
 import mp.gradia.subject.repository.SubjectRepository;
 
 public class LoginActivity extends AppCompatActivity {
@@ -67,6 +68,7 @@ public class LoginActivity extends AppCompatActivity {
     private ApiHelper apiHelper;
     // Subject Repository
     private SubjectRepository subjectRepository;
+    private StudySessionRepository studySessionRepository;
 
     // SharedPreferences 키 정의 (복합키 대응)
     private static final String PREFS_NAME = "user_session";
@@ -92,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
         userDao = db.userDao();
         apiHelper = new ApiHelper(this);
         subjectRepository = new SubjectRepository(this);
+        studySessionRepository = new StudySessionRepository(this);
 
         // Google 로그인 옵션 설정
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -191,6 +194,8 @@ public class LoginActivity extends AppCompatActivity {
                     public void onSuccess(AuthResponse authResponse) {
                         Log.d(TAG, "Google 로그인 API 호출 성공: " + authResponse.getAccess_token());
                         // authManager.saveAuthInfo()가 호출된 직후이므로 바로 subject 데이터 동기화 수행
+
+                        // TODO: 추후에 리팩토링 예정
                         subjectRepository.downloadAndReplaceFromServer(new SubjectRepository.CloudSyncCallback() {
                             @Override
                             public void onSuccess() {
@@ -203,6 +208,18 @@ public class LoginActivity extends AppCompatActivity {
                                 // 동기화 실패해도 계속 진행
                                 Toast.makeText(LoginActivity.this, "데이터 동기화에 실패했지만 계속 진행합니다.", Toast.LENGTH_SHORT)
                                         .show();
+                            }
+                        });
+
+                        studySessionRepository.downloadAndReplaceFromServer(new StudySessionRepository.CloudSyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "Google 로그인 - StudySession 데이터 동기화 성공");
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                Log.e(TAG, "Google 로그인 - StudySession 데이터 동기화 오류: " + message);
                             }
                         });
                     }
@@ -269,6 +286,18 @@ public class LoginActivity extends AppCompatActivity {
                                 // 동기화 실패해도 계속 진행
                                 Toast.makeText(LoginActivity.this, "데이터 동기화에 실패했지만 계속 진행합니다.", Toast.LENGTH_SHORT)
                                         .show();
+                            }
+                        });
+
+                        studySessionRepository.downloadAndReplaceFromServer(new StudySessionRepository.CloudSyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "Kakao 로그인 - StudySession 데이터 동기화 성공");
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                Log.e(TAG, "Kakao 로그인 - StudySession 데이터 동기화 오류: " + message);
                             }
                         });
                     }

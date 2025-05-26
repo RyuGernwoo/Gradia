@@ -81,8 +81,10 @@ public class SessionStatisticalDialog extends DialogFragment {
         db = AppDatabase.getInstance(requireContext());
         sessionDao = db.studySessionDao();
         subjectDao = db.subjectDao();
-        StudySessionViewModelFactory sessionFactory = new StudySessionViewModelFactory(sessionDao, subjectDao);
-        sessionViewModel = new ViewModelProvider(requireParentFragment(), sessionFactory).get(StudySessionViewModel.class);
+        StudySessionViewModelFactory sessionFactory = new StudySessionViewModelFactory(
+                requireActivity().getApplication(), sessionDao, subjectDao);
+        sessionViewModel = new ViewModelProvider(requireParentFragment(), sessionFactory)
+                .get(StudySessionViewModel.class);
     }
 
     /**
@@ -121,7 +123,8 @@ public class SessionStatisticalDialog extends DialogFragment {
     }
 
     /**
-     * 뷰가 생성된 후 호출됩니다. 툴바, 드롭다운, DatePicker, TimePicker, DurationPicker, 메모 입력 필드, 저장 버튼을 설정합니다.
+     * 뷰가 생성된 후 호출됩니다. 툴바, 드롭다운, DatePicker, TimePicker, DurationPicker, 메모 입력 필드,
+     * 저장 버튼을 설정합니다.
      */
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -131,6 +134,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
     /**
      * 새로운 SessionStatisticalDialog 객체를 생성하고 Bundle 데이터를 설정합니다.
+     * 
      * @param bundle 다이얼로그에 전달할 데이터가 담긴 Bundle 객체입니다.
      * @return 생성된 SessionStatisticalDialog 인스턴스입니다.
      */
@@ -142,6 +146,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
     /**
      * UI 컴포넌트들을 초기화합니다.
+     * 
      * @param v 뷰 계층 구조의 루트 뷰입니다.
      */
     private void initViews(View v) {
@@ -181,12 +186,12 @@ public class SessionStatisticalDialog extends DialogFragment {
                             setupProgressData();
                         }
                     }
-                }
-        );
+                });
     }
 
     /**
      * 주어진 세션의 집중 레벨을 카운트합니다.
+     * 
      * @param session 카운트할 StudySessionEntity 객체입니다.
      */
     private void countFocusLevel(StudySessionEntity session) {
@@ -208,6 +213,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
     /**
      * 가장 집중한 시간대를 계산합니다.
+     * 
      * @param session 계산에 사용할 StudySessionEntity 객체입니다.
      */
     private void countMostFocusTime(StudySessionEntity session) {
@@ -265,7 +271,8 @@ public class SessionStatisticalDialog extends DialogFragment {
 
         long max = focusTime[0];
         for (int i = 1; i < MAX_TIME_CLASS; i++)
-            if (max < focusTime[i]) max = focusTime[i];
+            if (max < focusTime[i])
+                max = focusTime[i];
 
         if (max == focusTime[FOCUS_TIME_MORNING])
             mostFocusTime = FOCUS_TIME_MORNING;
@@ -287,8 +294,10 @@ public class SessionStatisticalDialog extends DialogFragment {
         long minutes = totalFocusTime % 60;
         String totalFocusTime = "";
 
-        if (hours > 0) totalFocusTime += hours + "시간";
-        if (minutes > 0) totalFocusTime += minutes + "분";
+        if (hours > 0)
+            totalFocusTime += hours + "시간";
+        if (minutes > 0)
+            totalFocusTime += minutes + "분";
 
         totalFocusTimeTextView.setText(totalFocusTime);
 
@@ -327,17 +336,21 @@ public class SessionStatisticalDialog extends DialogFragment {
     private void setupProgressData() {
         timeDistributionRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         IntegratedDataBundle bundle = integrateSessions();
-        StudySessionAdapter timeDistribution = new StudySessionAdapter(requireContext(), bundle.getIntegratedList(), bundle.getIntegratedColorArray(), totalFocusTime);
+        StudySessionAdapter timeDistribution = new StudySessionAdapter(requireContext(), bundle.getIntegratedList(),
+                bundle.getIntegratedColorArray(), totalFocusTime);
         timeDistributionRecyclerView.setAdapter(timeDistribution);
 
-
-//        targetStudyTimeRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//        StudySessionAdapter targetStudyTime = new StudySessionAdapter(requireContext(), sessions, eventColors, (int) targetStudyTime);
-//        targetStudyTimeRecyclerView.setAdapter(targetStudyTime);
+        // targetStudyTimeRecyclerView.setLayoutManager(new
+        // LinearLayoutManager(getContext()));
+        // StudySessionAdapter targetStudyTime = new
+        // StudySessionAdapter(requireContext(), sessions, eventColors, (int)
+        // targetStudyTime);
+        // targetStudyTimeRecyclerView.setAdapter(targetStudyTime);
     }
 
     /**
      * 중복되는 세션을 통합하여 StudySessionEntity 목록과 해당 색상 배열을 반환합니다.
+     * 
      * @return 통합된 세션 데이터와 색상 배열을 포함하는 IntegratedDataBundle 객체입니다.
      */
     private IntegratedDataBundle integrateSessions() {
@@ -352,6 +365,7 @@ public class SessionStatisticalDialog extends DialogFragment {
             } else {
                 integratedMap.put(sessions.get(i).getSubjectId(), new StudySessionEntity(
                         sessions.get(i).getSubjectId(),
+                        sessions.get(i).getServerSubjectId(),
                         sessions.get(i).getSubjectName(),
                         sessions.get(i).getDate(),
                         sessions.get(i).getEndDate(),
@@ -385,7 +399,8 @@ public class SessionStatisticalDialog extends DialogFragment {
 
         /**
          * IntegratedDataBundle의 생성자입니다.
-         * @param integratedList 통합된 StudySessionEntity 목록입니다.
+         * 
+         * @param integratedList       통합된 StudySessionEntity 목록입니다.
          * @param integratedColorArray 통합된 세션의 색상 배열입니다.
          */
         public IntegratedDataBundle(List<StudySessionEntity> integratedList, int[] integratedColorArray) {
@@ -395,6 +410,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
         /**
          * 통합된 세션 목록을 반환합니다.
+         * 
          * @return 통합된 StudySessionEntity 목록입니다.
          */
         public List<StudySessionEntity> getIntegratedList() {
@@ -403,6 +419,7 @@ public class SessionStatisticalDialog extends DialogFragment {
 
         /**
          * 통합된 세션의 색상 배열을 반환합니다.
+         * 
          * @return 통합된 세션의 색상 배열입니다.
          */
         public int[] getIntegratedColorArray() {

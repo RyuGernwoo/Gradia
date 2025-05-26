@@ -49,9 +49,9 @@ public interface StudySessionDao {
 
     @Delete
     Completable delete(StudySessionEntity... session);
+
     @Query("SELECT * FROM study_session")
     LiveData<List<StudySessionEntity>> getAllSessions();
-
 
     @Query("SELECT subject_id AS subjectId, SUM(study_time) AS totalTime " +
             "FROM study_session " +
@@ -63,7 +63,4 @@ public interface StudySessionDao {
 
     @Query("SELECT date, SUM(study_time) as total FROM study_session WHERE strftime('%Y-%m', date) = :month GROUP BY date")
     LiveData<List<DayStudyTime>> getMonthlyStudyTime(String month);
-
-
-
 }

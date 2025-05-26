@@ -48,4 +48,7 @@ public interface SubjectDao {
     @Query("SELECT subject_id, name FROM subjects")
     LiveData<List<SubjectIdName>> getAllSubjectIdNamePairs();
 
+    @Query("SELECT * FROM subjects WHERE server_id = :serverId LIMIT 1")
+    Single<SubjectEntity> getSubjectByServerIdAsync(String serverId);
+
 }
