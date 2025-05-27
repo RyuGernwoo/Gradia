@@ -50,6 +50,8 @@ public class StudySessionRepository {
 
     private final StudySessionDao studySessionDao;
     private final SubjectDao subjectDao;
+
+    private final SubjectRepository subjectRepository;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     // 클라우드 동기화 관련 필드
@@ -67,6 +69,7 @@ public class StudySessionRepository {
         AppDatabase db = AppDatabase.getInstance(context);
         studySessionDao = db.studySessionDao();
         subjectDao = db.subjectDao();
+        subjectRepository = new SubjectRepository(context);
 
         // 클라우드 동기화 초기화
         this.apiService = RetrofitClient.getApiService();
@@ -105,12 +108,13 @@ public class StudySessionRepository {
     public void insert(StudySessionEntity session, CloudSyncCallback callback) {
         // 1. 로컬 DB에 먼저 저장
         disposables.add(
-                studySessionDao.insert(session)
+                studySessionDao.insertAndGetId(session)
                         .subscribeOn(Schedulers.from(executorService))
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                () -> {
-                                    Log.d(TAG, "로컬 학습 세션 저장 완료");
+                                (generatedId) -> {
+                                    Log.d(TAG, "로컬 학습 세션 저장 완료, session_id: " + generatedId);
+                                    session.setSessionId(generatedId.intValue());
 
                                     // 2. 로그인 상태일 때만 서버에 저장
                                     if (authManager.isLoggedIn()) {
@@ -172,22 +176,24 @@ public class StudySessionRepository {
     }
 
     public void delete(StudySessionEntity session, CloudSyncCallback callback) {
+        // 1. 로컬 DB에서 먼저 삭제
+        Log.d(TAG, "학습 세션 삭제 요청, session_id: " + session.getSessionId() +
+                ", serverId: " + session.getServerId());
+        deleteFromLocal(session, callback);
+
         // 1. 서버에서 먼저 삭제 (서버 ID가 있는 경우)
         if (authManager.isLoggedIn() && session.getServerId() != null) {
             deleteSessionFromServer(session.getServerId(), new CloudSyncCallback() {
                 @Override
                 public void onSuccess() {
-                    deleteFromLocal(session, callback);
+                    Log.d(TAG, "서버 학습 세션 삭제 완료");
                 }
 
                 @Override
                 public void onError(String message) {
                     Log.w(TAG, "서버 삭제 실패, 로컬만 삭제: " + message);
-                    deleteFromLocal(session, callback);
                 }
             });
-        } else {
-            deleteFromLocal(session, callback);
         }
     }
 
@@ -225,6 +231,14 @@ public class StudySessionRepository {
                 ", study_time=" + apiSession.getStudy_time() +
                 ", rest_time=" + apiSession.getRest_time());
 
+        if (apiSession.getSubject_id() == null || apiSession.getSubject_id().isEmpty()) {
+            Log.e(TAG, "subject_id가 비어 있습니다. 서버 생성 실패");
+            if (callback != null) {
+                callback.onError("subject_id가 비어 있습니다.");
+            }
+            return;
+        }
+
         apiService.createStudySession(authHeader, apiSession).enqueue(new Callback<StudySession>() {
             @Override
             public void onResponse(Call<StudySession> call, Response<StudySession> response) {
@@ -233,11 +247,12 @@ public class StudySessionRepository {
 
                     // 서버 ID를 로컬 엔티티에 저장
                     session.setServerId(createdSession.getId());
-                    studySessionDao.update(session)
-                            .subscribeOn(Schedulers.from(executorService))
-                            .subscribe(
-                                    () -> Log.d(TAG, "서버 ID 저장 완료"),
-                                    throwable -> Log.e(TAG, "서버 ID 저장 실패", throwable));
+                    disposables.add(
+                            studySessionDao.update(session)
+                                    .subscribeOn(Schedulers.from(executorService))
+                                    .subscribe(
+                                            () -> Log.d(TAG, "서버 ID 저장 완료"),
+                                            throwable -> Log.e(TAG, "서버 ID 저장 실패", throwable)));
 
                     Log.d(TAG, "서버 학습 세션 생성 완료");
                     if (callback != null) {
@@ -362,7 +377,6 @@ public class StudySessionRepository {
     /**
      * API StudySession을 로컬 StudySessionEntity로 변환 (비동기)
      */
-    @SuppressLint("CheckResult")
     private void convertToLocalEntityAsync(StudySession apiSession, ConvertCallback callback) {
         // 날짜 파싱 (YYYY-MM-DD 형식)
         LocalDate date = LocalDate.parse(apiSession.getDate());
@@ -372,79 +386,86 @@ public class StudySessionRepository {
         LocalTime endTime = parseTimeFromIsoString(apiSession.getEnd_time());
 
         // 서버 subject_id로 로컬 subject 정보 비동기 조회
-        subjectDao.getSubjectByServerIdAsync(apiSession.getSubject_id())
-                .subscribeOn(Schedulers.from(executorService))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        subject -> {
-                            int localSubjectId;
-                            String subjectName;
+        disposables.add(
+                subjectDao.getAll()
+                        .firstElement()
+                        .subscribeOn(Schedulers.from(executorService))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                subjects -> {
+                                    var subject = subjects.stream()
+                                            .filter(s -> s.getServerId() != null
+                                                    && s.getServerId().equals(apiSession.getSubject_id()))
+                                            .findFirst()
+                                            .orElse(null);
 
-                            if (subject != null) {
-                                localSubjectId = subject.getSubjectId();
-                                subjectName = subject.getName();
-                            } else {
-                                // Subject가 없는 경우 기본값 사용 (나중에 Subject 동기화 시 업데이트됨)
-                                localSubjectId = 1; // 임시값
-                                subjectName = "Unknown Subject"; // 임시값
-                                Log.w(TAG, "Subject not found for server_id: " + apiSession.getSubject_id());
-                            }
+                                    int localSubjectId;
+                                    String subjectName;
 
-                            // endDate 계산: startTime + studyTime + restTime
-                            long totalMinutes = apiSession.getStudy_time()
-                                    + (apiSession.getRest_time() != null ? apiSession.getRest_time() : 0);
-                            LocalDate endDate = date;
+                                    if (subject != null) {
+                                        localSubjectId = subject.getSubjectId();
+                                        subjectName = subject.getName();
+                                    } else {
+                                        // Subject가 없는 경우 기본값 사용 (나중에 Subject 동기화 시 업데이트됨)
+                                        Log.w(TAG, "Subject not found for server_id: " + apiSession.getSubject_id());
+                                        return;
+                                    }
 
-                            // 시작 시간에 총 시간(분)을 더해서 종료 날짜 계산
-                            LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
-                            LocalDateTime endDateTime = startDateTime.plusMinutes(totalMinutes);
+                                   // endDate 계산: startTime + studyTime + restTime
+                                    long totalMinutes = apiSession.getStudy_time()
+                                            + (apiSession.getRest_time() != null ? apiSession.getRest_time() : 0);
+                                    LocalDate endDate = date;
 
-                            // 날짜가 바뀌었다면 endDate 업데이트
-                            if (!endDateTime.toLocalDate().equals(date)) {
-                                endDate = endDateTime.toLocalDate();
-                            }
+                                    // 시작 시간에 총 시간(분)을 더해서 종료 날짜 계산
+                                    LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+                                    LocalDateTime endDateTime = startDateTime.plusMinutes(totalMinutes);
 
-                            StudySessionEntity entity = new StudySessionEntity(
-                                    localSubjectId,
-                                    apiSession.getSubject_id(),
-                                    subjectName,
-                                    date,
-                                    endDate,
-                                    apiSession.getStudy_time(),
-                                    startTime,
-                                    endTime,
-                                    apiSession.getRest_time() != null ? apiSession.getRest_time() : 0,
-                                    -1, // focusLevel
-                                    "" // memo
-                            );
+                                    // 날짜가 바뀌었다면 endDate 업데이트
+                                    if (!endDateTime.toLocalDate().equals(date)) {
+                                        endDate = endDateTime.toLocalDate();
+                                    }
 
-                            // 서버 ID 설정
-                            entity.setServerId(apiSession.getId());
+                                    StudySessionEntity entity = new StudySessionEntity(
+                                            localSubjectId,
+                                            apiSession.getSubject_id(),
+                                            subjectName,
+                                            date,
+                                            endDate,
+                                            apiSession.getStudy_time(),
+                                            startTime,
+                                            endTime,
+                                            apiSession.getRest_time() != null ? apiSession.getRest_time() : 0,
+                                            -1, // focusLevel
+                                            "" // memo
+                                    );
 
-                            // 생성/수정 시간 설정
-                            if (apiSession.getCreated_at() != null) {
-                                try {
-                                    entity.setCreatedAt(parseIsoDateTimeString(apiSession.getCreated_at()));
-                                } catch (Exception e) {
-                                    Log.w(TAG, "Created_at 파싱 실패: " + apiSession.getCreated_at(), e);
-                                    entity.setCreatedAt(LocalDateTime.now());
-                                }
-                            }
-                            if (apiSession.getUpdated_at() != null) {
-                                try {
-                                    entity.setUpdatedAt(parseIsoDateTimeString(apiSession.getUpdated_at()));
-                                } catch (Exception e) {
-                                    Log.w(TAG, "Updated_at 파싱 실패: " + apiSession.getUpdated_at(), e);
-                                    entity.setUpdatedAt(LocalDateTime.now());
-                                }
-                            }
+                                    // 서버 ID 설정
+                                    entity.setServerId(apiSession.getId());
 
-                            callback.onSuccess(entity);
-                        },
-                        throwable -> {
-                            Log.e(TAG, "Subject 조회 실패", throwable);
-                            callback.onError("Subject 조회 실패: " + throwable.getMessage());
-                        });
+                                    // 생성/수정 시간 설정
+                                    if (apiSession.getCreated_at() != null) {
+                                        try {
+                                            entity.setCreatedAt(parseIsoDateTimeString(apiSession.getCreated_at()));
+                                        } catch (Exception e) {
+                                            Log.w(TAG, "Created_at 파싱 실패: " + apiSession.getCreated_at(), e);
+                                            entity.setCreatedAt(LocalDateTime.now());
+                                        }
+                                    }
+                                    if (apiSession.getUpdated_at() != null) {
+                                        try {
+                                            entity.setUpdatedAt(parseIsoDateTimeString(apiSession.getUpdated_at()));
+                                        } catch (Exception e) {
+                                            Log.w(TAG, "Updated_at 파싱 실패: " + apiSession.getUpdated_at(), e);
+                                            entity.setUpdatedAt(LocalDateTime.now());
+                                        }
+                                    }
+
+                                    callback.onSuccess(entity);
+                                },
+                                throwable -> {
+                                    Log.e(TAG, "Subject 조회 실패", throwable);
+                                    callback.onError("Subject 조회 실패: " + throwable.getMessage());
+                                }));
     }
 
     /**
@@ -546,28 +567,28 @@ public class StudySessionRepository {
         }
 
         // 로컬 학습 세션들을 가져와서 동기화 수행
-        studySessionDao.getAllFlowable()
-                .firstElement()
-                .subscribeOn(Schedulers.from(executorService))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        localSessions -> {
-                            if (localSessions.isEmpty()) {
-                                if (callback != null)
-                                    callback.onSuccess();
-                                return;
-                            }
+        disposables.add(
+                studySessionDao.getAllFlowable()
+                        .firstElement()
+                        .subscribeOn(Schedulers.from(executorService))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                localSessions -> {
+                                    if (localSessions.isEmpty()) {
+                                        if (callback != null)
+                                            callback.onSuccess();
+                                        return;
+                                    }
 
-                            // 서버에서 학습 세션 목록을 가져와서 비교
-                            syncWithServerSessions(localSessions, callback);
-                        },
-                        throwable -> {
-                            Log.e(TAG, "로컬 학습 세션 조회 실패", throwable);
-                            if (callback != null) {
-                                callback.onError("로컬 데이터 조회 실패: " + throwable.getMessage());
-                            }
-                        }
-                );
+                                    // 서버에서 학습 세션 목록을 가져와서 비교
+                                    syncWithServerSessions(localSessions, callback);
+                                },
+                                throwable -> {
+                                    Log.e(TAG, "로컬 학습 세션 조회 실패", throwable);
+                                    if (callback != null) {
+                                        callback.onError("로컬 데이터 조회 실패: " + throwable.getMessage());
+                                    }
+                                }));
     }
 
     /**
@@ -603,6 +624,11 @@ public class StudySessionRepository {
 
     /**
      * 로컬 학습 세션들을 서버와 비교하여 필요한 동기화 수행
+     *
+     * 1. 로컬 세션 중 서버에 없는 세션은 생성 필요
+     * 2. 서버에 있는 세션 중 로컬 세션보다 업데이트 시간이 더 최근인 경우 업데이트 필요
+     * 3. 서버에 있는 세션 중 로컬 세션에 없는 경우 삭제 필요
+     * 4. 로컬 세션의 Subject가 서버에 없는 경우 Subject 생성 필요
      */
     public void performLocalToCloudSync(List<StudySession> serverSessions, List<StudySessionEntity> localSessions,
             CloudSyncCallback callback) {
@@ -626,8 +652,14 @@ public class StudySessionRepository {
         List<StudySessionEntity> needsCreate = new ArrayList<>(); // 서버에 생성 필요
         List<StudySessionEntity> needsUpdate = new ArrayList<>(); // 서버에 업데이트 필요
         List<StudySession> needsDelete = new ArrayList<>(); // 서버에서 삭제 필요
+        List<Integer> needsSubjectCreate = new ArrayList<>(); // 서버에 Subject 생성 필요
 
         for (StudySessionEntity localSession : localSessions) {
+            if (localSession.getServerSubjectId() == null) {
+                // 서버 Subject ID가 없는 경우 - 서버에 Subject 생성 필요
+                needsSubjectCreate.add(localSession.getSubjectId());
+            }
+
             if (localSession.getServerId() == null) {
                 // 서버 ID가 없으면 서버에 생성 필요
                 needsCreate.add(localSession);
@@ -662,7 +694,78 @@ public class StudySessionRepository {
             return;
         }
 
-        performBatchSessionSync(needsCreate, needsUpdate, needsDelete, callback);
+
+        // 로컬 Subject 동기화가 필요한 경우 먼저 수행
+        // 로컬 Subject ID를 서버 ID로 업데이트
+        // subject 동기화가 된 후, 이를 기반으로 하는 학습 세션 동기화를 뽑아서 새롭게 수행
+        // 단, 세션의 subject가 서버에 없는 경우는 업로드 할 수 없으므로 제외.
+        if (!needsSubjectCreate.isEmpty()) {
+            Log.d(TAG, "로컬 Subject 동기화 필요: " + needsSubjectCreate.size() + "개");
+
+            Runnable runnable = () -> {
+                disposables.add(
+                        subjectDao.getAll()
+                                .firstElement()
+                                .observeOn(Schedulers.from(executorService))
+                                .subscribeOn(AndroidSchedulers.mainThread())
+                                .subscribe(
+                                        subjectList -> {
+                                            ArrayList<StudySessionEntity> newNeedsCreate = new ArrayList<>();
+
+                                            for (var session : needsCreate) {
+                                                // 세션의 로컬 subjectId가 Subject의 로컬 ID와 일치하는지 확인
+                                                SubjectEntity subject = subjectList.stream()
+                                                        .filter(s -> s.getSubjectId() == session.getSubjectId())
+                                                        .findFirst()
+                                                        .orElse(null);
+
+                                                // 서버 ID가 있는 경우에만 동기화
+                                                if (subject != null && subject.getServerId() != null) {
+                                                    Log.d(TAG, "로컬 Subject ID: " + session.getSubjectId() +
+                                                            ", 서버 Subject ID: " + subject.getServerId());
+
+                                                    // 세션의 서버 Subject ID를 업데이트
+                                                    session.setServerSubjectId(subject.getServerId());
+
+                                                    // 새로 생성이 필요한 세션 목록에 추가
+                                                    newNeedsCreate.add(session);
+                                                } else {
+                                                    Log.w(TAG, "Subject not found for ID: " + session.getSubjectId());
+                                                }
+                                            }
+
+                                            performBatchSessionSync(newNeedsCreate, needsUpdate, needsDelete, callback);
+                                        },
+                                        throwable -> {
+                                            Log.e(TAG, "로컬 Subject 조회 실패", throwable);
+                                            if (callback != null) {
+                                                callback.onError("Subject 조회 실패: " + throwable.getMessage());
+                                            }
+                                        }));
+            };
+
+            // Subject 동기화가 필요한 경우 먼저 수행
+            subjectRepository.syncLocalToCloud(new SubjectRepository.CloudSyncCallback() {
+                @Override
+                public void onSuccess() {
+                    Log.d(TAG, "로컬 Subject 동기화 완료");
+                    runnable.run();
+                }
+
+                @Override
+                public void onError(String message) {
+                    Log.e(TAG, "로컬 Subject 동기화 실패: " + message);
+                    // 동기화 실패 시에도 계속 진행
+                    runnable.run();
+                    if (callback != null) {
+                        callback.onError("Subject 동기화 실패: " + message);
+                    }
+                }
+            });
+        } else {
+            // Subject 동기화가 필요하지 않은 경우 바로 배치 동기화 수행
+            performBatchSessionSync(needsCreate, needsUpdate, needsDelete, callback);
+        }
     }
 
     /**
@@ -793,22 +896,23 @@ public class StudySessionRepository {
                     Log.d(TAG, "서버에서 학습 세션 데이터 가져오기 성공: " + serverSessions.size() + "개");
 
                     // 1. 기존 로컬 데이터 삭제
-                    studySessionDao.clearAll()
-                            .subscribeOn(Schedulers.from(executorService))
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(
-                                    () -> {
-                                        Log.d(TAG, "기존 학습 세션 데이터 삭제 완료");
+                    disposables.add(
+                            studySessionDao.clearAll()
+                                    .subscribeOn(Schedulers.from(executorService))
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(
+                                            () -> {
+                                                Log.d(TAG, "기존 학습 세션 데이터 삭제 완료");
 
-                                        // 2. 서버 데이터를 로컬 데이터로 변환하여 저장
-                                        insertServerSessionsToLocal(serverSessions, callback);
-                                    },
-                                    throwable -> {
-                                        Log.e(TAG, "기존 학습 세션 데이터 삭제 실패", throwable);
-                                        if (callback != null) {
-                                            callback.onError("기존 데이터 삭제 실패: " + throwable.getMessage());
-                                        }
-                                    });
+                                                // 2. 서버 데이터를 로컬 데이터로 변환하여 저장
+                                                insertServerSessionsToLocal(serverSessions, callback);
+                                            },
+                                            throwable -> {
+                                                Log.e(TAG, "기존 학습 세션 데이터 삭제 실패", throwable);
+                                                if (callback != null) {
+                                                    callback.onError("기존 데이터 삭제 실패: " + throwable.getMessage());
+                                                }
+                                            }));
                 } else {
                     String errorMsg = "서버에서 학습 세션 데이터를 가져오는데 실패했습니다. 응답 코드: " + response.code();
                     Log.e(TAG, errorMsg);
@@ -896,26 +1000,36 @@ public class StudySessionRepository {
 
         // 로컬 DB에 일괄 저장
         StudySessionEntity[] sessionsArray = localSessions.toArray(new StudySessionEntity[0]);
-        studySessionDao.insert(sessionsArray)
-                .subscribeOn(Schedulers.from(executorService))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        () -> {
-                            Log.d(TAG, "서버 학습 세션 데이터 로컬 저장 완료: " + localSessions.size() + "개");
-                            if (callback != null) {
-                                if (hasError) {
-                                    callback.onError("일부 학습 세션 변환에 실패했지만 저장은 완료되었습니다.");
-                                } else {
-                                    callback.onSuccess();
-                                }
-                            }
-                        },
-                        throwable -> {
-                            Log.e(TAG, "서버 학습 세션 데이터 로컬 저장 실패", throwable);
-                            if (callback != null) {
-                                callback.onError("데이터 저장 실패: " + throwable.getMessage());
-                            }
-                        });
+        for (StudySessionEntity session : sessionsArray) {
+            Log.d(TAG, "로컬 저장할 학습 세션: " + session.getSubjectName() + " (서버 ID: " + session.getServerId() + ")");
+            studySessionDao.insert(session)
+                    .subscribeOn(Schedulers.from(executorService))
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            () -> Log.d(TAG, "로컬 학습 세션 저장 완료: " + session.getSubjectName()),
+                            throwable -> Log.e(TAG, "로컬 학습 세션 저장 실패: " + session.getSubjectName(), throwable));
+        }
+        // disposables.add(
+        // studySessionDao.insert(sessionsArray)
+        // .subscribeOn(Schedulers.from(executorService))
+        // .observeOn(AndroidSchedulers.mainThread())
+        // .subscribe(
+        // () -> {
+        // Log.d(TAG, "서버 학습 세션 데이터 로컬 저장 완료: " + localSessions.size() + "개");
+        // if (callback != null) {
+        // if (hasError) {
+        // callback.onError("일부 학습 세션 변환에 실패했지만 저장은 완료되었습니다.");
+        // } else {
+        // callback.onSuccess();
+        // }
+        // }
+        // },
+        // throwable -> {
+        // Log.e(TAG, "서버 학습 세션 데이터 로컬 저장 실패", throwable);
+        // if (callback != null) {
+        // callback.onError("데이터 저장 실패: " + throwable.getMessage());
+        // }
+        // }));
     }
 
     /**

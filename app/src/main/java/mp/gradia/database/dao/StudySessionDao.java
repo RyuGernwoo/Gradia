@@ -50,6 +50,9 @@ public interface StudySessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insert(StudySessionEntity... session);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    Single<Long> insertAndGetId(StudySessionEntity session);
+
     @Update
     Completable update(StudySessionEntity... session);
 

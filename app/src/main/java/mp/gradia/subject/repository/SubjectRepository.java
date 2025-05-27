@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import mp.gradia.api.ApiService;
@@ -88,49 +89,55 @@ public class SubjectRepository {
 
     public void insert(SubjectEntity subject, CloudSyncCallback callback) {
         // 1. 먼저 로컬 DB에 저장
-        Completable localInsert = subjectDao.insert(subject)
+        Single<Long> localInsert = subjectDao.insertAndGetId(subject)
                 .subscribeOn(Schedulers.from(executorService))
-                .doOnComplete(() -> Log.d(TAG, "로컬 DB에 과목 저장 완료: " + subject.getName()));
+                .doOnSuccess(generatedId -> {
+                    subject.setSubjectId(generatedId.intValue());
+                    Log.d(TAG, "로컬 DB에 과목 저장 완료: " + subject.getSubjectId());
+                });
 
         // 2. 서버에도 저장
         if (authManager.isLoggedIn()) {
-            localInsert
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                            () -> {
-                                Log.d(TAG, "로컬 과목 생성 완료: " + subject.getName());
-                                if (callback != null)
-                                    callback.onSuccess();
+            disposables.add(
+                    localInsert
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(
+                                    (generatedId) -> {
+                                        Log.d(TAG, "로컬 과목 생성 완료: " + subject.getSubjectId());
+                                        if (callback != null)
+                                            callback.onSuccess();
 
-                                // 서버 업로드는 별도로 비동기 수행
-                                uploadSubjectToServer(subject)
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(
-                                                () -> Log.d(TAG, "서버 동기화 완료: " + subject.getName()),
-                                                throwable -> Log.w(TAG, "서버 동기화 실패 (나중에 재시도): " + subject.getName(),
-                                                        throwable));
-                            },
-                            throwable -> {
-                                Log.e(TAG, "과목 생성 실패", throwable);
-                                if (callback != null)
-                                    callback.onError("과목 생성 실패: " + throwable.getMessage());
-                            });
+                                        // 서버 업로드는 별도로 비동기 수행
+                                        disposables.add(uploadSubjectToServer(subject)
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe(
+                                                        () -> Log.d(TAG, "서버 동기화 완료: " + subject.getName()),
+                                                        throwable -> Log.w(TAG,
+                                                                "서버 동기화 실패 (나중에 재시도): " + subject.getName(),
+                                                                throwable)));
+                                    },
+                                    throwable -> {
+                                        Log.e(TAG, "과목 생성 실패", throwable);
+                                        if (callback != null)
+                                            callback.onError("과목 생성 실패: " + throwable.getMessage());
+                                    }));
         } else {
             // 로그인되지 않은 경우 로컬 DB만 업데이트
-            localInsert
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                            () -> {
-                                Log.d(TAG, "과목 생성 완료 (오프라인): " + subject.getName());
-                                if (callback != null)
-                                    callback.onSuccess();
-                            },
-                            throwable -> {
-                                Log.e(TAG, "과목 생성 실패", throwable);
-                                if (callback != null)
-                                    callback.onError("과목 생성 실패: " + throwable.getMessage());
-                            });
+            disposables.add(
+                    localInsert
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(
+                                    (generatedId) -> {
+                                        Log.d(TAG, "과목 생성 완료 (오프라인): " + subject.getName());
+                                        if (callback != null)
+                                            callback.onSuccess();
+                                    },
+                                    throwable -> {
+                                        Log.e(TAG, "과목 생성 실패", throwable);
+                                        if (callback != null)
+                                            callback.onError("과목 생성 실패: " + throwable.getMessage());
+                                    }));
         }
     }
 
@@ -154,10 +161,10 @@ public class SubjectRepository {
         Log.d(TAG, "authManager.isLoggedIn(): " + authManager.isLoggedIn());
         Log.d(TAG, "업데이트할 과목명: " + subject.getName());
 
-        // 2. 서버에도 업데이트 (로그인 상태이고 서버 ID가 있는 경우만)
+        // 2. 서버에도 업데이트
         if (authManager.isLoggedIn() && subject.getServerId() != null) {
             Log.d(TAG, "서버 동기화 조건 만족 - 서버 업데이트 진행");
-            localUpdate
+            disposables.add(localUpdate
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             () -> {
@@ -166,19 +173,21 @@ public class SubjectRepository {
                                     callback.onSuccess();
 
                                 // 서버 업데이트는 별도로 비동기 수행
-                                updateSubjectOnServer(subject)
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(
-                                                () -> Log.d(TAG, "서버 동기화 완료: " + subject.getName()),
-                                                throwable -> Log.w(TAG, "서버 동기화 실패 (나중에 재시도): " + subject.getName(),
-                                                        throwable));
+                                disposables.add(
+                                        updateSubjectOnServer(subject)
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe(
+                                                        () -> Log.d(TAG, "서버 동기화 완료: " + subject.getName()),
+                                                        throwable -> Log.w(TAG,
+                                                                "서버 동기화 실패 (나중에 재시도): " + subject.getName(),
+                                                                throwable)));
                             },
                             throwable -> {
                                 Log.e(TAG, "과목 업데이트 실패", throwable);
                                 if (callback != null)
                                     callback.onError("과목 업데이트 실패: " + throwable.getMessage());
-                            });
+                            }));
         } else {
             Log.d(TAG, "서버 동기화 조건 불만족 - 로컬 DB만 업데이트");
             if (!authManager.isLoggedIn()) {
@@ -189,7 +198,7 @@ public class SubjectRepository {
             }
 
             // 로그인되지 않았거나 서버 ID가 없는 경우 로컬 DB만 업데이트
-            localUpdate
+            disposables.add(localUpdate
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             () -> {
@@ -201,7 +210,7 @@ public class SubjectRepository {
                                 Log.e(TAG, "과목 업데이트 실패", throwable);
                                 if (callback != null)
                                     callback.onError("과목 업데이트 실패: " + throwable.getMessage());
-                            });
+                            }));
         }
     }
 
@@ -213,47 +222,69 @@ public class SubjectRepository {
     }
 
     public void delete(SubjectEntity subject, CloudSyncCallback callback) {
-        // 삭제는 서버에서 먼저 시도하되, 실패해도 로컬 삭제는 진행
-        if (authManager.isLoggedIn() && subject.getServerId() != null) {
-            // 서버에서 먼저 삭제 시도
-            deleteSubjectFromServer(subject)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                            () -> {
-                                Log.d(TAG, "서버에서 과목 삭제 완료: " + subject.getName());
-                                // 서버 삭제 성공 후 로컬 삭제
-                                performLocalDelete(subject, callback);
-                            },
-                            throwable -> {
-                                Log.w(TAG, "서버 삭제 실패, 로컬만 삭제 진행: " + subject.getName(), throwable);
-                                // 서버 삭제 실패해도 로컬 삭제는 진행
-                                performLocalDelete(subject, callback);
-                            });
-        } else {
-            // 로그인되지 않았거나 서버 ID가 없는 경우 로컬 DB만 삭제
-            performLocalDelete(subject, callback);
-        }
-    }
+        Log.d(TAG, "[delete] 메소드 시작. 과목: " + subject.getName() + ", 서버 ID: " + subject.getServerId() + ", 로그인 상태: "
+                + authManager.isLoggedIn());
 
-    /**
-     * 로컬 DB에서 과목 삭제 수행
-     */
-    private void performLocalDelete(SubjectEntity subject, CloudSyncCallback callback) {
-        subjectDao.delete(subject)
+        Completable localDelete = subjectDao.delete(subject)
                 .subscribeOn(Schedulers.from(executorService))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        () -> {
-                            Log.d(TAG, "과목 삭제 완료: " + subject.getName());
-                            if (callback != null)
-                                callback.onSuccess();
-                        },
-                        throwable -> {
-                            Log.e(TAG, "과목 삭제 실패", throwable);
-                            if (callback != null)
-                                callback.onError("과목 삭제 실패: " + throwable.getMessage());
-                        });
+                .doOnComplete(() -> Log.d(TAG, "[delete] localDelete.doOnComplete (로컬 DB 삭제 완료): " + subject.getName()))
+                .doOnError(
+                        throwable -> Log.e(TAG, "[delete] localDelete.doOnError (로컬 DB 삭제 실패): " + subject.getName()))
+                .doOnDispose(() -> Log.w(TAG, "[delete] localDelete.doOnDispose: " + subject.getName() + " 스트림 해제됨!"));
+
+        if (authManager.isLoggedIn() && subject.getServerId() != null) {
+            Log.d(TAG, "[delete] 서버 삭제 조건 충족. 로컬 삭제 후 서버 삭제 예정: " + subject.getName());
+            disposables.add(
+                    localDelete
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(
+                                    () -> { // 로컬 삭제 성공 시
+                                        Log.i(TAG, "[delete] localDelete.subscribe onSuccess (로컬 과목 삭제 성공 콜백 시작): "
+                                                + subject.getName());
+
+                                        if (callback != null) {
+                                            callback.onSuccess();
+                                        }
+
+                                        disposables.add(
+                                                deleteSubjectFromServer(subject)
+                                                        .subscribeOn(Schedulers.io())
+                                                        .observeOn(AndroidSchedulers.mainThread())
+                                                        .subscribe(
+                                                                () -> Log.i(TAG,
+                                                                        "[delete] deleteSubjectFromServer.subscribe onSuccess (서버 과목 삭제 성공): "
+                                                                                + subject.getName()),
+                                                                serverError -> Log.e(TAG,
+                                                                        "[delete] deleteSubjectFromServer.subscribe onError (서버 과목 삭제 실패): "
+                                                                                + subject.getName(),
+                                                                        serverError)));
+                                        Log.d(TAG, "[delete] deleteSubjectFromServer 호출 시도 후 (disposables.add 완료): "
+                                                + subject.getName());
+                                    },
+                                    localError -> { // 로컬 삭제 실패 시
+                                        Log.e(TAG, "[delete] localDelete.subscribe onError (로컬 과목 삭제 실패): "
+                                                + subject.getName(), localError);
+                                        if (callback != null) {
+                                            callback.onError("로컬 과목 삭제 실패: " + localError.getMessage());
+                                        }
+                                    }));
+        } else {
+            Log.d(TAG, "[delete] 서버 삭제 조건 불충족 (로그아웃 또는 서버 ID 없음). 로컬 삭제만 진행: " + subject.getName());
+            disposables.add(
+                    localDelete
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(
+                                    () -> {
+                                        Log.d(TAG, "[delete] 과목 삭제 완료 (오프라인/서버ID 없음): " + subject.getName());
+                                        if (callback != null)
+                                            callback.onSuccess();
+                                    },
+                                    throwable -> {
+                                        Log.e(TAG, "[delete] 과목 삭제 실패 (오프라인/서버ID 없음): " + subject.getName(), throwable);
+                                        if (callback != null)
+                                            callback.onError("과목 삭제 실패: " + throwable.getMessage());
+                                    }));
+        }
     }
 
     /**
@@ -278,7 +309,7 @@ public class SubjectRepository {
                             updateTimestampsFromResponse(subject, response.body());
 
                             // 로컬 DB 업데이트 완료 후 emitter.onComplete() 호출
-                            subjectDao.update(subject)
+                            disposables.add(subjectDao.update(subject)
                                     .subscribeOn(Schedulers.from(executorService))
                                     .subscribe(
                                             () -> {
@@ -288,7 +319,7 @@ public class SubjectRepository {
                                             error -> {
                                                 Log.e(TAG, "서버 ID 저장 실패", error);
                                                 emitter.onError(error);
-                                            });
+                                            }));
                         } else {
                             emitter.onComplete();
                         }
@@ -322,11 +353,11 @@ public class SubjectRepository {
                         updateTimestampsFromResponse(subject, response.body());
 
                         // 로컬 DB 업데이트
-                        subjectDao.update(subject)
+                        disposables.add(subjectDao.update(subject)
                                 .subscribeOn(Schedulers.from(executorService))
                                 .subscribe(
                                         () -> Log.d(TAG, "서버 타임스탬프 업데이트 완료"),
-                                        error -> Log.e(TAG, "서버 타임스탬프 업데이트 실패", error));
+                                        error -> Log.e(TAG, "서버 타임스탬프 업데이트 실패", error)));
 
                         emitter.onComplete();
                     } else {
@@ -346,22 +377,34 @@ public class SubjectRepository {
      * 서버에서 과목 삭제
      */
     private Completable deleteSubjectFromServer(SubjectEntity subject) {
+        Log.d(TAG, "[deleteSubjectFromServer] 메소드 호출됨. Subject: " + subject.getName() + ", Server ID: "
+                + subject.getServerId()); // 이 로그가 보여야 합니다.
         return Completable.create(emitter -> {
             String authHeader = authManager.getAuthHeader();
             String serverId = subject.getServerId();
+
+            if (serverId == null) {
+                emitter.onError(new Exception("서버 ID가 없습니다. 로컬 DB에서만 삭제합니다."));
+                return;
+            }
+
+            Log.d(TAG, "서버 API 삭제 요청: " + serverId);
 
             apiService.deleteSubject(authHeader, serverId).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
+                        Log.d(TAG, "서버 과목 삭제 성공: " + subject.getName());
                         emitter.onComplete();
                     } else {
+                        Log.e(TAG, "서버 과목 삭제 실패: " + response.code());
                         emitter.onError(new Exception("서버에서 과목 삭제 실패: " + response.code()));
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
+                    Log.d(TAG, "서버 과목 삭제 네트워크 오류", t);
                     emitter.onError(t);
                 }
             });
@@ -470,7 +513,7 @@ public class SubjectRepository {
         }
 
         // 로컬 과목들을 가져와서 동기화 수행
-        subjectDao.getAll()
+        disposables.add(subjectDao.getAll()
                 .firstElement()
                 .subscribeOn(Schedulers.from(executorService))
                 .observeOn(AndroidSchedulers.mainThread())
@@ -490,7 +533,7 @@ public class SubjectRepository {
                             if (callback != null) {
                                 callback.onError("로컬 데이터 조회 실패: " + throwable.getMessage());
                             }
-                        });
+                        }));
     }
 
     /**
@@ -635,7 +678,7 @@ public class SubjectRepository {
 
         // 생성이 필요한 과목들 처리
         for (SubjectEntity subject : needsCreate) {
-            uploadSubjectToServer(subject)
+            disposables.add(uploadSubjectToServer(subject)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
@@ -649,12 +692,12 @@ public class SubjectRepository {
                                 hasError.set(true);
                                 completedItems.incrementAndGet();
                                 checkCompletion.run();
-                            });
+                            }));
         }
 
         // 업데이트가 필요한 과목들 처리
         for (SubjectEntity subject : needsUpdate) {
-            updateSubjectOnServer(subject)
+            disposables.add(updateSubjectOnServer(subject)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
@@ -668,12 +711,12 @@ public class SubjectRepository {
                                 hasError.set(true);
                                 completedItems.incrementAndGet();
                                 checkCompletion.run();
-                            });
+                            }));
         }
 
         // 삭제가 필요한 과목들 처리
         for (Subject subject : needsDelete) {
-            deleteSubjectFromServerById(subject.getId())
+            disposables.add(deleteSubjectFromServerById(subject.getId())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
@@ -687,7 +730,7 @@ public class SubjectRepository {
                                 hasError.set(true);
                                 completedItems.incrementAndGet();
                                 checkCompletion.run();
-                            });
+                            }));
         }
     }
 
@@ -740,7 +783,7 @@ public class SubjectRepository {
                     Log.d(TAG, "서버에서 과목 데이터 가져오기 성공: " + serverSubjects.size() + "개");
 
                     // 1. 기존 로컬 데이터 삭제
-                    subjectDao.clearAll()
+                    disposables.add(subjectDao.clearAll()
                             .subscribeOn(Schedulers.from(executorService))
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(
@@ -755,7 +798,7 @@ public class SubjectRepository {
                                         if (callback != null) {
                                             callback.onError("기존 데이터 삭제 실패: " + throwable.getMessage());
                                         }
-                                    });
+                                    }));
                 } else {
                     String errorMsg = "서버에서 과목 데이터를 가져오는데 실패했습니다. 응답 코드: " + response.code();
                     Log.e(TAG, errorMsg);
@@ -810,7 +853,7 @@ public class SubjectRepository {
 
         // 로컬 DB에 일괄 저장
         SubjectEntity[] subjectsArray = localSubjects.toArray(new SubjectEntity[0]);
-        subjectDao.insert(subjectsArray)
+        disposables.add(subjectDao.insert(subjectsArray)
                 .subscribeOn(Schedulers.from(executorService))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -825,7 +868,7 @@ public class SubjectRepository {
                             if (callback != null) {
                                 callback.onError("데이터 저장 실패: " + throwable.getMessage());
                             }
-                        });
+                        }));
     }
 
     /**

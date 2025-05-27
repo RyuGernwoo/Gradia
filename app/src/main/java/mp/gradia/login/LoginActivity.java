@@ -200,6 +200,18 @@ public class LoginActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess() {
                                 Log.d(TAG, "Google 로그인 - Subject 데이터 동기화 성공");
+
+                                studySessionRepository.downloadAndReplaceFromServer(new StudySessionRepository.CloudSyncCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "Google 로그인 - StudySession 데이터 동기화 성공");
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        Log.e(TAG, "Google 로그인 - StudySession 데이터 동기화 오류: " + message);
+                                    }
+                                });
                             }
 
                             @Override
@@ -208,18 +220,6 @@ public class LoginActivity extends AppCompatActivity {
                                 // 동기화 실패해도 계속 진행
                                 Toast.makeText(LoginActivity.this, "데이터 동기화에 실패했지만 계속 진행합니다.", Toast.LENGTH_SHORT)
                                         .show();
-                            }
-                        });
-
-                        studySessionRepository.downloadAndReplaceFromServer(new StudySessionRepository.CloudSyncCallback() {
-                            @Override
-                            public void onSuccess() {
-                                Log.d(TAG, "Google 로그인 - StudySession 데이터 동기화 성공");
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                Log.e(TAG, "Google 로그인 - StudySession 데이터 동기화 오류: " + message);
                             }
                         });
                     }
@@ -278,6 +278,18 @@ public class LoginActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess() {
                                 Log.d(TAG, "Kakao 로그인 - Subject 데이터 동기화 성공");
+
+                                studySessionRepository.downloadAndReplaceFromServer(new StudySessionRepository.CloudSyncCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "Kakao 로그인 - StudySession 데이터 동기화 성공");
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        Log.e(TAG, "Kakao 로그인 - StudySession 데이터 동기화 오류: " + message);
+                                    }
+                                });
                             }
 
                             @Override
@@ -289,17 +301,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         });
 
-                        studySessionRepository.downloadAndReplaceFromServer(new StudySessionRepository.CloudSyncCallback() {
-                            @Override
-                            public void onSuccess() {
-                                Log.d(TAG, "Kakao 로그인 - StudySession 데이터 동기화 성공");
-                            }
 
-                            @Override
-                            public void onError(String message) {
-                                Log.e(TAG, "Kakao 로그인 - StudySession 데이터 동기화 오류: " + message);
-                            }
-                        });
                     }
 
                     @Override
@@ -515,6 +517,8 @@ public class LoginActivity extends AppCompatActivity {
         disposables.clear();
         Log.d(TAG, "LoginActivity onDestroy: Disposables cleared.");
         disposables.clear();
+        subjectRepository.dispose();
+        studySessionRepository.dispose();
         Log.d(TAG, "LoginActivity onDestroy: Disposables cleared.");
     }
 }
