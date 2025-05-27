@@ -94,8 +94,8 @@ public class SessionAddDialog extends DialogFragment {
 
     // View Component
     private View v;
-    private Toolbar toolbar;
     private TextInputLayout startTimeInputLayout;
+    private Toolbar toolbar;
     private TextInputLayout endTimeInputLayout;
     private TextInputLayout sessionMemoInputLayout;
     private TextInputEditText dateEditText;
@@ -288,12 +288,13 @@ public class SessionAddDialog extends DialogFragment {
         toolbar.inflateMenu(R.menu.session_add_dialog_menu);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_delete_session) {
-                new MaterialAlertDialogBuilder(requireContext())
+                new MaterialAlertDialogBuilder(requireContext(), R.style.DeleteSessionDialogTheme)
                         .setTitle("세션 삭제")
                         .setMessage("이 세션을 정말 삭제하시겠습니까?")
                         .setNegativeButton("취소", null)
                         .setPositiveButton("삭제", (dialog, which) -> deleteSession())
                         .show();
+
                 return true;
             }
             return false;
@@ -611,7 +612,8 @@ public class SessionAddDialog extends DialogFragment {
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext());
         builder.setView(dialogView)
-                .setTitle("기간 선택")
+                .setTitle("세션 시간 선택")
+                .setMessage("세션의 시간을 입력해주세요.")
                 .setPositiveButton("확인", (dialog, id) -> {
                     durationHour = hourPicker.getValue();
                     durationMinute = minutePicker.getValue();
@@ -620,7 +622,7 @@ public class SessionAddDialog extends DialogFragment {
                     updateTimeEditText(clockFormat, SESSION_END_TIME);
                     updateDurationEditText();
                 })
-                .setNegativeButton("취소", (dialog, id) -> dialog.cancel());
+                .setNegativeButton("취소", null);
         builder.create().show();
     }
 

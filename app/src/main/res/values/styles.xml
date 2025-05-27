@@ -48,4 +48,32 @@
         <item name="android:layout_margin">5dp</item>
         <item name="android:orientation">vertical</item>
     </style>
+
+    <style name="RoundedShape" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50dp</item>
+    </style>
+
+
+    <!-- Delete Session Dialog -->
+    <style name="DeleteSessionDialogTheme" parent="MaterialAlertDialog.Material3">
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/red</item>
+        <item name="shapeAppearance">@style/RoundedShape</item>
+    </style>
+
+
+    <!-- Add Subject by EveryTime Dialog -->
+    <style name="AddSubjectDialogTheme" parent="MaterialAlertDialog.Material3">
+        <item name="buttonBarNeutralButtonStyle">@style/NeutralButtonStyle</item>
+    </style>
+
+    <style name="NeutralButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <!-- <item name="android:textColor">@android:color/</item>-->
+        <item name="shapeAppearance">@style/RoundedShape</item>
+    </style>
+
 </resources>

@@ -9,6 +9,20 @@
     <string name="subject_type_liberal_arts">교양</string>
     <string name="subject_type_unknown">미분류</string>
 
+    <!-- Subject Fragment -->
+    <string name="searchbar_hint">과목명 검색</string>
+    <string name="searchbar_menu_icon">정렬</string>
+
+    <!-- Subject Add Dialog -->
+    <string name="dialog_everytime_expand">시간표 url 확인 방법</string>
+    <string name="dialog_everytime_contract">접기</string>
+    <string name="dialog_expand_description1">시간표 탭의 오른쪽 상단의 톱니바퀴를 누릅니다.</string>
+    <string name="dialog_expand_description2">아래 URL 공유를 클릭합니다.</string>
+    <string name="everytime_url">시간표 URL</string>
+
+    <!-- Subject Detail Activity -->
+    <string name="appbar_title_subject_detail">과목 상세 보기</string>
+
     <!-- Navigation Bar -->
     <string name="text_label_home">홈</string>
     <string name="text_label_subject">과목</string>

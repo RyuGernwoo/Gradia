@@ -9,6 +9,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -24,12 +28,20 @@ public class SubjectFragment extends Fragment {
         public View onCreateView(@NonNull LayoutInflater inflater,
                         @Nullable ViewGroup container,
                         @Nullable Bundle savedInstanceState) {
+
                 return inflater.inflate(R.layout.fragment_subject, container, false);
         }
 
         @Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
                 super.onViewCreated(view, savedInstanceState);
+
+                ViewCompat.setOnApplyWindowInsetsListener(getView(), (v, windowInsets) -> {
+                        Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                        v.setPadding(v.getPaddingLeft(), 0, v.getPaddingRight(), v.getPaddingBottom());
+                        return windowInsets;
+                });
+
 
                 viewModel = new ViewModelProvider(this).get(SubjectViewModel.class);
 

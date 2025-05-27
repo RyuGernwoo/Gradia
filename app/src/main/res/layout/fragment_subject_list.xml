@@ -1,64 +1,125 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 검색창 + 정렬 -->
-    <LinearLayout
-        android:padding="15dp"
+    <ScrollView
+        android:id="@+id/schedule_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:fillViewport="true"
+        android:overScrollMode="never">
 
-        <EditText
-            android:id="@+id/editTextSearch"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="과목명 검색" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <Button
-            android:id="@+id/buttonSort"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="정렬" />
-    </LinearLayout>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:elevation="10dp"
+                app:cardCornerRadius="50dp">
 
-    <!-- 정렬 기준 텍스트 -->
-    <TextView
-        android:padding="15dp"
-        android:id="@+id/sortTextView"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search_text_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="과목명 검색"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    app:boxBackgroundMode="none"
+                    app:endIconMode="clear_text"
+                    app:expandedHintEnabled="false"
+                    app:hintEnabled="false"
+                    app:startIconDrawable="@drawable/outline_search_black_24"
+                    app:endIconDrawable="@drawable/outline_close_black_24">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/search_text_input_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/sortTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:text="정렬: 과목명"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <ImageButton
+                    android:id="@+id/sort_by_img_btn"
+                    android:background="@android:color/transparent"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="15dp"
+                    android:padding="10dp"
+                    android:src="@drawable/outline_filter_alt_black_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/textEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="등록된 과목이 없습니다."
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewSubjects"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingTop="8dp" />
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddSubjectEverytime"
+        style="?attr/floatingActionButtonSmallStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="정렬: 과목명"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp" />
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="38dp"
+        android:layout_marginBottom="100dp"
+        android:src="@drawable/everytime" />
 
-
-    <!-- 과목 없음 -->
-    <TextView
-        android:id="@+id/textEmpty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="등록된 과목이 없습니다."
-        android:layout_gravity="center_horizontal"
-        android:visibility="gone"
-        android:layout_marginTop="16dp"/>
-
-    <!-- 과목 리스트 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewSubjects"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <!-- 과목 추가 버튼 -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddSubject"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="30dp"
         android:src="@drawable/ic_add" />
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

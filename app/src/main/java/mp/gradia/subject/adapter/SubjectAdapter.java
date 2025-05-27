@@ -1,12 +1,20 @@
 package mp.gradia.subject.adapter;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -17,6 +25,7 @@ import mp.gradia.database.entity.SubjectEntity;
 
 public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectViewHolder> {
 
+    private Context context;
     // 과목 리스트 변수
     private List<SubjectEntity> subjectList = new ArrayList<>();
 
@@ -31,6 +40,11 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
     // 외부에서 클릭 리스너를 설정
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    public SubjectAdapter(Context context, List<SubjectEntity> subjectList) {
+        this.context = context;
+        this.subjectList = subjectList;
     }
 
     // 과목 리스트를 설정, 리사이클러뷰 갱신
@@ -53,6 +67,13 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         // 과목 데이터 바인딩
         SubjectEntity subject = subjectList.get(position);
         holder.textSubjectName.setText(subject.name); // 과목명 설정
+
+        int color = Color.parseColor(subject.getColor());
+        Drawable baseDrawable = ContextCompat.getDrawable(context, R.drawable.color_circle);
+        if (baseDrawable instanceof GradientDrawable) {
+            ((GradientDrawable) baseDrawable).setColor(color);
+            holder.circle.setImageDrawable(baseDrawable);
+        }
 
         // 과목 유형에 따라 텍스트 변환
         String typeStr;
@@ -84,9 +105,12 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         private final TextView textSubjectName;
         private final TextView textSubjectType;
         private final TextView textSubjectTime;
+        private ImageView circle;
 
         public SubjectViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            circle = itemView.findViewById(R.id.color_circle);
 
             // 각 TextView 연결
             textSubjectName = itemView.findViewById(R.id.textSubjectName);
