@@ -32,9 +32,12 @@ import mp.gradia.api.models.EvaluationRatio;
 import mp.gradia.api.models.Subject;
 import mp.gradia.api.models.SubjectsApiResponse;
 import mp.gradia.api.models.TargetStudyTime;
+import mp.gradia.api.models.TimetableItem;
+import mp.gradia.api.models.TimetableResponse;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.utils.SubjectUtil;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -942,5 +945,44 @@ public class SubjectRepository {
         }
 
         return localSubject;
+    }
+
+    public void fetchEveryTimeTable(String url, CloudSyncCallback callback) {
+        apiService.getTimetable(url).enqueue(new Callback<TimetableResponse>() {
+            @Override
+            public void onResponse(Call<TimetableResponse> call, Response<TimetableResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TimetableResponse timetable = response.body();
+                    List<TimetableItem> timetableItems = timetable.getTimetable();
+                    List<SubjectEntity> convertedSubjects = SubjectUtil.convertToEntityList(timetableItems);
+                    for (SubjectEntity subject : convertedSubjects) {
+                        insert(subject, new CloudSyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "과목 추가 성공: " + subject.getName());
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.e(TAG, "과목 추가 실패: " + subject.getName() + ", 오류: " + error);
+                            }
+                        });
+                    }
+
+                    if (callback != null) {
+                        callback.onSuccess();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TimetableResponse> call, Throwable t) {
+                Log.e(TAG, "과목 조회 실패", t);
+
+                if (callback != null) {
+                    callback.onError("과목 조회 실패: " + t.getMessage());
+                }
+            }
+        });
     }
 }

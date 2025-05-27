@@ -184,6 +184,7 @@ public class SubjectDetailFragment extends Fragment {
                             Toast.makeText(getActivity(), "과목이 성공적으로 삭제되었습니다.", Toast.LENGTH_SHORT).show();
 
                             // 삭제 후 과목 리스트로 명확하게 이동
+                            // TODO: 해당 코드에서 크래시 발생
                             Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
                                     .navigate(R.id.action_subjectDeleteDialog_to_subjectList);
                         }
