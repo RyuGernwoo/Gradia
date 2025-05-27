@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 import mp.gradia.database.entity.SubjectEntity;
-import mp.gradia.subject.repository.SubjectRepository;
+import mp.gradia.database.repository.SubjectRepository;
 
 public class SubjectViewModel extends AndroidViewModel {
     private int sortType = 0; // 0: 이름, 1: 학점, 2: 주간 목표

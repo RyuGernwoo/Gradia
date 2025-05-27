@@ -45,8 +45,8 @@ import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.UserDao;
 import mp.gradia.database.entity.UserEntity;
 import mp.gradia.main.MainActivity;
-import mp.gradia.subject.repository.StudySessionRepository;
-import mp.gradia.subject.repository.SubjectRepository;
+import mp.gradia.database.repository.StudySessionRepository;
+import mp.gradia.database.repository.SubjectRepository;
 
 public class LoginActivity extends AppCompatActivity {
 

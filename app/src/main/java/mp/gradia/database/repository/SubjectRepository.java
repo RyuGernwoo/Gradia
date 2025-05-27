@@ -1,6 +1,5 @@
-package mp.gradia.subject.repository;
+package mp.gradia.database.repository;
 
-import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 

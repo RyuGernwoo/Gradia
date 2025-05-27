@@ -1,7 +1,5 @@
-package mp.gradia.subject.repository;
+package mp.gradia.database.repository;
 
-import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
@@ -23,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import mp.gradia.api.ApiService;
@@ -31,8 +28,6 @@ import mp.gradia.api.AuthManager;
 import mp.gradia.api.RetrofitClient;
 import mp.gradia.api.models.StudySession;
 import mp.gradia.api.models.StudySessionsApiResponse;
-import mp.gradia.api.models.Subject;
-import mp.gradia.api.models.SubjectsApiResponse;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.StudySessionDao;
 import mp.gradia.database.dao.SubjectDao;

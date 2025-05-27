@@ -2,7 +2,6 @@ package mp.gradia.subject.ui;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,7 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import mp.gradia.R;
-import mp.gradia.subject.repository.SubjectRepository;
+import mp.gradia.database.repository.SubjectRepository;
 import mp.gradia.subject.viewmodel.SubjectViewModel;
 
 public class SubjectDeleteDialog extends DialogFragment {

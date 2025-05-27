@@ -1,7 +1,6 @@
 package mp.gradia.time;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,8 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import mp.gradia.R;
-import mp.gradia.subject.repository.StudySessionRepository;
-import mp.gradia.subject.repository.SubjectRepository;
+import mp.gradia.database.repository.StudySessionRepository;
 
 public class TimeFragment extends Fragment {
     // Page Constants
