@@ -1,6 +1,5 @@
 package mp.gradia.subject.ui;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,7 +25,7 @@ import mp.gradia.R;
 import mp.gradia.database.entity.EvaluationRatio;
 import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.database.entity.TargetStudyTime;
-import mp.gradia.subject.repository.SubjectRepository;
+import mp.gradia.database.repository.SubjectRepository;
 import mp.gradia.subject.viewmodel.SubjectViewModel;
 
 // 과목 추가 및 수정 화면 fragment

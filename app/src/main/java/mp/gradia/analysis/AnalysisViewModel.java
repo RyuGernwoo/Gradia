@@ -6,15 +6,13 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import mp.gradia.database.SubjectIdName;
 import mp.gradia.database.entity.DayStudyTime;
 import mp.gradia.database.entity.StudySessionEntity;
 import mp.gradia.database.entity.SubjectStudyTime;
-import mp.gradia.subject.repository.StudySessionRepository;
+import mp.gradia.database.repository.StudySessionRepository;
 
 public class AnalysisViewModel extends AndroidViewModel {
 

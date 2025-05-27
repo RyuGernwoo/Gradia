@@ -1,6 +1,5 @@
-package mp.gradia.subject.repository;
+package mp.gradia.database.repository;
 
-import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
@@ -101,8 +100,7 @@ public class SubjectRepository {
 
         // 2. 서버에도 저장
         if (authManager.isLoggedIn()) {
-            disposables.add(
-                    localInsert
+            disposables.add(localInsert
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(
                                     (generatedId) -> {
@@ -296,7 +294,7 @@ public class SubjectRepository {
     private Completable uploadSubjectToServer(SubjectEntity subject) {
         return Completable.create(emitter -> {
             String authHeader = authManager.getAuthHeader();
-            Subject apiSubject = convertToApiSubject(subject);
+            Subject apiSubject = SubjectUtil.convertToApiSubject(subject);
             apiSubject.setId(null); // 새 과목이므로 ID는 null로 설정
 
             apiService.createSubject(authHeader, apiSubject).enqueue(new Callback<Subject>() {
@@ -309,7 +307,7 @@ public class SubjectRepository {
                             subject.setServerId(serverId);
 
                             // 서버에서 받은 생성/업데이트 시간 설정
-                            updateTimestampsFromResponse(subject, response.body());
+                            SubjectUtil.updateTimestampsFromResponse(subject, response.body());
 
                             // 로컬 DB 업데이트 완료 후 emitter.onComplete() 호출
                             disposables.add(subjectDao.update(subject)
@@ -346,14 +344,14 @@ public class SubjectRepository {
         return Completable.create(emitter -> {
             String authHeader = authManager.getAuthHeader();
             String serverId = subject.getServerId();
-            Subject apiSubject = convertToApiSubject(subject);
+            Subject apiSubject = SubjectUtil.convertToApiSubject(subject);
 
             apiService.updateSubject(authHeader, serverId, apiSubject).enqueue(new Callback<Subject>() {
                 @Override
                 public void onResponse(Call<Subject> call, Response<Subject> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         // 서버에서 받은 업데이트 시간 설정
-                        updateTimestampsFromResponse(subject, response.body());
+                        SubjectUtil.updateTimestampsFromResponse(subject, response.body());
 
                         // 로컬 DB 업데이트
                         disposables.add(subjectDao.update(subject)
@@ -412,88 +410,6 @@ public class SubjectRepository {
                 }
             });
         });
-    }
-
-    /**
-     * 서버 응답에서 타임스탬프 업데이트
-     */
-    private void updateTimestampsFromResponse(SubjectEntity subject, Subject serverSubject) {
-        if (serverSubject.getCreated_at() != null) {
-            try {
-                LocalDateTime createdAt = LocalDateTime.parse(serverSubject.getCreated_at(),
-                        DateTimeFormatter.ISO_DATE_TIME);
-                subject.setCreatedAt(createdAt);
-            } catch (Exception e) {
-                Log.e(TAG, "Created_at 변환 오류", e);
-            }
-        }
-
-        if (serverSubject.getUpdated_at() != null) {
-            try {
-                LocalDateTime updatedAt = LocalDateTime.parse(serverSubject.getUpdated_at(),
-                        DateTimeFormatter.ISO_DATE_TIME);
-                subject.setUpdatedAt(updatedAt);
-            } catch (Exception e) {
-                Log.e(TAG, "Updated_at 변환 오류", e);
-            }
-        }
-    }
-
-    /**
-     * 로컬 SubjectEntity를 API Subject 모델로 변환합니다.
-     */
-    private Subject convertToApiSubject(SubjectEntity localSubject) {
-        Subject apiSubject = new Subject();
-        apiSubject.setId(String.valueOf(localSubject.getSubjectId()));
-        if (localSubject.getServerId() != null) {
-            apiSubject.setId(localSubject.getServerId());
-        }
-        apiSubject.setName(localSubject.getName());
-        apiSubject.setType(localSubject.getType());
-        apiSubject.setCredit(localSubject.getCredit());
-        apiSubject.setDifficulty(localSubject.getDifficulty());
-        apiSubject.setMid_term_schedule(localSubject.getMidTermSchedule());
-        apiSubject.setFinal_term_schedule(localSubject.getFinalTermSchedule());
-        apiSubject.setColor(localSubject.getColor());
-
-        // 생성 시간과 업데이트 시간을 ISO 형식 문자열로 변환
-        if (localSubject.getCreatedAt() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-            apiSubject.setCreated_at(localSubject.getCreatedAt().format(formatter));
-        }
-
-        if (localSubject.getUpdatedAt() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-            apiSubject.setUpdated_at(localSubject.getUpdatedAt().format(formatter));
-        }
-
-        // 평가 비율 변환
-        if (localSubject.getRatio() != null) {
-            EvaluationRatio apiRatio = new EvaluationRatio();
-            mp.gradia.database.entity.EvaluationRatio localRatio = localSubject.getRatio();
-
-            apiRatio.setMid_term_ratio(localRatio.midTermRatio);
-            apiRatio.setFinal_term_ratio(localRatio.finalTermRatio);
-            apiRatio.setQuiz_ratio(localRatio.quizRatio);
-            apiRatio.setAssignment_ratio(localRatio.assignmentRatio);
-            apiRatio.setAttendance_ratio(localRatio.attendanceRatio);
-
-            apiSubject.setEvaluation_ratio(apiRatio);
-        }
-
-        // 목표 공부 시간 변환
-        if (localSubject.getTime() != null) {
-            TargetStudyTime apiTime = new TargetStudyTime();
-            mp.gradia.database.entity.TargetStudyTime localTime = localSubject.getTime();
-
-            apiTime.setDaily_target_study_time(localTime.dailyTargetStudyTime);
-            apiTime.setWeekly_target_study_time(localTime.weeklyTargetStudyTime);
-            apiTime.setMonthly_target_study_time(localTime.monthlyTargetStudyTime);
-
-            apiSubject.setTarget_study_time(apiTime);
-        }
-
-        return apiSubject;
     }
 
     /**
@@ -604,7 +520,7 @@ public class SubjectRepository {
             } else if (serverSubjectMap.containsKey(localSubject.getServerId())) {
                 // 서버에 있는 경우 업데이트 시간 비교
                 Subject serverSubject = serverSubjectMap.get(localSubject.getServerId());
-                if (isLocalNewer(localSubject, serverSubject)) {
+                if (SubjectUtil.isLocalNewer(localSubject, serverSubject)) {
                     needsUpdate.add(localSubject);
                 }
             } else {
@@ -633,28 +549,6 @@ public class SubjectRepository {
         }
 
         performBatchSync(needsCreate, needsUpdate, needsDelete, callback);
-    }
-
-    /**
-     * 로컬 과목이 서버 과목보다 최신인지 확인
-     */
-    private boolean isLocalNewer(SubjectEntity localSubject, mp.gradia.api.models.Subject serverSubject) {
-        if (localSubject.getUpdatedAt() == null) {
-            return false;
-        }
-
-        if (serverSubject.getUpdated_at() == null) {
-            return true;
-        }
-
-        try {
-            LocalDateTime serverUpdatedAt = LocalDateTime.parse(serverSubject.getUpdated_at(),
-                    DateTimeFormatter.ISO_DATE_TIME);
-            return localSubject.getUpdatedAt().isAfter(serverUpdatedAt);
-        } catch (Exception e) {
-            Log.e(TAG, "서버 업데이트 시간 파싱 오류", e);
-            return true; // 파싱 오류 시 로컬을 우선
-        }
     }
 
     /**
@@ -838,7 +732,7 @@ public class SubjectRepository {
         // 서버 데이터를 로컬 엔티티로 변환
         for (Subject serverSubject : serverSubjects) {
             try {
-                SubjectEntity localSubject = convertServerToLocalSubject(serverSubject);
+                SubjectEntity localSubject = SubjectUtil.convertServerToLocalSubject(serverSubject);
                 localSubjects.add(localSubject);
                 Log.d(TAG, "변환된 과목: " + localSubject.getName() + " (서버 ID: " + localSubject.getServerId() + ")");
             } catch (Exception e) {
@@ -873,80 +767,6 @@ public class SubjectRepository {
                             }
                         }));
     }
-
-    /**
-     * 서버 Subject 모델을 로컬 SubjectEntity로 변환합니다.
-     */
-    private SubjectEntity convertServerToLocalSubject(Subject serverSubject) {
-        // 평가 비율 변환
-        mp.gradia.database.entity.EvaluationRatio localRatio = null;
-        if (serverSubject.getEvaluation_ratio() != null) {
-            localRatio = new mp.gradia.database.entity.EvaluationRatio();
-            EvaluationRatio serverRatio = serverSubject.getEvaluation_ratio();
-
-            localRatio.midTermRatio = serverRatio.getMid_term_ratio();
-            localRatio.finalTermRatio = serverRatio.getFinal_term_ratio();
-            localRatio.quizRatio = serverRatio.getQuiz_ratio();
-            localRatio.assignmentRatio = serverRatio.getAssignment_ratio();
-            localRatio.attendanceRatio = serverRatio.getAttendance_ratio();
-        }
-
-        // 목표 공부 시간 변환
-        mp.gradia.database.entity.TargetStudyTime localTime = null;
-        if (serverSubject.getTarget_study_time() != null) {
-            TargetStudyTime serverTime = serverSubject.getTarget_study_time();
-
-            localTime = new mp.gradia.database.entity.TargetStudyTime(
-                    serverTime.getDaily_target_study_time(),
-                    serverTime.getWeekly_target_study_time(),
-                    serverTime.getMonthly_target_study_time());
-        }
-
-        // SubjectEntity 생성
-        SubjectEntity localSubject = new SubjectEntity(
-                serverSubject.getName(),
-                serverSubject.getCredit(),
-                serverSubject.getColor(),
-                serverSubject.getType(),
-                serverSubject.getMid_term_schedule(),
-                serverSubject.getFinal_term_schedule(),
-                localRatio,
-                localTime);
-
-        // 서버 ID 및 기타 필드 설정
-        localSubject.setServerId(serverSubject.getId());
-        localSubject.setDifficulty(serverSubject.getDifficulty());
-
-        // created_at과 updated_at 설정
-        if (serverSubject.getCreated_at() != null) {
-            try {
-                LocalDateTime createdAt = LocalDateTime.parse(serverSubject.getCreated_at(),
-                        DateTimeFormatter.ISO_DATE_TIME);
-                localSubject.setCreatedAt(createdAt);
-            } catch (Exception e) {
-                Log.e(TAG, "Created_at 변환 오류", e);
-                localSubject.setCreatedAt(LocalDateTime.now());
-            }
-        } else {
-            localSubject.setCreatedAt(LocalDateTime.now());
-        }
-
-        if (serverSubject.getUpdated_at() != null) {
-            try {
-                LocalDateTime updatedAt = LocalDateTime.parse(serverSubject.getUpdated_at(),
-                        DateTimeFormatter.ISO_DATE_TIME);
-                localSubject.setUpdatedAt(updatedAt);
-            } catch (Exception e) {
-                Log.e(TAG, "Updated_at 변환 오류", e);
-                localSubject.setUpdatedAt(LocalDateTime.now());
-            }
-        } else {
-            localSubject.setUpdatedAt(LocalDateTime.now());
-        }
-
-        return localSubject;
-    }
-
     public void fetchEveryTimeTable(String url, CloudSyncCallback callback) {
         apiService.getTimetable(url).enqueue(new Callback<TimetableResponse>() {
             @Override
@@ -954,7 +774,7 @@ public class SubjectRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     TimetableResponse timetable = response.body();
                     List<TimetableItem> timetableItems = timetable.getTimetable();
-                    List<SubjectEntity> convertedSubjects = SubjectUtil.convertToEntityList(timetableItems);
+                    List<SubjectEntity> convertedSubjects = SubjectUtil.convertTimetableItemsToSubjectEntities(timetableItems);
                     for (SubjectEntity subject : convertedSubjects) {
                         insert(subject, new CloudSyncCallback() {
                             @Override

@@ -7,14 +7,10 @@ import android.util.Log;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
-import com.anychart.charts.Sunburst;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,18 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import mp.gradia.Event;
-import mp.gradia.api.models.StudySession;
 import mp.gradia.database.dao.StudySessionDao;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.StudySessionEntity;
 import mp.gradia.database.entity.SubjectEntity;
-import mp.gradia.subject.repository.StudySessionRepository;
+import mp.gradia.database.repository.StudySessionRepository;
 import mp.gradia.database.entity.TargetStudyTime;
 import orion.gz.scheduleview.ScheduleEventItem;
 
