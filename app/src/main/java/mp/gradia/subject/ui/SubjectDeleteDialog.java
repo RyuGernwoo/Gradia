@@ -2,6 +2,7 @@ package mp.gradia.subject.ui;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,7 +25,7 @@ public class SubjectDeleteDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         subjectId = getArguments().getInt("subjectId", -1);
-        viewModel = new ViewModelProvider(this).get(SubjectViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(SubjectViewModel.class);
 
         return new AlertDialog.Builder(requireContext())
                 .setTitle("정말 삭제하시겠습니까?")
@@ -56,7 +57,6 @@ public class SubjectDeleteDialog extends DialogFragment {
                                     }
                                 }
                             };
-
                             viewModel.delete(subject, callback);
                         }
                     });

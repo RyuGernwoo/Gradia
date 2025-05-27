@@ -373,38 +373,26 @@ public class StudySessionViewModel extends AndroidViewModel {
     }
 
     public void deleteSessionById(int id) {
-        compositeDisposable.add(
-                sessionDao.deleteById(id)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                () -> {
-                                    Log.d("SessionAddDialog", "Session deleted successfully");
-                                },
-                                throwable -> {
-                                    Log.e("SessionAddDialog", "Error deleting session", throwable);
-                                }
-                        )
-        );
-    }
-    /**
-     * 세션을 삭제합니다. (클라우드 동기화 포함)
-     *
-     * @param session 삭제할 StudySessionEntity
-     */
-    public void deleteSession(StudySessionEntity session) {
-        repository.delete(session, new StudySessionRepository.CloudSyncCallback() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "Session deleted successfully with cloud sync");
-            }
+        compositeDisposable.add(sessionDao.getByIdSingle(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((v) -> {
+                    repository.delete(v);
+                }));
 
-            @Override
-            public void onError(String message) {
-                Log.e(TAG, "Error deleting session: " + message);
-                errorMessageMutableLiveData.setValue("세션 삭제 실패: " + message);
-            }
-        });
+//        compositeDisposable.add(
+//                sessionDao.deleteById(id)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(
+//                                () -> {
+//                                    Log.d("SessionAddDialog", "Session deleted successfully");
+//                                },
+//                                throwable -> {
+//                                    Log.e("SessionAddDialog", "Error deleting session", throwable);
+//                                }
+//                        )
+//        );
     }
 
     /**

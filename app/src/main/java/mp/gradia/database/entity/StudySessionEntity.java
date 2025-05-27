@@ -48,6 +48,7 @@ public class StudySessionEntity {
     @ColumnInfo(name = "subject_id")
     public int subjectId;
 
+    @Nullable
     @ColumnInfo(name = "server_subject_id")
     public String serverSubjectId;
 
@@ -91,7 +92,7 @@ public class StudySessionEntity {
 
 
     // 생성자 정의
-    public StudySessionEntity(int subjectId, String serverSubjectId, @NonNull String subjectName, @NonNull LocalDate date, @Nullable LocalDate endDate, long studyTime, LocalTime startTime, LocalTime endTime, @Nullable long restTime, @Nullable int focusLevel, @Nullable String memo) {
+    public StudySessionEntity(int subjectId, @Nullable String serverSubjectId, @NonNull String subjectName, @NonNull LocalDate date, @Nullable LocalDate endDate, long studyTime, LocalTime startTime, LocalTime endTime, @Nullable long restTime, @Nullable int focusLevel, @Nullable String memo) {
         this.subjectId = subjectId;
         this.serverSubjectId = serverSubjectId;
         this.subjectName = subjectName;

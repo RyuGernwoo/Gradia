@@ -39,6 +39,9 @@ public interface SubjectDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insert(SubjectEntity... subject);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    Single<Long> insertAndGetId(SubjectEntity subject);
+
     @Update
     Completable update(SubjectEntity... subject);
 
