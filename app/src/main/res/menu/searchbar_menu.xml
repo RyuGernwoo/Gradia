@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:icon="@drawable/outline_sort_by_alpha_black_24"
+        android:id="@+id/sort_name"
+        android:title="이름순" />
+    <item
+        android:icon="@drawable/outline_format_list_numbered_black_24"
+        android:id="@+id/sort_credit"
+        android:title="학점순" />
+    <item
+        android:icon="@drawable/outline_update_black_24"
+        android:id="@+id/sort_weekly"
+        android:title="주간 목표시간순" />
+    <item
+        android:icon="@drawable/outline_swap_vert_black_24"
+        android:id="@+id/sort_all"
+        android:title="전체 보기" />
+
+</menu>
