@@ -36,6 +36,7 @@ import mp.gradia.database.entity.DayStudyTime;
 import mp.gradia.database.entity.StudySessionEntity;
 import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.database.entity.SubjectStudyTime;
+import mp.gradia.utils.StudySessionUtil;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -217,7 +218,7 @@ public class StudySessionRepository {
      */
     private void createSessionOnServer(StudySessionEntity session, CloudSyncCallback callback) {
         String authHeader = authManager.getAuthHeader();
-        StudySession apiSession = convertToApiSession(session);
+        StudySession apiSession = StudySessionUtil.convertToApiSession(session);
 
         Log.d(TAG, "서버 학습 세션 생성 요청: " + "subject_id=" + apiSession.getSubject_id() +
                 ", date=" + apiSession.getDate() +
@@ -277,7 +278,7 @@ public class StudySessionRepository {
     private void updateSessionOnServer(StudySessionEntity session, CloudSyncCallback callback) {
         String authHeader = authManager.getAuthHeader();
         String serverId = session.getServerId();
-        StudySession apiSession = convertToApiSession(session);
+        StudySession apiSession = StudySessionUtil.convertToApiSession(session);
 
         apiService.updateStudySession(authHeader, serverId, apiSession).enqueue(new Callback<StudySession>() {
             @Override
@@ -338,38 +339,6 @@ public class StudySessionRepository {
     }
 
     /**
-     * StudySessionEntity를 API용 StudySession으로 변환
-     * 주의: 현재는 로컬 subject_id를 사용하며, 향후 Subject 동기화 개선 시 수정 필요
-     */
-    private StudySession convertToApiSession(StudySessionEntity entity) {
-        StudySession apiSession = new StudySession();
-
-        if (entity.getServerId() != null) {
-            apiSession.setId(entity.getServerId());
-        }
-
-        // subject_id는 서버의 Subject ID를 사용해야 하지만,
-        // 현재는 간단히 로컬 ID를 문자열로 변환하여 사용
-        // TODO: Subject Repository와 연동하여 serverId를 조회하는 방식으로 개선 필요
-        apiSession.setSubject_id(String.valueOf(entity.getServerSubjectId()));
-        apiSession.setDate(entity.getDate().toString());
-        apiSession.setStudy_time((int) entity.getStudyTime());
-
-        // start time과 end time이 HH:mm 형식으로 저장되어 있기 때문에
-        // LocalDateTime으로 변환 후 ISO 8601 형식으로 저장
-        // (예: "2023-10-01T10:00:00")
-        LocalDateTime startDateTime = LocalDateTime.of(entity.getDate(), entity.getStartTime());
-        LocalDateTime endDateTime = LocalDateTime.of(entity.getDate(), entity.getEndTime());
-
-        apiSession.setStart_time(startDateTime.toString());
-        apiSession.setEnd_time(endDateTime.toString());
-
-        apiSession.setRest_time((int) entity.getRestTime());
-
-        return apiSession;
-    }
-
-    /**
      * API StudySession을 로컬 StudySessionEntity로 변환 (비동기)
      */
     private void convertToLocalEntityAsync(StudySession apiSession, ConvertCallback callback) {
@@ -377,8 +346,8 @@ public class StudySessionRepository {
         LocalDate date = LocalDate.parse(apiSession.getDate());
 
         // ISO 8601 시간을 LocalTime으로 변환
-        LocalTime startTime = parseTimeFromIsoString(apiSession.getStart_time());
-        LocalTime endTime = parseTimeFromIsoString(apiSession.getEnd_time());
+        LocalTime startTime = StudySessionUtil.parseTimeFromIsoString(apiSession.getStart_time());
+        LocalTime endTime = StudySessionUtil.parseTimeFromIsoString(apiSession.getEnd_time());
 
         // 서버 subject_id로 로컬 subject 정보 비동기 조회
         disposables.add(
@@ -440,7 +409,7 @@ public class StudySessionRepository {
                                     // 생성/수정 시간 설정
                                     if (apiSession.getCreated_at() != null) {
                                         try {
-                                            entity.setCreatedAt(parseIsoDateTimeString(apiSession.getCreated_at()));
+                                            entity.setCreatedAt(StudySessionUtil.parseIsoDateTimeString(apiSession.getCreated_at()));
                                         } catch (Exception e) {
                                             Log.w(TAG, "Created_at 파싱 실패: " + apiSession.getCreated_at(), e);
                                             entity.setCreatedAt(LocalDateTime.now());
@@ -448,7 +417,7 @@ public class StudySessionRepository {
                                     }
                                     if (apiSession.getUpdated_at() != null) {
                                         try {
-                                            entity.setUpdatedAt(parseIsoDateTimeString(apiSession.getUpdated_at()));
+                                            entity.setUpdatedAt(StudySessionUtil.parseIsoDateTimeString(apiSession.getUpdated_at()));
                                         } catch (Exception e) {
                                             Log.w(TAG, "Updated_at 파싱 실패: " + apiSession.getUpdated_at(), e);
                                             entity.setUpdatedAt(LocalDateTime.now());
@@ -472,82 +441,6 @@ public class StudySessionRepository {
         void onError(String message);
     }
 
-    /**
-     * ISO 8601 형식의 시간 문자열에서 LocalTime 추출
-     * 예: "2023-10-01T10:30:00" -> LocalTime.of(10, 30)
-     * "2023-10-01T10:30:00Z" -> LocalTime.of(10, 30)
-     * "2023-10-01T10:30:00.123Z" -> LocalTime.of(10, 30)
-     */
-    private LocalTime parseTimeFromIsoString(String isoTimeString) {
-        try {
-            if (isoTimeString == null || isoTimeString.isEmpty()) {
-                return LocalTime.now();
-            }
-
-            // Z나 타임존 정보 제거
-            String cleanTimeString = isoTimeString;
-            if (cleanTimeString.endsWith("Z")) {
-                cleanTimeString = cleanTimeString.substring(0, cleanTimeString.length() - 1);
-            }
-
-            // 밀리초 정보가 있는 경우 제거 (예: .123 부분)
-            if (cleanTimeString.contains(".")) {
-                int dotIndex = cleanTimeString.lastIndexOf('.');
-                if (dotIndex > 10) { // 날짜 부분 이후의 점만 처리
-                    cleanTimeString = cleanTimeString.substring(0, dotIndex);
-                }
-            }
-
-            // ISO 8601 형식을 LocalDateTime으로 파싱한 후 시간 부분만 추출
-            LocalDateTime dateTime = LocalDateTime.parse(cleanTimeString);
-            return dateTime.toLocalTime();
-        } catch (Exception e) {
-            Log.e(TAG, "시간 파싱 실패: " + isoTimeString, e);
-            return LocalTime.now();
-        }
-    }
-
-    /**
-     * ISO 8601 형식의 날짜시간 문자열을 LocalDateTime으로 파싱
-     * 마이크로초와 타임존 정보를 포함한 형식을 처리
-     * 예: "2025-05-26T11:59:33.681000Z" -> LocalDateTime
-     * "2023-10-01T10:30:00Z" -> LocalDateTime
-     * "2023-10-01T10:30:00" -> LocalDateTime
-     */
-    private LocalDateTime parseIsoDateTimeString(String isoDateTimeString) {
-        try {
-            if (isoDateTimeString == null || isoDateTimeString.isEmpty()) {
-                return LocalDateTime.now();
-            }
-
-            // Z나 타임존 정보 제거
-            String cleanDateTimeString = isoDateTimeString;
-            if (cleanDateTimeString.endsWith("Z")) {
-                cleanDateTimeString = cleanDateTimeString.substring(0, cleanDateTimeString.length() - 1);
-            }
-
-            // 마이크로초 정보가 있는 경우 밀리초까지만 유지 (Java LocalDateTime은 나노초까지 지원하지만 안전하게 처리)
-            if (cleanDateTimeString.contains(".")) {
-                int dotIndex = cleanDateTimeString.lastIndexOf('.');
-                if (dotIndex > 10) { // 날짜 부분 이후의 점만 처리
-                    String fractionalPart = cleanDateTimeString.substring(dotIndex + 1);
-
-                    // 마이크로초(6자리)를 밀리초(3자리)로 변환
-                    if (fractionalPart.length() > 3) {
-                        fractionalPart = fractionalPart.substring(0, 3);
-                    }
-
-                    cleanDateTimeString = cleanDateTimeString.substring(0, dotIndex + 1) + fractionalPart;
-                }
-            }
-
-            // ISO 8601 형식을 LocalDateTime으로 파싱
-            return LocalDateTime.parse(cleanDateTimeString);
-        } catch (Exception e) {
-            Log.e(TAG, "날짜시간 파싱 실패: " + isoDateTimeString, e);
-            return LocalDateTime.now();
-        }
-    }
 
     /**
      * 로컬 DB 기준으로 클라우드 동기화 수행
@@ -661,7 +554,7 @@ public class StudySessionRepository {
             } else if (serverSessionMap.containsKey(localSession.getServerId())) {
                 // 서버에 있는 경우 업데이트 시간 비교
                 StudySession serverSession = serverSessionMap.get(localSession.getServerId());
-                if (isLocalSessionNewer(localSession, serverSession)) {
+                if (StudySessionUtil.isLocalSessionNewer(localSession, serverSession)) {
                     needsUpdate.add(localSession);
                 }
             } else {
@@ -760,27 +653,6 @@ public class StudySessionRepository {
         } else {
             // Subject 동기화가 필요하지 않은 경우 바로 배치 동기화 수행
             performBatchSessionSync(needsCreate, needsUpdate, needsDelete, callback);
-        }
-    }
-
-    /**
-     * 로컬 학습 세션이 서버 세션보다 최신인지 확인
-     */
-    private boolean isLocalSessionNewer(StudySessionEntity localSession, StudySession serverSession) {
-        if (localSession.getUpdatedAt() == null) {
-            return false;
-        }
-
-        if (serverSession.getUpdated_at() == null) {
-            return true;
-        }
-
-        try {
-            LocalDateTime serverUpdatedAt = parseIsoDateTimeString(serverSession.getUpdated_at());
-            return localSession.getUpdatedAt().isAfter(serverUpdatedAt);
-        } catch (Exception e) {
-            Log.e(TAG, "서버 업데이트 시간 파싱 오류", e);
-            return true; // 파싱 오류 시 로컬을 우선
         }
     }
 
@@ -997,34 +869,13 @@ public class StudySessionRepository {
         StudySessionEntity[] sessionsArray = localSessions.toArray(new StudySessionEntity[0]);
         for (StudySessionEntity session : sessionsArray) {
             Log.d(TAG, "로컬 저장할 학습 세션: " + session.getSubjectName() + " (서버 ID: " + session.getServerId() + ")");
-            studySessionDao.insert(session)
+            disposables.add(studySessionDao.insert(session)
                     .subscribeOn(Schedulers.from(executorService))
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             () -> Log.d(TAG, "로컬 학습 세션 저장 완료: " + session.getSubjectName()),
-                            throwable -> Log.e(TAG, "로컬 학습 세션 저장 실패: " + session.getSubjectName(), throwable));
+                            throwable -> Log.e(TAG, "로컬 학습 세션 저장 실패: " + session.getSubjectName(), throwable)));
         }
-        // disposables.add(
-        // studySessionDao.insert(sessionsArray)
-        // .subscribeOn(Schedulers.from(executorService))
-        // .observeOn(AndroidSchedulers.mainThread())
-        // .subscribe(
-        // () -> {
-        // Log.d(TAG, "서버 학습 세션 데이터 로컬 저장 완료: " + localSessions.size() + "개");
-        // if (callback != null) {
-        // if (hasError) {
-        // callback.onError("일부 학습 세션 변환에 실패했지만 저장은 완료되었습니다.");
-        // } else {
-        // callback.onSuccess();
-        // }
-        // }
-        // },
-        // throwable -> {
-        // Log.e(TAG, "서버 학습 세션 데이터 로컬 저장 실패", throwable);
-        // if (callback != null) {
-        // callback.onError("데이터 저장 실패: " + throwable.getMessage());
-        // }
-        // }));
     }
 
     /**
