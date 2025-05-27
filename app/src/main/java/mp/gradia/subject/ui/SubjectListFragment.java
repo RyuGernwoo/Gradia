@@ -56,6 +56,7 @@ import java.util.List;
 import mp.gradia.R;
 import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.subject.adapter.SubjectAdapter;
+import mp.gradia.subject.repository.SubjectRepository;
 import mp.gradia.subject.viewmodel.SubjectViewModel;
 
 public class SubjectListFragment extends Fragment {
@@ -287,8 +288,22 @@ public class SubjectListFragment extends Fragment {
     private void loadTimeTable(String url) {
         // TO-DO : Implement Timetable from everytime.
         Log.d("SubjectListFragment", url);
-        // set timetable load state
-        isTimetableLoaded = true;
+        subjectViewModel.fetchEveryTimeTable(url, new SubjectRepository.CloudSyncCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(requireContext(), "시간표가 성공적으로 가져와졌습니다.", Toast.LENGTH_SHORT).show();
+                // 시간표 로드 후 UI 업데이트
+                updateFilteredAndSortedList();
+
+                // set timetable load state
+                isTimetableLoaded = true;
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(requireContext(), "시간표 가져오기 실패: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     // 현재 저장 상태를 SharedPref에 저장

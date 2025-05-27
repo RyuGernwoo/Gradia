@@ -80,6 +80,10 @@ public class SubjectViewModel extends AndroidViewModel {
         repository.delete(subject, callback);
     }
 
+    public void fetchEveryTimeTable(String url, SubjectRepository.CloudSyncCallback callback) {
+        repository.fetchEveryTimeTable(url, callback);
+    }
+
     /**
      * 로컬 DB 기준으로 클라우드 동기화 수행
      */
