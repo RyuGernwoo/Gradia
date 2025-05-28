@@ -2,6 +2,7 @@ package mp.gradia.analysis;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,12 +28,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import mp.gradia.R;
 import mp.gradia.database.SubjectIdName;
 import mp.gradia.database.entity.DayStudyTime;
 import mp.gradia.database.entity.StudySessionEntity;
 import mp.gradia.database.entity.SubjectStudyTime;
+import mp.gradia.feedback.FeedbackAnalysis;
+import mp.gradia.feedback.FeedbackManager;
 
 public class AnalysisFragment extends Fragment {
 
@@ -191,6 +195,23 @@ public class AnalysisFragment extends Fragment {
         barChart.setData(barData);
         barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
         barChart.invalidate();
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("AnalysisFragment", "onResume called");
+
+        // advice를 생성하는 예시 코드
+        Optional<FeedbackAnalysis> analysis = FeedbackManager.analayzeLogPeriod(sessionList);
+        var recentSessions = sessionList.stream().filter(s -> s.getDate().isAfter(java.time.LocalDate.now().minusDays(30))).toList();
+        Optional<FeedbackAnalysis> recentAnalysis = FeedbackManager.analayzeLogPeriod(recentSessions);
+
+        var advice = FeedbackManager.generateTemperalAdvice(recentAnalysis, analysis);
+        for (var line : advice) {
+            Log.d("AnalysisFragment", "Advice: " + line.getType());
+        }
     }
 }
 
