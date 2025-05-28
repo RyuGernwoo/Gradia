@@ -399,8 +399,8 @@ public class StudySessionRepository {
                                             startTime,
                                             endTime,
                                             apiSession.getRest_time() != null ? apiSession.getRest_time() : 0,
-                                            -1, // focusLevel
-                                            "" // memo
+                                            apiSession.getFocus_level(),
+                                            apiSession.getMemo()
                                     );
 
                                     // 서버 ID 설정
