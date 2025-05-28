@@ -5,7 +5,9 @@ import java.util.List;
 import mp.gradia.api.models.AuthResponse;
 import mp.gradia.api.models.GoogleLoginRequest;
 import mp.gradia.api.models.GradePredictionRequest;
+import mp.gradia.api.models.GradePredictionRequestV2;
 import mp.gradia.api.models.GradePredictionResponse;
+import mp.gradia.api.models.GradePredictionResponseV2;
 import mp.gradia.api.models.KakaoLoginRequest;
 import mp.gradia.api.models.StudySession;
 import mp.gradia.api.models.StudySessionsApiResponse;
@@ -107,4 +109,8 @@ public interface ApiService {
         @POST("grade-prediction/")
         Call<GradePredictionResponse> predictGrade(@Header("Authorization") String token,
                         @Body GradePredictionRequest request);
+
+        @POST("grade-prediction/v2")
+        Call<GradePredictionResponseV2> predictGradeV2(@Header("Authorization") String token,
+                                                       @Body GradePredictionRequestV2 request);
 }
