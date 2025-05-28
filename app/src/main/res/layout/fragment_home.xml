@@ -13,6 +13,8 @@
         android:id="@+id/img_main_icon"
         android:layout_width="54dp"
         android:layout_height="54dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="6dp"
         android:src="@drawable/ic_main_logo_removebg"
         android:contentDescription="Main_Icon"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,6 +25,7 @@
         android:id="@+id/img_profile"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="20dp"
         android:contentDescription="Profile"
         android:src="@drawable/outline_account_circle_black_24"
@@ -81,11 +84,35 @@
             android:fontFamily="@font/fontstyle" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/sort_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="정렬: 과목명"
+        android:textSize="14sp"
+        android:fontFamily="@font/fontstyle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_marquee_notifications" />
+
+    <ImageButton
+        android:id="@+id/sort_by_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp"
+        android:src="@drawable/outline_filter_alt_black_24"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="정렬 기준 변경"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_marquee_notifications"/>
+
     <!-- 추가된 과목들을 표시할 컨테이너 -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/empty_state_container"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -13,30 +13,47 @@ import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import mp.gradia.R;
+import mp.gradia.database.AppDatabase; // AppDatabase 추가
+import mp.gradia.database.dao.StudySessionDao; // StudySessionDao 추가
+import mp.gradia.database.dao.SubjectDao; // SubjectDao 추가 (Factory용)
 import mp.gradia.main.MainActivity;
+import mp.gradia.database.entity.StudySessionEntity; // StudySessionEntity 추가
 import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.database.entity.TargetStudyTime;
+import mp.gradia.time.inner.viewmodel.StudySessionViewModel; // StudySessionViewModel import
+import mp.gradia.time.inner.viewmodel.StudySessionViewModelFactory; // ViewModel Factory import
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
-    private LinearLayout subjectListContainer;
-    private TextView textNoData;
-    private Button btnGoToSubjects;
-    private TextView tvMarqueeNotifications;
+    private LinearLayout subjectListContainer; // 과목 리스트
+    private TextView textNoData; // 과목 없을 때 표시
+    private Button btnGoToSubjects; // 과목 없을 때 과목으로 이동 버튼
+    private TextView tvMarqueeNotifications; // 전광판
+    private StudySessionViewModel studySessionViewModel; // 과목 세부 정보 가져오기
+    private Map<Integer, Long> todayStudiedTimeMap = new HashMap<>(); // 과목 ID별 총 공부 시간(분) 저장
+    private ImageButton sortByButton;
+    private TextView sortTextView;
+    private int selectedSortType = 0;
 
     @Nullable
     @Override
@@ -57,6 +74,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        // 정렬 관련 UI 요소 바인딩
+        sortByButton = view.findViewById(R.id.sort_by_button);
+        sortTextView = view.findViewById(R.id.sort_text_view);
+
         ImageView imgProfile = view.findViewById(R.id.img_profile);
         // 프로필 창 진입
         imgProfile.setOnClickListener(v -> {
@@ -64,10 +85,76 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-        // updateSubjectList(); // onResume에서 호출됨
+        // ViewModel 초기화
+        AppDatabase db = AppDatabase.getInstance(requireActivity().getApplication());
+        StudySessionDao sessionDao = db.studySessionDao();
+        SubjectDao subjectDaoForFactory = db.subjectDao(); // ViewModel Factory가 SubjectDao도 받는 경우 대비
+        StudySessionViewModelFactory factory = new StudySessionViewModelFactory(requireActivity().getApplication(), sessionDao, subjectDaoForFactory);
+        studySessionViewModel = new ViewModelProvider(this, factory).get(StudySessionViewModel.class);
+
+        observeTodaysStudySessions(); // 공부 시간 데이터 관찰 시작
+        setupSortButton(); // 정렬 버튼 설정 메소드 호출
+        updateSortTextView(); // 초기 정렬 텍스트 설정
+
         return view;
     }
-    
+
+    private void observeTodaysStudySessions() {
+        studySessionViewModel.getScheduleSessionLiveData().observe(getViewLifecycleOwner(), todaysSessions -> {
+            if (todaysSessions != null) {
+                Log.d(TAG, "오늘의 학습 세션 데이터 업데이트됨. 세션 수: " + todaysSessions.size());
+                todayStudiedTimeMap.clear();
+                for (StudySessionEntity session : todaysSessions) {
+                    // 오늘 날짜의 세션만 집계 (loadScheduleItemsByDate가 이미 날짜 필터링하지만, 한번 더 확인 가능)
+                    if (session.getDate().equals(LocalDate.now())) {
+                        int subjectId = session.getSubjectId();
+                        long currentTotal = todayStudiedTimeMap.getOrDefault(subjectId, 0L);
+                        todayStudiedTimeMap.put(subjectId, currentTotal + session.getStudyTime()); // studyTime은 분 단위로 가정
+                    }
+                }
+                Log.d(TAG, "오늘의 과목별 공부 시간 집계 완료: " + todayStudiedTimeMap.toString());
+                // 공부 시간 데이터가 변경되었으므로, 과목 목록 UI를 다시 그림
+                updateSubjectList();
+            } else {
+                Log.d(TAG, "오늘의 학습 세션 데이터가 null입니다.");
+                todayStudiedTimeMap.clear();
+                updateSubjectList(); // 빈 데이터로라도 UI 갱신
+            }
+        });
+    }
+    private void setupSortButton() {
+        sortByButton.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(getContext(), sortByButton);
+            popup.getMenuInflater().inflate(R.menu.searchbar_menu_home, popup.getMenu()); // 메뉴 리소스 파일명 확인
+            popup.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.sort_by_name_home) {
+                    selectedSortType = 0;
+                } else if (itemId == R.id.sort_by_study_time_home) {
+                    selectedSortType = 1;
+                } else if (itemId == R.id.sort_by_target_time_home) {
+                    selectedSortType = 2;
+                } else {
+                    return false;
+                }
+                updateSortTextView();
+                updateSubjectList(); // 정렬 기준 변경 후 목록 새로고침
+                return true;
+            });
+            popup.show();
+        });
+    }
+
+    private void updateSortTextView() {
+        String sortText = "정렬: ";
+        switch (selectedSortType) {
+            case 0: default: sortText += "과목명"; break;
+            case 1: sortText += "일일 공부 시간순"; break;
+            case 2: sortText += "일일 목표 시간순"; break;
+        }
+        sortTextView.setText(sortText);
+    }
+
     /* 추가된 과목 여부에 따라 텍스트와 버튼 또는 추가된 과목 표시 */
     private void updateSubjectList() {
         if (getActivity() == null || !(getActivity() instanceof MainActivity)) {
@@ -75,19 +162,46 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        List<SubjectEntity> subjects = ((MainActivity) requireActivity()).getSelectedSubjects();
-        Log.d(TAG, "updateSubjectList called. Subjects count: " + (subjects != null ? subjects.size() : "null"));
-        subjectListContainer.removeAllViews(); // 기존 뷰들을 모두 제거
+        List<SubjectEntity> subjectsFromActivity = ((MainActivity) requireActivity()).getSelectedSubjects();
+        if (subjectsFromActivity == null) { // 방어 코드
+            subjectsFromActivity = new ArrayList<>();
+        }
+        // 정렬을 위해 새로운 리스트에 복사
+        List<SubjectEntity> subjects = new ArrayList<>(subjectsFromActivity);
+
+        Log.d(TAG, "updateSubjectList called. SOriginal subjects count: " + subjects.size() + ", SortType: " + selectedSortType);
+        subjectListContainer.removeAllViews();
 
         if (subjects == null || subjects.isEmpty()) {
             textNoData.setVisibility(View.VISIBLE);
             btnGoToSubjects.setVisibility(View.VISIBLE);
             subjectListContainer.setVisibility(View.GONE);
-            updateMarquee(new ArrayList<>());
+            updateMarquee(new ArrayList<>()); // 과목 없을 시 전광판도 비움
         } else {
             textNoData.setVisibility(View.GONE);
             btnGoToSubjects.setVisibility(View.GONE);
             subjectListContainer.setVisibility(View.VISIBLE);
+
+            // 정렬 로직 적용
+            switch (selectedSortType) {
+                case 0: // 이름 오름차순
+                    Collections.sort(subjects, Comparator.comparing(SubjectEntity::getName, String.CASE_INSENSITIVE_ORDER));
+                    break;
+                case 1: // 오늘 공부 시간 내림차순 (많은 순)
+                    Collections.sort(subjects, (s1, s2) -> {
+                        long time1 = todayStudiedTimeMap.getOrDefault(s1.getSubjectId(), 0L);
+                        long time2 = todayStudiedTimeMap.getOrDefault(s2.getSubjectId(), 0L);
+                        return Long.compare(time2, time1); // 내림차순
+                    });
+                    break;
+                case 2: // 일일 목표 시간 내림차순 (많은 순)
+                    Collections.sort(subjects, (s1, s2) -> {
+                        int target1 = (s1.getTime() != null) ? s1.getTime().getDailyTargetStudyTime() : 0;
+                        int target2 = (s2.getTime() != null) ? s2.getTime().getDailyTargetStudyTime() : 0;
+                        return Integer.compare(target2, target1); // 내림차순
+                    });
+                    break;
+            }
 
             LayoutInflater inflater = LayoutInflater.from(getContext());
             List<String> unmetTargetSubjects = new ArrayList<>(); // 목표 미달성 과목명 리스트
@@ -124,25 +238,25 @@ public class HomeFragment extends Fragment {
                         Log.w(TAG, "Subject " + subject.getName() + " has no color, using default LTGRAY.");
                     }
                 } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "Invalid color format for subject " + subject.getName() + ": " + subject.getColor(), e);
+                    Log.e(TAG, "Invalid color format: " + subject.getColor(), e);
                     GradientDrawable background = (GradientDrawable) ContextCompat.getDrawable(requireContext(), R.drawable.color_circle).mutate();
                     background.setColor(Color.GRAY); // 오류 시 회색
                     colorCircle.setBackground(background);
                 }
 
                 // 2. 과목명 설정
-                subjectName.setText(subject.getName()); // [cite: 3]
+                subjectName.setText(subject.getName());
 
                 // 3. 확장 레이아웃 시간 데이터 설정 (시간/분 형식으로 변경)
-                // TODO: 'actualStudiedTimeMinutes'는 실제 공부한 시간(분 단위)으로 대체 필요
-                int actualStudiedTimeMinutes = 0; // 예시: 실제 공부한 시간 (분 단위)
+                long actualStudiedTimeMinutesLong = todayStudiedTimeMap.getOrDefault(subject.getSubjectId(), 0L);
+                int actualStudiedTimeMinutes = (int) actualStudiedTimeMinutesLong;
                 studyTimeTV.setText(formatMinutesToHoursAndMinutes(actualStudiedTimeMinutes));
+                Log.d(TAG, "Subject: " + subject.getName() + ", Today's Studied Time: " + actualStudiedTimeMinutes + " mins");
 
                 TargetStudyTime targetTime = subject.getTime();
                 int dailyTargetMinutes = 0;
                 if (targetTime != null) {
-                    // TargetStudyTime의 getDailyTargetStudyTime()이 분 단위를 반환한다고 가정
-                    dailyTargetMinutes = targetTime.getDailyTargetStudyTime();
+                    dailyTargetMinutes = targetTime.getDailyTargetStudyTime(); // 분 단위 가정
                     targetStudyTimeTV.setText(formatMinutesToHoursAndMinutes(dailyTargetMinutes));
                 } else {
                     targetStudyTimeTV.setText("미설정");
@@ -169,7 +283,6 @@ public class HomeFragment extends Fragment {
                     btnRecord.setOnClickListener(v -> {
                         if (getActivity() instanceof MainActivity) {
                             Toast.makeText(getContext(), subject.getName() + " 기록 화면으로 이동합니다.", Toast.LENGTH_SHORT).show();
-                            // ((MainActivity) getActivity()).moveToTimeFragmentWithSubject(subject.getSubjectId()); // MainActivity에 메소드 구현 필요
                             ((MainActivity) getActivity()).navigateToFragment(MainActivity.TIME_FRAGMENT, subject.getSubjectId());
                         }
                     });
@@ -255,16 +368,18 @@ public class HomeFragment extends Fragment {
 
         tvMarqueeNotifications.setText(finalTextToDisplay);
         tvMarqueeNotifications.setVisibility(View.VISIBLE);
-        // setText() 호출 후 setSelected(true)를 호출해야 marquee가 시작됩니다.
         tvMarqueeNotifications.setSelected(true);
         Log.d(TAG, "Marquee text set: " + finalTextToDisplay);
     }
 
-    /* 화면 돌아올 때마다 과목 있는지 갱신 */
+    /* 화면 돌아올 때마다 과목 갱신 */
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume called, updating subject list and marquee.");
-        updateSubjectList();
+        Log.d(TAG, "onResume called. Requesting today's study sessions.");
+        // 오늘 날짜의 세션 데이터를 ViewModel에 요청
+        if (studySessionViewModel != null) {
+            studySessionViewModel.loadScheduleItemsByDate(LocalDate.now());
+        }
     }
 }
