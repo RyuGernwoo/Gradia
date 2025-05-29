@@ -1,5 +1,8 @@
 package mp.gradia.api;
 
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -13,8 +16,16 @@ public class RetrofitClient {
 
     public static Retrofit getClient() {
         if (retrofit == null) {
+            // OkHttpClient 설정 - timeout을 길게 설정
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(60, TimeUnit.SECONDS) // 연결 timeout: 60초
+                    .readTimeout(120, TimeUnit.SECONDS) // 읽기 timeout: 120초 (prediction API용)
+                    .writeTimeout(60, TimeUnit.SECONDS) // 쓰기 timeout: 60초
+                    .build();
+
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
+                    .client(okHttpClient) // OkHttpClient 추가
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }

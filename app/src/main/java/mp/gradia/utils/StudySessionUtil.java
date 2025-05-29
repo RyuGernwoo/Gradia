@@ -105,6 +105,8 @@ public class StudySessionUtil {
         apiSession.setSubject_id(String.valueOf(entity.getServerSubjectId()));
         apiSession.setDate(entity.getDate().toString());
         apiSession.setStudy_time((int) entity.getStudyTime());
+        apiSession.setMemo(entity.getMemo());
+        apiSession.setFocus_level(entity.getFocusLevel());
 
         // start time과 end time이 HH:mm 형식으로 저장되어 있기 때문에
         // LocalDateTime으로 변환 후 ISO 8601 형식으로 저장
@@ -114,7 +116,6 @@ public class StudySessionUtil {
 
         apiSession.setStart_time(startDateTime.toString());
         apiSession.setEnd_time(endDateTime.toString());
-
         apiSession.setRest_time((int) entity.getRestTime());
 
         return apiSession;
