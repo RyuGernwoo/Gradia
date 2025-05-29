@@ -137,8 +137,18 @@
             android:id="@+id/tvPrediction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="예상 성적: A / 우선순위 추천: OO"
-            android:textSize="16sp" />
+            android:text="학습 데이터를 기반으로 성적을 예측하고 맞춤 조언을 받아보세요"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- 성적 예측 Fragment Container -->
+        <FrameLayout
+            android:id="@+id/grade_prediction_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
 
     </LinearLayout>
 </ScrollView>

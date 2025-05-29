@@ -1,0 +1,859 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- 과목 선택 섹션 -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="과목 선택"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginBottom="12dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/subjectDropdownLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="과목을 선택하세요"
+                app:hintTextColor="#666666"
+                app:boxStrokeColor="#CCCCCC"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:endIconMode="dropdown_menu"
+                app:endIconTint="#666666">
+
+                <AutoCompleteTextView
+                    android:id="@+id/subjectDropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
+                    android:textColor="#333333"
+                    android:textSize="16sp"
+                    android:completionThreshold="1"
+                    android:dropDownSelector="?android:attr/selectableItemBackground"
+                    android:popupBackground="@android:color/white" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 이해도 입력 섹션 -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="이해도 선택"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginBottom="16dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="6dp"
+                app:cardElevation="1dp"
+                app:cardBackgroundColor="#F5F5F5"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/understandingLevelText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="이해도: 3 (보통)"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#555555"
+                    android:gravity="center"
+                    android:padding="12dp" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <SeekBar
+                android:id="@+id/understandingSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="5"
+                android:min="1"
+                android:progress="3"
+                android:progressTint="#666666"
+                android:thumbTint="#555555"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="매우 어려움"
+                    android:textSize="11sp"
+                    android:textColor="#888888"
+                    android:gravity="start" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="매우 쉬움"
+                    android:textSize="11sp"
+                    android:textColor="#888888"
+                    android:gravity="end" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 예측 버튼 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/predictButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="성적 예측하기"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        app:cornerRadius="8dp"
+        android:layout_marginBottom="12dp"
+        android:backgroundTint="#555555"
+        app:elevation="2dp" />
+
+    <!-- 로딩 인디케이터 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/loadingCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:visibility="gone"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:gravity="center">
+
+            <ProgressBar
+                android:id="@+id/loadingProgress"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:indeterminateTint="#666666"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:id="@+id/loadingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="성적을 예측하고 있습니다..."
+                android:textSize="14sp"
+                android:textColor="#666666" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 신뢰도 경고 콜아웃 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/reliabilityWarningCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="6dp"
+        app:cardElevation="1dp"
+        app:cardBackgroundColor="#FFF8E1"
+        app:strokeColor="#FFB74D"
+        app:strokeWidth="1dp"
+        android:visibility="gone"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:text="!"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FF8F00"
+                android:gravity="center"
+
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/reliabilityWarningText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="신뢰도가 낮습니다. 더 많은 학습 데이터가 필요할 수 있습니다."
+                android:textSize="13sp"
+                android:textColor="#E65100" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 결과 표시 섹션 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/resultCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 헤더 섹션 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#F5F5F5"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="예측 결과"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:gravity="center"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="AI 기반 학습 분석"
+                    android:textSize="12sp"
+                    android:textColor="#666666"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- 예측 성적 및 점수 카드 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <!-- 예측 성적 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:cardCornerRadius="6dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#F8F9FA"
+                        android:layout_marginEnd="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="예상 성적"
+                                android:textSize="11sp"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/predictedGrade"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="#333333" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 예측 점수 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:cardCornerRadius="6dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#F8F9FA"
+                        android:layout_marginStart="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="예상 점수"
+                                android:textSize="11sp"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/predictedScore"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="#333333" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+                <!-- 신뢰도 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="6dp"
+                    app:cardElevation="1dp"
+                    app:cardBackgroundColor="#F8F9FA"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="12dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="신뢰도"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#555555"
+                            android:layout_marginEnd="8dp" />
+
+                        <TextView
+                            android:id="@+id/confidence"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="14sp"
+                            android:textColor="#555555" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- 분석 결과 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="학습 분석"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- 학습량 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:layout_marginBottom="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="학습량"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/learningVolume"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="분석 중..."
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 학습 품질 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:layout_marginBottom="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="학습 품질"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/learningQuality"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="분석 중..."
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 학습 일관성 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:layout_marginBottom="6dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="학습 일관성"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/learningConsistency"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="분석 중..."
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 주요 요인 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/keyFactorsCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="주요 요인"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/keyFactors"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+                <!-- 개인화된 조언 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="맞춤 조언"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- 최우선 개선 사항 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/priorityHighCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:layout_marginBottom="6dp"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="최우선 개선 사항"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#D32F2F"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/priorityHighAdvice"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 학습 최적화 제안 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/optimizationCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:layout_marginBottom="6dp"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="학습 최적화 제안"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#1976D2"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/optimizationAdvice"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 현재 강점 유지 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/maintenanceCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="현재 강점 유지"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#388E3C"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/maintenanceAdvice"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+                <!-- 주간 계획 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="추천 주간 계획"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- 권장 주간 학습 시간 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/targetHoursCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:layout_marginBottom="6dp"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="권장 주간 학습 시간"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/targetHours"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 권장 세션 수 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/targetSessionsCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:layout_marginBottom="6dp"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="권장 세션 수"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/targetSessions"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 집중 영역 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/focusAreasCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp"
+                        app:cardBackgroundColor="#FAFAFA"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="집중 영역"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="#666666"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/focusAreas"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=""
+                                android:textSize="13sp"
+                                android:textColor="#333333"
+                                android:lineSpacingExtra="2dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout> 

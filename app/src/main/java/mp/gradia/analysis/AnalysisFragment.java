@@ -79,28 +79,39 @@ public class AnalysisFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                if (tab.getPosition() == 0) tryShowBarChart();
-                else tryShowBarChartByDay();
+                if (tab.getPosition() == 0)
+                    tryShowBarChart();
+                else
+                    tryShowBarChartByDay();
             }
-            @Override public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override public void onTabReselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
 
         viewModel = new ViewModelProvider(this).get(AnalysisViewModel.class);
 
         viewModel.getTotalStudyTimes().observe(getViewLifecycleOwner(), times -> {
             studyTimeList = times;
-            if (tabLayout.getSelectedTabPosition() == 0) tryShowBarChart();
+            if (tabLayout.getSelectedTabPosition() == 0)
+                tryShowBarChart();
         });
 
         viewModel.getSubjectNames().observe(getViewLifecycleOwner(), names -> {
             subjectNameList = names;
-            if (tabLayout.getSelectedTabPosition() == 0) tryShowBarChart();
+            if (tabLayout.getSelectedTabPosition() == 0)
+                tryShowBarChart();
         });
 
         viewModel.getAllSessions().observe(getViewLifecycleOwner(), sessions -> {
             sessionList = sessions;
-            if (tabLayout.getSelectedTabPosition() == 1) tryShowBarChartByDay();
+            if (tabLayout.getSelectedTabPosition() == 1)
+                tryShowBarChartByDay();
         });
 
         viewModel.getTodayStudyTime().observe(getViewLifecycleOwner(), minutes -> {
@@ -111,7 +122,8 @@ public class AnalysisFragment extends Fragment {
         });
 
         viewModel.getMonthlyStudyTime().observe(getViewLifecycleOwner(), list -> {
-            if (list == null || list.isEmpty()) return;
+            if (list == null || list.isEmpty())
+                return;
             int totalPercent = 0;
             for (DayStudyTime day : list) {
                 totalPercent += Math.min((day.total * 100.0 / DAILY_GOAL_MINUTES), 100);
@@ -123,15 +135,27 @@ public class AnalysisFragment extends Fragment {
 
         btnPrevWeek.setOnClickListener(v -> {
             currentWeekStart = currentWeekStart.minusWeeks(1);
-            if (tabLayout.getSelectedTabPosition() == 0) tryShowBarChart();
-            else tryShowBarChartByDay();
+            if (tabLayout.getSelectedTabPosition() == 0)
+                tryShowBarChart();
+            else
+                tryShowBarChartByDay();
         });
 
         btnNextWeek.setOnClickListener(v -> {
             currentWeekStart = currentWeekStart.plusWeeks(1);
-            if (tabLayout.getSelectedTabPosition() == 0) tryShowBarChart();
-            else tryShowBarChartByDay();
+            if (tabLayout.getSelectedTabPosition() == 0)
+                tryShowBarChart();
+            else
+                tryShowBarChartByDay();
         });
+
+        // 성적 예측 Fragment를 child fragment로 추가
+        if (savedInstanceState == null) {
+            GradePredictionFragment gradePredictionFragment = GradePredictionFragment.newInstance();
+            getChildFragmentManager().beginTransaction()
+                    .replace(R.id.grade_prediction_container, gradePredictionFragment)
+                    .commit();
+        }
 
         return view;
     }
@@ -147,10 +171,12 @@ public class AnalysisFragment extends Fragment {
 
     private void tryShowBarChart() {
         tvWeekRange.setVisibility(View.VISIBLE);
-        if (studyTimeList == null || subjectNameList == null || studyTimeList.isEmpty() || subjectNameList.isEmpty()) return;
+        if (studyTimeList == null || subjectNameList == null || studyTimeList.isEmpty() || subjectNameList.isEmpty())
+            return;
 
         Map<Integer, String> idNameMap = new HashMap<>();
-        for (SubjectIdName pair : subjectNameList) idNameMap.put(pair.getSubjectId(), pair.getSubjectName());
+        for (SubjectIdName pair : subjectNameList)
+            idNameMap.put(pair.getSubjectId(), pair.getSubjectName());
 
         LocalDate end = currentWeekStart.plusDays(6);
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("M월 d일");
@@ -175,7 +201,6 @@ public class AnalysisFragment extends Fragment {
             labels.add(pair.getSubjectName());
         }
 
-
         BarDataSet dataSet = new BarDataSet(entries, "과목별 학습시간 (분)");
         dataSet.setColor(Color.parseColor("#9370DB"));
         BarData barData = new BarData(dataSet);
@@ -199,10 +224,12 @@ public class AnalysisFragment extends Fragment {
 
     private void tryShowBarChartByDay() {
         tvWeekRange.setVisibility(View.VISIBLE);
-        if (sessionList == null) return;
+        if (sessionList == null)
+            return;
 
         Map<DayOfWeek, Long> timeMap = new EnumMap<>(DayOfWeek.class);
-        for (DayOfWeek day : DayOfWeek.values()) timeMap.put(day, 0L);
+        for (DayOfWeek day : DayOfWeek.values())
+            timeMap.put(day, 0L);
 
         LocalDate end = currentWeekStart.plusDays(6);
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("M월 d일");
@@ -238,7 +265,6 @@ public class AnalysisFragment extends Fragment {
         barChart.invalidate();
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -246,7 +272,8 @@ public class AnalysisFragment extends Fragment {
 
         // advice를 생성하는 예시 코드
         Optional<FeedbackAnalysis> analysis = FeedbackManager.analayzeLogPeriod(sessionList);
-        var recentSessions = sessionList.stream().filter(s -> s.getDate().isAfter(java.time.LocalDate.now().minusDays(30))).toList();
+        var recentSessions = sessionList.stream()
+                .filter(s -> s.getDate().isAfter(java.time.LocalDate.now().minusDays(30))).toList();
         Optional<FeedbackAnalysis> recentAnalysis = FeedbackManager.analayzeLogPeriod(recentSessions);
 
         var advice = FeedbackManager.generateTemperalAdvice(recentAnalysis, analysis);
@@ -255,5 +282,3 @@ public class AnalysisFragment extends Fragment {
         }
     }
 }
-
-
