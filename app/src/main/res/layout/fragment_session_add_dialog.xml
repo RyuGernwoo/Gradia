@@ -154,16 +154,16 @@
             <!-- Session : Subject DropDown Menu -->
             <ImageView
                 android:id="@+id/ic_subject"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@drawable/outline_menu_book_black_24"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginBottom="15dp"
-                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                android:src="@drawable/outline_menu_book_black_24"
+                app:layout_constraintBottom_toTopOf="@+id/divider1"
                 app:layout_constraintEnd_toStartOf="@+id/select_subject_dropdown"
-                app:layout_constraintTop_toBottomOf="@+id/session_review_layout"
-                app:layout_constraintBottom_toTopOf="@+id/divider1" />
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintTop_toBottomOf="@+id/session_review_layout" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/select_subject_dropdown"
@@ -199,16 +199,16 @@
 
             <ImageView
                 android:id="@+id/ic_date"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@drawable/outline_calendar_month_black_24"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginBottom="15dp"
-                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                android:src="@drawable/outline_calendar_month_black_24"
+                app:layout_constraintBottom_toTopOf="@+id/ic_time"
                 app:layout_constraintEnd_toStartOf="@+id/date_picker_textinput"
-                app:layout_constraintTop_toBottomOf="@+id/divider1"
-                app:layout_constraintBottom_toTopOf="@+id/ic_time"/>
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintTop_toBottomOf="@+id/divider1" />
 
             <!-- Session : Date TextInput -->
             <com.google.android.material.textfield.TextInputLayout
@@ -235,16 +235,16 @@
 
             <ImageView
                 android:id="@+id/ic_time"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@drawable/outline_timer_black_24"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginBottom="15dp"
-                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                android:src="@drawable/outline_timer_black_24"
+                app:layout_constraintBottom_toTopOf="@+id/ic_duration"
                 app:layout_constraintEnd_toStartOf="@+id/start_time_picker_textinput"
-                app:layout_constraintTop_toBottomOf="@+id/ic_date"
-                app:layout_constraintBottom_toTopOf="@+id/ic_duration"/>
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintTop_toBottomOf="@+id/ic_date" />
 
             <!-- Session : Start Time TextInput -->
             <com.google.android.material.textfield.TextInputLayout
@@ -254,9 +254,9 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
                 android:hint="@string/start_time_picker"
-                app:errorEnabled="true"
-                app:errorTextColor="@color/red"
                 app:boxStrokeErrorColor="@color/red"
+                app:errorTextColor="@color/red"
+
                 app:layout_constraintEnd_toStartOf="@+id/right_arrow_imageview"
                 app:layout_constraintStart_toEndOf="@+id/ic_time"
                 app:layout_constraintTop_toBottomOf="@+id/date_picker_textinput">
@@ -291,9 +291,9 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
                 android:hint="@string/end_time_picker"
-                app:errorEnabled="true"
-                app:errorTextColor="@color/red"
                 app:boxStrokeErrorColor="@color/red"
+                app:errorTextColor="@color/red"
+                app:layout_constraintBottom_toTopOf="@+id/duration_textinput"
                 app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
                 app:layout_constraintStart_toEndOf="@+id/right_arrow_imageview"
                 app:layout_constraintTop_toBottomOf="@+id/date_picker_textinput">
@@ -311,17 +311,17 @@
 
             <ImageView
                 android:id="@+id/ic_duration"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@drawable/outline_timelapse_black_24"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="15dp"
                 android:layout_marginBottom="15dp"
-                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                android:src="@drawable/outline_timelapse_black_24"
+                app:layout_constraintBottom_toTopOf="@+id/divider2"
                 app:layout_constraintEnd_toStartOf="@+id/duration_textinput"
-                app:layout_constraintTop_toBottomOf="@+id/ic_time"
-                app:layout_constraintBottom_toTopOf="@+id/divider2"/>
-            
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                app:layout_constraintTop_toBottomOf="@+id/ic_time" />
+
             <!-- Session : Duration Time TextInput -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/duration_textinput"
@@ -360,14 +360,14 @@
 
             <ImageView
                 android:id="@+id/ic_memo"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:src="@drawable/outline_edit_note_black_24"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="35dp"
                 android:layout_marginBottom="15dp"
-                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                android:src="@drawable/outline_edit_note_black_24"
                 app:layout_constraintEnd_toStartOf="@+id/session_memo_textinput"
+                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
                 app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
             <!-- Session : Memo TextInput -->
@@ -389,18 +389,6 @@
                     android:hint="@string/session_memo_hint" />
 
             </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Session : Save Session Button -->
-            <Button
-                android:id="@+id/save_session_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:text="@string/btn_session_save"
-                app:layout_constraintBottom_toBottomOf="@+id/dialog_layout"
-                app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
-                app:layout_constraintStart_toStartOf="@+id/dialog_layout"
-                app:layout_constraintTop_toBottomOf="@+id/session_memo_textinput" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

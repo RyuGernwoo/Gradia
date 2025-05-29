@@ -6,6 +6,7 @@
     </style>
 
     <style name="Theme.Gradia" parent="Base.Theme.Gradia">
+        <item name="android:windowActivityTransitions">true</item>
         <item name="font">@font/maruburi_regular</item>
         <item name="fontFamily">@font/maruburi_regular</item>
     </style>

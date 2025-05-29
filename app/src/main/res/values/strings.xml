@@ -13,12 +13,35 @@
     <string name="searchbar_hint">과목명 검색</string>
     <string name="searchbar_menu_icon">정렬</string>
 
-    <!-- Subject Add Dialog -->
+    <!-- Subject Add AlertDialog(EveryTime) -->
     <string name="dialog_everytime_expand">시간표 url 확인 방법</string>
     <string name="dialog_everytime_contract">접기</string>
     <string name="dialog_expand_description1">시간표 탭의 오른쪽 상단의 톱니바퀴를 누릅니다.</string>
     <string name="dialog_expand_description2">아래 URL 공유를 클릭합니다.</string>
     <string name="everytime_url">시간표 URL</string>
+
+    <!-- Subject Add FullScreenDialog -->
+    <string name="appbar_title_add_subject">과목 추가</string>
+    <string name="subject_credit_1">1 학점</string>
+    <string name="subject_credit_2">2 학점</string>
+    <string name="subject_credit_3">3 학점</string>
+    <string name="subject_difficulty_unknown">잘 모르겠음</string>
+    <string name="subject_difficulty_1">매우 쉬움</string>
+    <string name="subject_difficulty_2">조금 쉬움</string>
+    <string name="subject_difficulty_3">보통</string>
+    <string name="subject_difficulty_4">조금 어려움</string>
+    <string name="subject_difficulty_5">매우 어려움</string>
+    <string name="subject_daily_target_study_time">일간 목표시간</string>
+    <string name="subject_weekly_target_study_time">주간 목표시간</string>
+    <string name="subject_monthly_target_study_time">월간 목표시간</string>
+    <string name="subject_mid_term_date">중간고사 일정</string>
+    <string name="subject_final_term_date">기말고사 일정</string>
+    <string name="subject_mid_term_ratio">중간고사 비율</string>
+    <string name="subject_final_term_ratio">기말고사 비율</string>
+    <string name="subject_assignment_ratio">과제 비율</string>
+    <string name="subject_quiz_ratio">퀴즈 비율</string>
+    <string name="subject_attendance_ratio">출석 비율</string>
+    <string name="error_subject_name_isempty">과목명을 입력해주세요.</string>
 
     <!-- Subject Detail Activity -->
     <string name="appbar_title_subject_detail">과목 상세 보기</string>
@@ -51,6 +74,7 @@
     <string name="session_memo">기록</string>
     <string name="session_memo_hint">이번 세션에서 무엇을 공부했나요?</string>
     <string name="btn_session_save">세션 저장하기</string>
+    <!--<string name="error_session_start_time_isemtpy"></string>-->
 
     <!-- Session Review -->
     <string name="session_review">세션의 집중도를 간단하게 표현해주세요!</string>

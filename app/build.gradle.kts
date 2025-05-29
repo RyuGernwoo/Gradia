@@ -41,34 +41,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.core.ktx)
     // implementation(files("../libs/ScheduleView.aar"))
-
-    // Fragment
-    val fragment_version = "1.8.3"
-    implementation("androidx.fragment:fragment:$fragment_version")
-
-    implementation ("androidx.navigation:navigation-fragment:2.7.7")
-    implementation ("androidx.navigation:navigation-ui:2.7.7")
-    // Android Room & RxJava
-    val room_version = "2.6.1"
-    ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-runtime:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    implementation("androidx.room:room-rxjava3:$room_version")
-    implementation("io.reactivex.rxjava3:rxjava:3.1.5")
-    implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
-
-    val compose_runtime_version = "1.7.8"
-    implementation("androidx.compose.runtime:runtime:$compose_runtime_version")
-    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
-
-    // Widget Library
-    implementation("com.github.orion-gz:Pomodoro-Timer-Widget:1.0.7")
-    implementation("com.github.orion-gz:Android-Schedule-View-Widget:1.0.4")
-    implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
-
-
+    implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -80,13 +54,43 @@ dependencies {
 
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.0")
-    implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:2.9.0")
-
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     testImplementation(libs.mockito.core)
+
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-reactivestreams-ktx:2.9.0")
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+
+    val compose_runtime_version = "1.7.8"
+    implementation("androidx.compose.runtime:runtime:$compose_runtime_version")
+
+
+    // Fragment
+    val fragment_version = "1.8.3"
+    implementation("androidx.fragment:fragment:$fragment_version")
+
+    // Navigation
+    implementation ("androidx.navigation:navigation-fragment:2.7.7")
+    implementation ("androidx.navigation:navigation-ui:2.7.7")
+
+
+    // Android Room & RxJava
+    val room_version = "2.6.1"
+    ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    implementation("androidx.room:room-rxjava3:$room_version")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.5")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
+
+    // Widget Library
+    implementation("com.github.orion-gz:Pomodoro-Timer-Widget:1.0.7")
+    implementation("com.github.orion-gz:Android-Schedule-View-Widget:1.0.4")
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation ("com.github.Dhaval2404:ColorPicker:2.3")
+    // implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
 
     // 구글 연동
     implementation("com.google.android.gms:play-services-auth:21.0.0")

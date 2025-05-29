@@ -75,6 +75,7 @@
                 android:id="@+id/img1"
                 android:layout_width="wrap_content"
                 android:layout_height="100dp"
+                android:layout_margin="15dp"
                 android:src="@drawable/everytime_1" />
 
             <ImageView
@@ -95,6 +96,7 @@
                 android:id="@+id/img2"
                 android:layout_width="match_parent"
                 android:layout_height="350dp"
+                android:layout_margin="15dp"
                 android:src="@drawable/everytime_2" />
 
         </LinearLayout>
@@ -106,9 +108,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
             android:hint="@string/everytime_url"
-            app:boxStrokeErrorColor="@color/red"
             app:errorEnabled="true"
-            app:errorTextColor="@color/red">
+            app:errorTextColor="@color/red"
+            app:boxStrokeErrorColor="@color/red">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/everytime_url_edittext"

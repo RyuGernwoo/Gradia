@@ -1,6 +1,7 @@
 package mp.gradia.subject.ui;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -28,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -52,6 +56,7 @@ public class SubjectListFragment extends Fragment {
     private ImageButton sortImgBtn;
     private FloatingActionButton fabAdd;
     private FloatingActionButton fabAddEverytime;
+    private LoadingIndicator loadingIndicator;
 
     private List<SubjectEntity> fullSubjectList = new ArrayList<>();
     private int selectedFilterType = -1; // -1: 전체, 0~2: 필터
@@ -98,6 +103,7 @@ public class SubjectListFragment extends Fragment {
         sortImgBtn = view.findViewById(R.id.sort_by_img_btn);
         fabAdd = view.findViewById(R.id.fabAddSubject);
         fabAddEverytime = view.findViewById(R.id.fabAddSubjectEverytime);
+        loadingIndicator = view.findViewById(R.id.loading_indicator);
     }
 
     private void setupRecylcerView() {
@@ -115,6 +121,10 @@ public class SubjectListFragment extends Fragment {
 
         // RecyclerView 데이터 관찰
         subjectViewModel.getAllSubjects().observe(getViewLifecycleOwner(), subjects -> {
+            if (subjects.isEmpty()) {
+                saveTimetableStatePref(false);
+            }
+            
             fullSubjectList = subjects;
             updateFilteredAndSortedList();
         });
@@ -138,8 +148,7 @@ public class SubjectListFragment extends Fragment {
         if (isTimetableLoaded) {
             fabAddEverytime.setVisibility(View.GONE);
             return;
-        }
-        else {
+        } else {
             fabAddEverytime.setVisibility(View.VISIBLE);
         }
 
@@ -151,19 +160,19 @@ public class SubjectListFragment extends Fragment {
 
 
             LinearLayout expandContentLayout = dialogView.findViewById(R.id.expand_content_container);
-            LinearLayout expandLayoutContainer = dialogView.findViewById(R.id.expand_layout_container);;
+            LinearLayout expandLayoutContainer = dialogView.findViewById(R.id.expand_layout_container);
+
             ImageView expandImg = dialogView.findViewById(R.id.expand_img);
             TextView expandTextView = dialogView.findViewById(R.id.expand_textview);
             TextInputEditText everytimeUrlEdittext = dialogView.findViewById(R.id.everytime_url_edittext);
 
-            expandLayoutContainer.setOnClickListener( expandView -> {
+            expandLayoutContainer.setOnClickListener(expandView -> {
                 if (isExpand) {
                     isExpand = false;
                     expandTextView.setText(R.string.dialog_everytime_expand);
                     expandImg.setImageResource(R.drawable.ic_expand_more);
                     expandContentLayout.setVisibility(View.GONE);
-                }
-                else {
+                } else {
                     isExpand = true;
                     expandTextView.setText(R.string.dialog_everytime_contract);
                     expandImg.setImageResource(R.drawable.ic_expand_less);
@@ -176,16 +185,31 @@ public class SubjectListFragment extends Fragment {
                     .setNeutralButton("에브리타임으로 이동", (dialog, which) -> {
                         launchEveryTime();
                     })
-                    .setPositiveButton("확인", (dialog, which) -> {
-                        // TO-DO : Implement Timetable from everytime.
-                        String url = everytimeUrlEdittext.getText().toString();
-                        loadTimeTable(url);
-                        // TimeTable을 로드하게되면 로드 된 상태가 저장되어 더이상 사용자에게 fab가 보이지 않게 됨
-                        saveTimetableStatePref();
-                    })
+                    .setPositiveButton("확인", null)
                     .setView(dialogView);
 
-            builder.create().show();
+            final AlertDialog dialog = builder.create();
+            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialogInterface) {
+                    Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                    positiveButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String url = everytimeUrlEdittext.getText().toString();
+                            if (!url.contains("https://everytime.kr/")) {
+                                everytimeUrlEdittext.setError("잘못된 주소입니다.");
+
+                            }
+                            else if (url.contains("https://everytime.kr/")){
+                                dialog.dismiss();
+                                loadTimeTable(url);
+                            }
+                        }
+                    });
+                }
+            });
+            dialog.show();
         });
     }
 
@@ -267,29 +291,37 @@ public class SubjectListFragment extends Fragment {
             }
         }
     }
+
     private void loadTimeTable(String url) {
-        // TO-DO : Implement Timetable from everytime.
         Log.d("SubjectListFragment", url);
+        recyclerView.setVisibility(View.GONE);
+        loadingIndicator.setVisibility(View.VISIBLE);
         subjectViewModel.fetchEveryTimeTable(url, new SubjectRepository.CloudSyncCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(requireContext(), "시간표가 성공적으로 가져와졌습니다.", Toast.LENGTH_SHORT).show();
-                // 시간표 로드 후 UI 업데이트
-                updateFilteredAndSortedList();
-
+                Toast.makeText(requireContext(), "시간표를 성공적으로 가져왔습니다.", Toast.LENGTH_SHORT).show();
                 // set timetable load state
-                isTimetableLoaded = true;
+                // 시간표 로드 후 UI 업데이트
+                saveTimetableStatePref(true);
+
+                fabAddEverytime.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                loadingIndicator.setVisibility(View.GONE);
+                updateFilteredAndSortedList();
             }
 
             @Override
             public void onError(String error) {
+                loadingIndicator.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
                 Toast.makeText(requireContext(), "시간표 가져오기 실패: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     // 현재 저장 상태를 SharedPref에 저장
-    private void saveTimetableStatePref() {
+    private void saveTimetableStatePref(boolean value) {
+        isTimetableLoaded = value;
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences(EVERYTIME_TIMETABLE_PREF, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("timetableLoaded", isTimetableLoaded);
@@ -319,6 +351,7 @@ public class SubjectListFragment extends Fragment {
             }
         });
     }
+
     private void updateFilteredAndSortedList() {
         String query = searchEditText.getText().toString().toLowerCase();
         List<SubjectEntity> filtered = new ArrayList<>();

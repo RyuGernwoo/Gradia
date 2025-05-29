@@ -1,24 +1,39 @@
 package mp.gradia.subject.ui;
 
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.dhaval2404.colorpicker.ColorPickerDialog;
+import com.github.dhaval2404.colorpicker.listener.ColorListener;
+import com.github.dhaval2404.colorpicker.model.ColorShape;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.transition.platform.MaterialElevationScale;
+import com.google.android.material.transition.platform.MaterialFade;
+import com.google.android.material.transition.platform.MaterialSharedAxis;
+
+import org.jetbrains.annotations.NotNull;
 
 import mp.gradia.R;
 import mp.gradia.database.entity.TodoEntity;
@@ -28,6 +43,7 @@ import mp.gradia.subject.viewmodel.TodoViewModel;
 
 import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.subject.viewmodel.SubjectViewModel;
+import mp.gradia.time.inner.viewmodel.StudySessionViewModelFactory;
 
 public class SubjectDetailFragment extends Fragment {
 
@@ -35,12 +51,17 @@ public class SubjectDetailFragment extends Fragment {
     private SubjectViewModel viewModel;
 
     private TodoViewModel todoViewModel;
+    private SubjectEntity subject;
     private TodoAdapter todoAdapter;
+    private RecyclerView recyclerTodo;
+    private Button buttonAddTodo;
+    private ImageView colorCircle;
 
     private TextView textSubjectName, textType, textCredit, textDifficulty,
             textMidSchedule, textFinalSchedule, textEvalRatio, textTargetTime;
 
     private int subjectId;
+    private int subjectColor;
 
     public SubjectDetailFragment() {
     }
@@ -51,7 +72,6 @@ public class SubjectDetailFragment extends Fragment {
 
         subjectId = getArguments().getInt("subjectId", -1);
         if (subjectId == -1) return;
-
         viewModel = new ViewModelProvider(this).get(SubjectViewModel.class);
     }
 
@@ -62,7 +82,9 @@ public class SubjectDetailFragment extends Fragment {
 
         // 과목 데이터 가져오기
         viewModel.getSubjectById(subjectId).observe(getViewLifecycleOwner(), subject -> {
-            if (subject != null) bindSubjectData(subject);
+            if (subject != null) {
+                bindSubjectData(subject);
+            }
         });
 
         return inflater.inflate(R.layout.fragment_subject_detail, container, false);
@@ -74,12 +96,95 @@ public class SubjectDetailFragment extends Fragment {
 
         initViews(view);
         setupToolbar(view);
+        setupDetailView();
+        setupTodo();
+    }
 
+    private void initViews(View view) {
+        toolbar = view.findViewById(R.id.toolbar);
+        colorCircle = view.findViewById(R.id.color_circle);
+        // 과목 정보 TextView 연결
+        textSubjectName = view.findViewById(R.id.textSubjectName);
+        textType = view.findViewById(R.id.textType);
+        textCredit = view.findViewById(R.id.textCredit);
+        textDifficulty = view.findViewById(R.id.textDifficulty);
+        textMidSchedule = view.findViewById(R.id.textMidSchedule);
+        textFinalSchedule = view.findViewById(R.id.textFinalSchedule);
+        textEvalRatio = view.findViewById(R.id.textEvalRatio);
+        textTargetTime = view.findViewById(R.id.textTargetTime);
+        recyclerTodo = view.findViewById(R.id.recyclerTodo);
+        buttonAddTodo = view.findViewById(R.id.buttonAddTodo);
+    }
+
+    private void setupToolbar(View view) {
+        toolbar.setNavigationOnClickListener(v -> Navigation.findNavController(view).popBackStack());
+        toolbar.inflateMenu(R.menu.subject_detail_menu);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_edit_subject) {
+                Bundle bundle = new Bundle();
+                bundle.putInt("subjectId", subjectId);
+                Navigation.findNavController(view).navigate(R.id.action_subjectDetail_to_subjectAdd, bundle);
+
+                return true;
+            } else if (item.getItemId() == R.id.action_delete_subject) {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext(), R.style.DeleteSessionDialogTheme);
+                builder.setTitle("과목 삭제")
+                        .setMessage("이 과목을 정말 삭제하시겠습니까?")
+                        .setNegativeButton("취소", null)
+                        .setPositiveButton("삭제", (dialog, which) -> deleteSubject());
+
+                AlertDialog alertDialog = builder.create();
+
+                // 3. 다이얼로그의 Window 가져오기
+                Window window = alertDialog.getWindow();
+                if (window != null) {
+                    // 예시: MaterialSharedAxis (Z축)
+                    MaterialSharedAxis enterTransitionZ = new MaterialSharedAxis(MaterialSharedAxis.Z, true);
+                    enterTransitionZ.setDuration(1000L); // 길게 테스트
+                    window.setEnterTransition(enterTransitionZ);
+
+                    MaterialSharedAxis exitTransitionZ = new MaterialSharedAxis(MaterialSharedAxis.Z, false);
+                    exitTransitionZ.setDuration(1000L);
+                    window.setExitTransition(exitTransitionZ);
+                }
+                alertDialog.show();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void setSubjectColor(int color) {
+        Drawable baseDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.color_circle);
+        if (baseDrawable instanceof GradientDrawable) {
+            ((GradientDrawable) baseDrawable).setColor(color);
+            colorCircle.setImageDrawable(baseDrawable);
+        }
+
+        buttonAddTodo.setBackgroundColor(color);
+    }
+
+    private void setupDetailView() {
+        colorCircle.setOnClickListener(v -> {
+            new ColorPickerDialog
+                    .Builder(requireContext())
+                    .setTitle("과목 색상 선택")
+                    .setColorShape(ColorShape.SQAURE)
+                    .setDefaultColor(subjectColor)
+                    .setColorListener(new ColorListener() {
+                        @Override
+                        public void onColorSelected(int color, @NotNull String colorHex) {
+                            subject.setColor(String.format("#%06X", (0xFFFFFF & color)));
+                            viewModel.update(subject);
+                            setSubjectColor(color);
+                        }
+                    })
+                    .show();
+        });
+    }
+
+    private void setupTodo() {
         // 할 일 목록
-        // TODO: 메모 기능 미구현으로 주석 처리
-        RecyclerView recyclerTodo = view.findViewById(R.id.recyclerTodo);
-        Button buttonAddTodo = view.findViewById(R.id.buttonAddTodo);
-
         todoAdapter = new TodoAdapter();
         recyclerTodo.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerTodo.setAdapter(todoAdapter);
@@ -130,44 +235,6 @@ public class SubjectDetailFragment extends Fragment {
         });
     }
 
-    private void initViews(View view) {
-        toolbar = view.findViewById(R.id.toolbar);
-        // 과목 정보 TextView 연결
-        textSubjectName = view.findViewById(R.id.textSubjectName);
-        textType = view.findViewById(R.id.textType);
-        textCredit = view.findViewById(R.id.textCredit);
-        textDifficulty = view.findViewById(R.id.textDifficulty);
-        textMidSchedule = view.findViewById(R.id.textMidSchedule);
-        textFinalSchedule = view.findViewById(R.id.textFinalSchedule);
-        textEvalRatio = view.findViewById(R.id.textEvalRatio);
-        textTargetTime = view.findViewById(R.id.textTargetTime);
-    }
-
-    private void setupToolbar(View view) {
-        toolbar.setNavigationOnClickListener(v -> Navigation.findNavController(view).popBackStack());
-        toolbar.inflateMenu(R.menu.subject_detail_menu);
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_edit_subject) {
-                Bundle bundle = new Bundle();
-                bundle.putInt("subjectId", subjectId);
-                Navigation.findNavController(view).navigate(R.id.action_subjectDetail_to_subjectAdd, bundle);
-
-                return true;
-            }
-            else if (item.getItemId() == R.id.action_delete_subject) {
-                new MaterialAlertDialogBuilder(requireContext(), R.style.DeleteSessionDialogTheme)
-                        .setTitle("과목 삭제")
-                        .setMessage("이 과목을 정말 삭제하시겠습니까?")
-                        .setNegativeButton("취소", null)
-                        .setPositiveButton("삭제", (dialog, which) -> deleteSubject())
-                        .show();
-
-                return true;
-            }
-            return false;
-        });
-    }
-
     private void deleteSubject() {
         viewModel.getSubjectById(subjectId).observe(this, subject -> {
             if (subject != null) {
@@ -179,9 +246,7 @@ public class SubjectDetailFragment extends Fragment {
                             Toast.makeText(getActivity(), "과목이 성공적으로 삭제되었습니다.", Toast.LENGTH_SHORT).show();
 
                             // 삭제 후 과목 리스트로 명확하게 이동
-                            // TODO: 해당 코드에서 크래시 발생
-                            Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-                                    .navigate(R.id.action_subjectDeleteDialog_to_subjectList);
+                            Navigation.findNavController(requireActivity(), R.id.nav_host_fragment).navigate(R.id.action_subjectDetail_to_subjectDelete);
                         }
                     }
 
@@ -199,7 +264,11 @@ public class SubjectDetailFragment extends Fragment {
     }
 
     private void bindSubjectData(SubjectEntity subject) {
+        this.subject = subject;
         textSubjectName.setText(subject.name);
+        subjectColor = Color.parseColor(subject.getColor());
+        setSubjectColor(subjectColor);
+
         String typeText;
         switch (subject.type) {
             case 0:
@@ -215,6 +284,7 @@ public class SubjectDetailFragment extends Fragment {
                 typeText = "기타";
                 break;
         }
+
         textType.setText(typeText);
 
         textCredit.setText(subject.credit + "학점");
@@ -234,7 +304,7 @@ public class SubjectDetailFragment extends Fragment {
             textEvalRatio.setText("평가 비율 정보 없음");
         }
 
-// 목표 시간 출력 (null 방어)
+        // 목표 시간 출력 (null 방어)
         if (subject.time != null) {
             textTargetTime.setText("일간 " + subject.time.dailyTargetStudyTime +
                     "시간 / 주간 " + subject.time.weeklyTargetStudyTime +

@@ -2,8 +2,8 @@ package mp.gradia.time.inner.record.dialog;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +11,8 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -30,11 +28,12 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.snackbar.SnackbarContentLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+import com.google.android.material.transition.MaterialFadeThrough;
+import com.google.android.material.transition.platform.MaterialFade;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -49,9 +48,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import mp.gradia.R;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.StudySessionDao;
@@ -66,6 +64,7 @@ import mp.gradia.time.inner.viewmodel.SubjectViewModelFactory;
 // 세션이 종료될 시 Full Screen Dialog를 화면에 띄움
 public class SessionAddDialog extends DialogFragment {
     // CONSTANT
+    private static final long DIALOG_TRANSITION_DURATION = 300L;
     // TimePicker를 업데이트할 때 사용하기 위한 상태 변수
     private static final int SESSION_START_TIME = 0;
     private static final int SESSION_END_TIME = 1;
@@ -94,9 +93,10 @@ public class SessionAddDialog extends DialogFragment {
 
     // View Component
     private View v;
-    private TextInputLayout startTimeInputLayout;
     private Toolbar toolbar;
+    private TextInputLayout startTimeInputLayout;
     private TextInputLayout endTimeInputLayout;
+    private TextInputLayout dateInputLayout;
     private TextInputLayout sessionMemoInputLayout;
     private TextInputEditText dateEditText;
     private TextInputEditText startTimeEditText;
@@ -104,7 +104,6 @@ public class SessionAddDialog extends DialogFragment {
     private TextInputEditText durationEditText;
     private TextInputEditText sessionMemoEditText;
     private AutoCompleteTextView dropdown;
-    private Button saveSessionBtn;
     private LinearLayout sessionReviewFocusLevel1;
     private LinearLayout sessionReviewFocusLevel2;
     private LinearLayout sessionReviewFocusLevel3;
@@ -112,7 +111,7 @@ public class SessionAddDialog extends DialogFragment {
 
     // 세션의 정보들을 저장 할 변수
     private boolean isYesterday = false;
-    private final long[] selectedDateMillis = { MaterialDatePicker.todayInUtcMilliseconds(), -1 };
+    private final long[] selectedDateMillis = {MaterialDatePicker.todayInUtcMilliseconds(), -1};
     private int sessionId = -1;
 
     private String serverSessionId;
@@ -195,8 +194,18 @@ public class SessionAddDialog extends DialogFragment {
         Dialog dialog = getDialog();
         if (dialog != null) {
             Window window = dialog.getWindow();
-            if (window != null)
+            if (window != null) {
                 window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+                // Material 3 Motion 추가(작동 안함)
+                MaterialFade enterFade = new MaterialFade();
+                enterFade.setDuration(DIALOG_TRANSITION_DURATION);
+                MaterialFadeThrough transition = new MaterialFadeThrough();
+                window.setEnterTransition(enterFade);
+
+                MaterialFade exitFade = new MaterialFade();
+                exitFade.setDuration(DIALOG_TRANSITION_DURATION);
+                window.setExitTransition(exitFade);
+            }
         }
     }
 
@@ -206,12 +215,14 @@ public class SessionAddDialog extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_session_add_dialog, container, false);
-
+        if (v instanceof ViewGroup) {
+            ((ViewGroup) v).setTransitionGroup(true); // API 21+
+        }
         // 전체 화면과 앱 뷰의 padding 설정
         AppBarLayout appBarLayout = v.findViewById(R.id.appbar_layout);
         ViewCompat.setOnApplyWindowInsetsListener(appBarLayout, (view, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            view.setPadding(view.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
+            view.setPadding(view.getPaddingLeft(), insets.top, v.getPaddingRight(),  v.getPaddingBottom());
             return windowInsets;
         });
 
@@ -239,7 +250,6 @@ public class SessionAddDialog extends DialogFragment {
         updateTimeEditText(clockFormat, SESSION_END_TIME);
 
         setupSessionMemo();
-        setupSaveSession();
     }
 
     /**
@@ -261,10 +271,13 @@ public class SessionAddDialog extends DialogFragment {
         toolbar = v.findViewById(R.id.toolbar);
         if (sessionMode == MODE_EDIT) {
             toolbar.setTitle(R.string.appbar_title_edit_session);
-            setupToolbarMenu();
-        }
+            setupToolbarMenu(MODE_EDIT);
+        } else
+            setupToolbarMenu(MODE_ADD);
+
         dropdown = v.findViewById(R.id.dropdown_autocomplete);
         dateEditText = v.findViewById(R.id.date_picker_edittext);
+        dateInputLayout = v.findViewById(R.id.date_picker_textinput);
         startTimeInputLayout = v.findViewById(R.id.start_time_picker_textinput);
         startTimeEditText = v.findViewById(R.id.start_time_picker_edittext);
         endTimeInputLayout = v.findViewById(R.id.end_time_picker_textinput);
@@ -276,18 +289,24 @@ public class SessionAddDialog extends DialogFragment {
         if (sessionMemo != null)
             sessionMemoEditText.setText(sessionMemo);
 
-        saveSessionBtn = v.findViewById(R.id.save_session_btn);
-
         sessionReviewFocusLevel1 = v.findViewById(R.id.session_review_focus_level1);
         sessionReviewFocusLevel2 = v.findViewById(R.id.session_review_focus_level2);
         sessionReviewFocusLevel3 = v.findViewById(R.id.session_review_focus_level3);
         sessionReviewFocusLevel4 = v.findViewById(R.id.session_review_focus_level4);
     }
 
-    private void setupToolbarMenu() {
+    private void setupToolbarMenu(int mode) {
         toolbar.inflateMenu(R.menu.session_add_dialog_menu);
+
+        if (mode == MODE_ADD) {
+            toolbar.getMenu().removeItem(R.id.action_delete_session);
+        }
+
         toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_delete_session) {
+            if (item.getItemId() == R.id.action_save_session) {
+                saveSession();
+                return true;
+            } else if (item.getItemId() == R.id.action_delete_session) {
                 new MaterialAlertDialogBuilder(requireContext(), R.style.DeleteSessionDialogTheme)
                         .setTitle("세션 삭제")
                         .setMessage("이 세션을 정말 삭제하시겠습니까?")
@@ -379,26 +398,31 @@ public class SessionAddDialog extends DialogFragment {
     private void setupDatePicker() {
         updateDateEditText(selectedDateMillis);
         dateEditText.setOnClickListener(v -> {
-            MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
-            builder.setTitleText("날짜 선택");
-            builder.setSelection(selectedDateMillis[0]);
-
-            final MaterialDatePicker<Long> datePicker = builder.build();
-            datePicker.addOnPositiveButtonClickListener(selection -> {
-                selectedDateMillis[0] = selection;
-                if (selectedDateMillis[1] != -1 && isYesterday) {
-                    selectedDateMillis[1] = selectedDateMillis[0] + Duration.ofDays(1).toMillis();
-                }
-
-                updateDateEditText(selectedDateMillis);
-                checkValidation();
-            });
-            datePicker.show(getParentFragmentManager(), datePicker.toString());
+            showDatePicker();
         });
+    }
+
+    private void showDatePicker() {
+        MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
+        builder.setTitleText("날짜 선택");
+        builder.setSelection(selectedDateMillis[0]);
+
+        final MaterialDatePicker<Long> datePicker = builder.build();
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            selectedDateMillis[0] = selection;
+            if (selectedDateMillis[1] != -1 && isYesterday) {
+                selectedDateMillis[1] = selectedDateMillis[0] + Duration.ofDays(1).toMillis();
+            }
+
+            updateDateEditText(selectedDateMillis);
+            checkValidation();
+        });
+        datePicker.show(getParentFragmentManager(), datePicker.toString());
     }
 
     /**
      * 선택된 날짜 (UTC 밀리초)를 "yyyy-MM-dd" 형식의 문자열로 변환하여 DateEditText에 업데이트합니다.
+     *
      * @param utcMillis 선택된 날짜의 UTC 밀리초 배열입니다.
      */
     private void updateDateEditText(long[] utcMillis) {
@@ -629,30 +653,29 @@ public class SessionAddDialog extends DialogFragment {
     /**
      * 중복되는 세션이 있을 경우 Snackbar를 표시합니다.
      *
-     * @param overlappingSession 중복되는 StudySessionEntity 객체입니다. null이면 중복이 없음을
-     *                           의미합니다.
-     *
      * @param overlappingSession 중복되는 StudySessionEntity 객체입니다. null이면 중복이 없음을 의미합니다.
      */
     private void showOverlappingSesison(StudySessionEntity overlappingSession) {
         if (overlappingSession == null) {
             startTimeInputLayout.setError(null);
+            startTimeInputLayout.setErrorEnabled(false);
             endTimeInputLayout.setError(null);
+            endTimeInputLayout.setErrorEnabled(false);
             return;
         }
 
-        int overlappingSubjectId = overlappingSession.getSubjectId() - 1;
         LocalDate overlappingDate = overlappingSession.getDate();
         LocalTime overlappingStartTime = overlappingSession.getStartTime();
         LocalTime overlappingEndTime = overlappingSession.getEndTime();
-        String subjectName = subjects.get(overlappingSubjectId);
-        String errorMsg = "중복되는 세션입니다.\n" + subjectName + " " + overlappingDate + " " + overlappingStartTime + " - "
-                + overlappingEndTime;
-        Snackbar errorSnackBar = Snackbar.make(v, errorMsg, Snackbar.LENGTH_INDEFINITE).setAnchorView(saveSessionBtn);
+        String subjectName = overlappingSession.getSubjectName();
+        String errorMsg = "중복되는 세션입니다 : " + subjectName + "\n" + overlappingDate + " " + overlappingStartTime + " - " + overlappingEndTime;
+        Snackbar errorSnackBar = Snackbar.make(v, errorMsg, Snackbar.LENGTH_INDEFINITE);
         errorSnackBar.setAction("확인", v -> errorSnackBar.dismiss());
         errorSnackBar.show();
 
+        startTimeInputLayout.setErrorEnabled(true);
         startTimeInputLayout.setError("잘못된 시간입니다.");
+        endTimeInputLayout.setErrorEnabled(true);
         endTimeInputLayout.setError("잘못된 시간입니다.");
         startTimeInputLayout.setErrorIconOnClickListener(
                 v -> {
@@ -672,7 +695,8 @@ public class SessionAddDialog extends DialogFragment {
     public interface TimeValidationCallback {
         /**
          * 시간 유효성 검사 결과가 반환될 때 호출됩니다.
-         * @param isValid 시간이 유효한지 여부입니다.
+         *
+         * @param isValid            시간이 유효한지 여부입니다.
          * @param overlappingSession 중복되는 세션이 있을 경우 해당 세션 객체입니다.
          */
         void onValidationResult(boolean isValid, @Nullable StudySessionEntity overlappingSession);
@@ -681,65 +705,107 @@ public class SessionAddDialog extends DialogFragment {
     /**
      * 세션 저장 버튼 클릭 리스너를 설정하여 세션 정보를 데이터베이스에 저장하고 다이얼로그를 닫습니다.
      */
-    private void setupSaveSession() {
-        saveSessionBtn.setOnClickListener(v -> {
-            if (selectedStartHour == -1 || selectedStartMinute == -1) {
-                Toast.makeText(requireContext(), R.string.toast_message_invalid_time, Toast.LENGTH_SHORT).show();
-                return;
-            }
+    private void saveSession() {
+        if (isEmptyState()) return;
 
-            LocalDate date = getDate(selectedDateMillis[0]);
-            LocalDate endDate = (selectedDateMillis[1] == -1) ? date : getDate(selectedDateMillis[1]);
-            LocalTime startTime = LocalTime.of(selectedStartHour, selectedStartMinute);
-            LocalTime endTime = LocalTime.of(selectedEndHour, selectedEndMinute);
-            long minutes = (long) durationHour * 60 + durationMinute;
-            sessionMemo = sessionMemoEditText.getText().toString();
+        LocalDate date = getDate(selectedDateMillis[0]);
+        LocalDate endDate = (selectedDateMillis[1] == -1) ? date : getDate(selectedDateMillis[1]);
+        LocalTime startTime = LocalTime.of(selectedStartHour, selectedStartMinute);
+        LocalTime endTime = LocalTime.of(selectedEndHour, selectedEndMinute);
+        long minutes = (long) durationHour * 60 + durationMinute;
+        sessionMemo = sessionMemoEditText.getText().toString();
 
-            Bundle result = new Bundle();
+        Bundle result = new Bundle();
 
-            String log = "SubjectId : " + String.valueOf(subjectId) + "\n" + "serverSubjectId: " + serverSubjectId + "\n" + "SubjectName : " + subjectName + "\n"
-                    + "Date : " + date.toString() + "\n" + "endDate : " + "\n" + "minutes : " + minutes + "\n"
-                    + "StartTime : " + startTime.toString() + "\n" + "EndTime : " + endTime.toString() + "\n"
-                    + "Memo : " + sessionMemo + "\n";
-            Log.i("SessionAddDialog", log);
+        String log = "SubjectId : " + String.valueOf(subjectId) + "\n" + "serverSubjectId: " + serverSubjectId + "\n" + "SubjectName : " + subjectName + "\n"
+                + "Date : " + date.toString() + "\n" + "endDate : " + "\n" + "minutes : " + minutes + "\n"
+                + "StartTime : " + startTime.toString() + "\n" + "EndTime : " + endTime.toString() + "\n"
+                + "Memo : " + sessionMemo + "\n";
+        Log.i("SessionAddDialog", log);
 
-            validateTimeSlot(date, endDate, startTime, endTime, (isValid, overlappingSession) -> {
-                if (isValid) {
-                    showOverlappingSesison(null);
-                    StudySessionEntity session = new StudySessionEntity(subjectId, serverSubjectId, subjectName, date, endDate, minutes,
-                            startTime, endTime, 0, focusLevel, sessionMemo);
+        validateTimeSlot(date, endDate, startTime, endTime, (isValid, overlappingSession) -> {
+            if (isValid) {
+                showOverlappingSesison(null);
+                StudySessionEntity session = new StudySessionEntity(subjectId, serverSubjectId, subjectName, date, endDate, minutes,
+                        startTime, endTime, 0, focusLevel, sessionMemo);
 
-                    if (sessionMode == MODE_EDIT) {
-                        session.setSessionId(sessionId);
-                        session.setServerId(serverSessionId);
-                        Log.d("SessionAddDialog", "Updating serverSessionId: " + serverSessionId);
-                        sessionViewModel.updateSession(session);
-                        result.putInt(KEY_SESSION_MODE, MODE_EDIT);
-                    } else {
-                        sessionViewModel.saveSession(session);
-                        result.putInt(KEY_SESSION_MODE, MODE_EDIT);
-                        String log2 = "SubjectId : " + String.valueOf(subjectId) + "\n" + "SubjectName : " + subjectName
-                                + "\n" + "Date : " + date.toString() + "\n" + "endDate : " + "\n" + "minutes : "
-                                + minutes + "\n" + "StartTime : " + startTime.toString() + "\n" + "EndTime : "
-                                + endTime.toString() + "\n" + "Memo : " + sessionMemo + "\n";
-                        Log.i("SessionAddDialog", log2);
-                    }
-
-                    Toast.makeText(requireContext(), R.string.toast_message_session_saved, Toast.LENGTH_SHORT).show();
-                    getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
-                    dismiss();
+                if (sessionMode == MODE_EDIT) {
+                    session.setSessionId(sessionId);
+                    session.setServerId(serverSessionId);
+                    Log.d("SessionAddDialog", "Updating serverSessionId: " + serverSessionId);
+                    sessionViewModel.updateSession(session);
+                    result.putInt(KEY_SESSION_MODE, MODE_EDIT);
                 } else {
-                    showOverlappingSesison(overlappingSession);
+                    sessionViewModel.saveSession(session);
+                    result.putInt(KEY_SESSION_MODE, MODE_EDIT);
+                    String log2 = "SubjectId : " + String.valueOf(subjectId) + "\n" + "SubjectName : " + subjectName
+                            + "\n" + "Date : " + date.toString() + "\n" + "endDate : " + "\n" + "minutes : "
+                            + minutes + "\n" + "StartTime : " + startTime.toString() + "\n" + "EndTime : "
+                            + endTime.toString() + "\n" + "Memo : " + sessionMemo + "\n";
+                    Log.i("SessionAddDialog", log2);
                 }
-            });
+
+                Toast.makeText(requireContext(), R.string.toast_message_session_saved, Toast.LENGTH_SHORT).show();
+                getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
+                dismiss();
+            } else {
+                showOverlappingSesison(overlappingSession);
+            }
         });
     }
 
+    private boolean isEmptyState() {
+        if (selectedStartHour == -1 || selectedStartMinute == -1) {
+            Snackbar errorSnackBar = Snackbar.make(v, R.string.toast_message_invalid_time, Snackbar.LENGTH_INDEFINITE);
+            errorSnackBar.setAction("확인", v -> errorSnackBar.dismiss());
+            errorSnackBar.show();
+
+            if (TextUtils.isEmpty(dateEditText.getText())) {
+                dateInputLayout.setErrorEnabled(true);
+                dateInputLayout.setError("날짜가 입력되지 않았습니다.");
+                dateInputLayout.setErrorIconOnClickListener(
+                        v -> {
+                            errorSnackBar.setAction("수정", view -> showDatePicker());
+                            errorSnackBar.show();
+                        });
+            }
+            if (TextUtils.isEmpty(startTimeEditText.getText())) {
+                startTimeInputLayout.setErrorEnabled(true);
+                startTimeInputLayout.setError("시작 시간이 입력되지 않았습니다.");
+                startTimeInputLayout.setErrorIconOnClickListener(
+                        v -> {
+                            errorSnackBar.setText("시작 시간이 입력되지 않았습니다.");
+                            errorSnackBar.setAction("수정", view -> showStartTimePicker());
+                            errorSnackBar.show();
+                        });
+            }
+            if (TextUtils.isEmpty(endTimeEditText.getText())) {
+                endTimeInputLayout.setErrorEnabled(true);
+                endTimeInputLayout.setError("종료 시간이 입력되지 않았습니다.");
+                endTimeInputLayout.setErrorIconOnClickListener(
+                        v -> {
+                            errorSnackBar.setAction("수정", view -> showEndTimePicker());
+                            errorSnackBar.show();
+                        });
+            }
+            return true;
+        }
+        else {
+            dateInputLayout.setError(null);
+            dateInputLayout.setErrorEnabled(false);
+            startTimeInputLayout.setError(null);
+            startTimeInputLayout.setErrorEnabled(false);
+            endTimeInputLayout.setError(null);
+            endTimeInputLayout.setErrorEnabled(false);
+            return false;
+        }
+    }
     /**
      * 시간 유효성 검사를 수행하고 결과를 표시합니다.
      */
     private void checkValidation() {
         if (selectedStartHour != -1 && selectedStartMinute != -1) {
+
             LocalDate date = getDate(selectedDateMillis[0]);
             LocalDate endDate = (selectedDateMillis[1] != -1) ? getDate(selectedDateMillis[1]) : null;
             LocalTime startTime = LocalTime.of(selectedStartHour, selectedStartMinute);
@@ -765,7 +831,7 @@ public class SessionAddDialog extends DialogFragment {
      * @param callback 유효성 검사 결과를 반환할 콜백입니다.
      */
     private void validateTimeSlot(LocalDate date, @Nullable LocalDate endDate, LocalTime start, LocalTime end,
-            TimeValidationCallback callback) {
+                                  TimeValidationCallback callback) {
         if (date == null || start == null || end == null || callback == null) {
             if (callback != null)
                 callback.onValidationResult(false, null);
@@ -778,10 +844,10 @@ public class SessionAddDialog extends DialogFragment {
         // 세션 시작 날짜보다 뒤인 경우
         if (endDate != null && endDate.isAfter(date))
             newSessionEndDateTime = LocalDateTime.of(endDate, end);
-        // 세션 종료 시간이 세션 시작 시간보다 앞서 있을 때 (즉, 자정을 넘어갈때)
+            // 세션 종료 시간이 세션 시작 시간보다 앞서 있을 때 (즉, 자정을 넘어갈때)
         else if (end.isBefore(start))
             newSessionEndDateTime = LocalDateTime.of(date.plusDays(1), end);
-        // 일반적인 상황(시작과 종료의 날짜가 같음)
+            // 일반적인 상황(시작과 종료의 날짜가 같음)
         else
             newSessionEndDateTime = LocalDateTime.of(date, end);
 
@@ -805,30 +871,25 @@ public class SessionAddDialog extends DialogFragment {
                     if (sessionId == existingSession.getSessionId())
                         continue;
 
-                    LocalDateTime existingSessionStartDateTime = LocalDateTime.of(existingSession.getDate(),
-                            existingSession.getStartTime());
+                    LocalDateTime existingSessionStartDateTime = LocalDateTime.of(existingSession.getDate(), existingSession.getStartTime());
                     LocalDateTime existingSessionEndDateTime;
                     LocalDate existingSessionEndDate = existingSession.getEndDate();
 
                     // 가져온 세션의 데이터가 endDate를 가지고 있을 경우
                     if (existingSessionEndDate != null && existingSessionEndDate.isAfter(existingSession.getDate()))
-                        existingSessionEndDateTime = LocalDateTime.of(existingSessionEndDate,
-                                existingSession.getEndTime());
-                    // 세션의 endTime이 startTime보다 앞설 경우
+                        existingSessionEndDateTime = LocalDateTime.of(existingSessionEndDate, existingSession.getEndTime());
+                        // 세션의 endTime이 startTime보다 앞설 경우
                     else if (existingSession.getEndTime().isBefore(existingSession.getStartTime()))
-                        existingSessionEndDateTime = LocalDateTime.of(existingSession.getDate().plusDays(1),
-                                existingSession.getEndTime());
-                    // 일반적인 상황
+                        existingSessionEndDateTime = LocalDateTime.of(existingSession.getDate().plusDays(1), existingSession.getEndTime());
+                        // 일반적인 상황
                     else
-                        existingSessionEndDateTime = LocalDateTime.of(existingSession.getDate(),
-                                existingSession.getEndTime());
+                        existingSessionEndDateTime = LocalDateTime.of(existingSession.getDate(), existingSession.getEndTime());
 
                     // endDate가 startDate보다 빠른 경우
                     if (!existingSessionEndDateTime.isAfter(existingSessionStartDateTime))
                         continue;
 
-                    boolean isOverlap = newSessionStartDateTime.isBefore(existingSessionEndDateTime) &&
-                            existingSessionStartDateTime.isBefore(newSessionEndDateTime);
+                    boolean isOverlap = newSessionStartDateTime.isBefore(existingSessionEndDateTime) && existingSessionStartDateTime.isBefore(newSessionEndDateTime);
 
                     if (isOverlap) {
                         callback.onValidationResult(false, existingSession);

@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Full Screen Dialog : Add Session -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- App bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:elevation="5dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:paddingStart="6dp"
+            android:paddingEnd="16dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:navigationIcon="@drawable/outline_close_black_24"
+            app:title="@string/appbar_title_add_subject" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Content Layout -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <ScrollView
+            android:id="@+id/schedule_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/dialog_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- Session : Subject DropDown Menu -->
+                <ImageView
+                    android:id="@+id/ic_subject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:src="@drawable/outline_menu_book_black_24"
+                    app:layout_constraintBottom_toBottomOf="@+id/subject_textinput"
+                    app:layout_constraintEnd_toStartOf="@+id/subject_textinput"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@+id/subject_textinput" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/subject_textinput"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:hint="@string/dropdown_select_subject"
+                    app:errorTextColor="@color/red"
+                    app:boxStrokeErrorColor="@color/red"
+                    app:cursorErrorColor="@color/red"
+                    app:errorContentDescription="@string/error_subject_name_isempty"
+                    app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_subject"
+                    app:layout_constraintTop_toTopOf="@+id/dialog_layout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/subject_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/ic_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:src="@drawable/palette_24px"
+                    app:layout_constraintBottom_toBottomOf="@+id/color_picker_rect"
+                    app:layout_constraintEnd_toStartOf="@+id/color_picker_rect"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@+id/color_picker_rect" />
+
+                <LinearLayout
+                    android:id="@+id/color_picker_rect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:background="@drawable/color_picker_rectangle"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toTopOf="@+id/divider1"
+                    app:layout_constraintStart_toEndOf="@+id/ic_color"
+                    app:layout_constraintTop_toBottomOf="@+id/subject_textinput" />
+
+                <TextView
+                    android:id="@+id/color_code"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:text="string_hex_color"
+                    app:layout_constraintBottom_toBottomOf="@id/color_picker_rect"
+                    app:layout_constraintStart_toEndOf="@+id/color_picker_rect"
+                    app:layout_constraintTop_toTopOf="@+id/color_picker_rect" />
+
+                <!-- Divider -->
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/divider1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    app:dividerInsetEnd="15dp"
+                    app:dividerInsetStart="15dp"
+                    app:layout_constraintBottom_toTopOf="@+id/subject_type_chip"
+                    app:layout_constraintTop_toBottomOf="@+id/color_picker_rect" />
+
+                <ImageView
+                    android:id="@+id/ic_subject_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:src="@drawable/category_24px"
+                    app:layout_constraintBottom_toBottomOf="@+id/subject_type_chip"
+                    app:layout_constraintEnd_toStartOf="@+id/subject_type_chip"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@+id/subject_type_chip" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/subject_type_chip"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_subject_type"
+                    app:layout_constraintTop_toBottomOf="@+id/divider1"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_type_required"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_type_required" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_type_elective"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_type_elective" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_type_liberal_arts"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_type_liberal_arts" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+                <ImageView
+                    android:id="@+id/ic_credit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:src="@drawable/numbers_24px"
+                    app:layout_constraintBottom_toBottomOf="@+id/subject_credit_chip"
+                    app:layout_constraintEnd_toStartOf="@+id/subject_credit_chip"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@+id/subject_credit_chip" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/subject_credit_chip"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    app:layout_constraintBottom_toTopOf="@+id/divider2"
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_credit"
+                    app:layout_constraintTop_toBottomOf="@+id/subject_type_chip"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_credit_1"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_credit_1" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_credit_2"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_credit_2" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_credit_3"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_credit_3" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+                <!-- Divider -->
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/divider2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    app:dividerInsetEnd="15dp"
+                    app:dividerInsetStart="15dp"
+                    app:layout_constraintBottom_toTopOf="@+id/subject_difficulty_chip"
+                    app:layout_constraintTop_toBottomOf="@+id/subject_credit_chip" />
+
+                <ImageView
+                    android:id="@+id/ic_difficulty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:src="@drawable/speed_24px"
+                    app:layout_constraintBottom_toBottomOf="@id/subject_difficulty_chip"
+                    app:layout_constraintEnd_toStartOf="@+id/subject_difficulty_chip"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@+id/subject_difficulty_chip" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/subject_difficulty_chip"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    app:layout_constraintBottom_toTopOf="@+id/daily_target_study_time_inputtext"
+                    app:layout_constraintEnd_toEndOf="@id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_credit"
+                    app:layout_constraintTop_toBottomOf="@+id/divider2"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_difficulty_unknown"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_difficulty_unknown" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_difficulty_1"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_difficulty_1" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_difficulty_2"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_difficulty_2" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_difficulty_3"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_difficulty_3" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_difficulty_4"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_difficulty_4" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/subject_difficulty_5"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checkable="true"
+                        android:text="@string/subject_difficulty_5" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+                <ImageView
+                    android:id="@+id/ic_target"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:src="@drawable/target_24px"
+                    app:layout_constraintBottom_toBottomOf="@id/daily_target_study_time_inputtext"
+                    app:layout_constraintEnd_toStartOf="@+id/daily_target_study_time_inputtext"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@+id/daily_target_study_time_inputtext" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/daily_target_study_time_inputtext"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:hint="@string/subject_daily_target_study_time"
+
+                    app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_subject"
+                    app:layout_constraintTop_toBottomOf="@+id/subject_difficulty_chip">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/daily_target_study_time_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/weekly_target_study_time_inputtext"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:hint="@string/subject_weekly_target_study_time"
+                    app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_subject"
+                    app:layout_constraintTop_toBottomOf="@+id/daily_target_study_time_inputtext">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/weekly_target_study_time_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/monthly_target_study_time_inputtext"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:hint="@string/subject_monthly_target_study_time"
+                    app:layout_constraintBottom_toTopOf="@id/divider3"
+                    app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_subject"
+                    app:layout_constraintTop_toBottomOf="@+id/weekly_target_study_time_inputtext">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/monthly_target_study_time_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Divider -->
+                <com.google.android.material.divider.MaterialDivider
+                    android:id="@+id/divider3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    app:dividerInsetEnd="15dp"
+                    app:dividerInsetStart="15dp"
+                    app:layout_constraintBottom_toTopOf="@+id/mid_term_textinput"
+                    app:layout_constraintTop_toBottomOf="@+id/monthly_target_study_time_inputtext" />
+
+                <ImageView
+                    android:id="@+id/ic_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:src="@drawable/event_24px"
+                    app:layout_constraintBottom_toBottomOf="@id/mid_term_textinput"
+                    app:layout_constraintEnd_toStartOf="@+id/mid_term_textinput"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@+id/mid_term_textinput" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/mid_term_textinput"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:hint="@string/subject_mid_term_date"
+                    app:layout_constraintBottom_toTopOf="@id/final_term_textinput"
+                    app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_date"
+                    app:layout_constraintTop_toBottomOf="@+id/divider3">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/mid_term_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:inputType="none" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/final_term_textinput"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:hint="@string/subject_final_term_date"
+                    app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/ic_date"
+                    app:layout_constraintTop_toBottomOf="@id/mid_term_textinput">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/final_term_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:inputType="none" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/ic_ratio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:src="@drawable/percent_24px"
+                    app:layout_constraintBottom_toBottomOf="@id/mid_term_ratio_textinput"
+                    app:layout_constraintEnd_toStartOf="@+id/mid_term_textinput"
+                    app:layout_constraintStart_toStartOf="@+id/dialog_layout"
+                    app:layout_constraintTop_toTopOf="@+id/mid_term_ratio_textinput" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/mid_term_ratio_textinput"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:hint="@string/subject_mid_term_ratio"
+                    app:layout_constraintEnd_toStartOf="@+id/final_term_ratio_textinput"
+                    app:layout_constraintStart_toEndOf="@+id/ic_ratio"
+                    app:layout_constraintTop_toBottomOf="@id/final_term_textinput">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/mid_term_ratio_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/final_term_ratio_textinput"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="15dp"
+                    android:hint="@string/subject_final_term_ratio"
+                    app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                    app:layout_constraintStart_toEndOf="@+id/mid_term_ratio_textinput"
+                    app:layout_constraintTop_toBottomOf="@id/final_term_textinput">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/final_term_ratio_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/assignment_ratio_textinput"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="15dp"
+                    android:hint="@string/subject_assignment_ratio"
+                    app:layout_constraintEnd_toStartOf="@+id/quiz_ratio_textinput"
+                    app:layout_constraintHorizontal_chainStyle="spread"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@+id/ic_ratio"
+                    app:layout_constraintTop_toBottomOf="@id/mid_term_ratio_textinput"
+                    >
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/assignment_ratio_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/quiz_ratio_textinput"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="15dp"
+                    android:hint="@string/subject_quiz_ratio"
+                    app:layout_constraintEnd_toStartOf="@+id/attendance_ratio_textinput"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@+id/assignment_ratio_textinput"
+                    app:layout_constraintTop_toBottomOf="@id/mid_term_ratio_textinput"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/quiz_ratio_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/attendance_ratio_textinput"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="15dp"
+                    android:hint="@string/subject_attendance_ratio"
+                    app:layout_constraintEnd_toEndOf="@+id/dialog_layout"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@+id/quiz_ratio_textinput"
+                    app:layout_constraintTop_toBottomOf="@id/final_term_ratio_textinput"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/attendance_ratio_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

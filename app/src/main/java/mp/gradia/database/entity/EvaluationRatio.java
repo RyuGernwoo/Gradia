@@ -38,4 +38,44 @@ public class EvaluationRatio {
         this.assignmentRatio = 0;
         this.attendanceRatio = 0;
     }
+
+    public int getMidTermRatio() {
+        return midTermRatio;
+    }
+
+    public void setMidTermRatio(int midTermRatio) {
+        this.midTermRatio = midTermRatio;
+    }
+
+    public int getFinalTermRatio() {
+        return finalTermRatio;
+    }
+
+    public void setFinalTermRatio(int finalTermRatio) {
+        this.finalTermRatio = finalTermRatio;
+    }
+
+    public int getQuizRatio() {
+        return quizRatio;
+    }
+
+    public void setQuizRatio(int quizRatio) {
+        this.quizRatio = quizRatio;
+    }
+
+    public int getAssignmentRatio() {
+        return assignmentRatio;
+    }
+
+    public void setAssignmentRatio(int assignmentRatio) {
+        this.assignmentRatio = assignmentRatio;
+    }
+
+    public int getAttendanceRatio() {
+        return attendanceRatio;
+    }
+
+    public void setAttendanceRatio(int attendanceRatio) {
+        this.attendanceRatio = attendanceRatio;
+    }
 }

@@ -283,10 +283,11 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
                         addSessionFab.setClickable(true);
                         addSessionFab.setAlpha(1F);
 
+                        selectedSubject = subjectList.get(0);
+                        subjectViewModel.selectSubject(selectedSubject);
+                        setSelectedSubject(selectedSubject);
+
                         if (getChildFragmentManager().findFragmentById(R.id.fragment_container) == null) {
-                            selectedSubject = subjectList.get(0);
-                            subjectViewModel.selectSubject(selectedSubject);
-                            setSelectedSubject(selectedSubject);
                             loadChildFragment(new TimeRecordTimerFragment());
                         }
                     }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -28,16 +29,16 @@
                     android:id="@+id/search_text_input_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="과목명 검색"
                     android:layout_marginStart="5dp"
                     android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:hint="과목명 검색"
                     app:boxBackgroundMode="none"
+                    app:endIconDrawable="@drawable/outline_close_black_24"
                     app:endIconMode="clear_text"
                     app:expandedHintEnabled="false"
                     app:hintEnabled="false"
-                    app:startIconDrawable="@drawable/outline_search_black_24"
-                    app:endIconDrawable="@drawable/outline_close_black_24">
+                    app:startIconDrawable="@drawable/outline_search_black_24">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/search_text_input_edit_text"
@@ -64,22 +65,22 @@
                     android:layout_marginBottom="15dp"
                     android:text="정렬: 과목명"
                     android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
                     android:id="@+id/sort_by_img_btn"
-                    android:background="@android:color/transparent"
-                    android:foreground="?attr/selectableItemBackground"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="15dp"
+                    android:background="@android:color/transparent"
+                    android:foreground="?attr/selectableItemBackground"
                     android:padding="10dp"
                     android:src="@drawable/outline_filter_alt_black_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -92,13 +93,21 @@
                 android:text="등록된 과목이 없습니다."
                 android:visibility="gone" />
 
+            <com.google.android.material.loadingindicator.LoadingIndicator
+                android:id="@+id/loading_indicator"
+                style="@style/Widget.Material3.LoadingIndicator.Contained"
+                android:layout_margin="100dp"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewSubjects"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:paddingTop="8dp" />
-
 
         </LinearLayout>
 
