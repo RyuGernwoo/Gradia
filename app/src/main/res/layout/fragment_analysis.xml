@@ -27,12 +27,60 @@
             app:tabTextColor="@android:color/darker_gray"
             android:layout_marginTop="8dp" />
 
-        <!-- 통계 그래프 -->
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/chartStudyTime"
+        <!-- 주간 범위-->
+        <LinearLayout
+            android:id="@+id/weekControlLayout"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="12dp" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="12dp">
+
+            <ImageButton
+                android:id="@+id/btnPrevWeek"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_arrow_left"
+                android:background="@null"
+                android:contentDescription="이전 주" />
+
+            <TextView
+                android:id="@+id/tvWeekRange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00.00 ~ 00.00"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"/>
+
+            <ImageButton
+                android:id="@+id/btnNextWeek"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_arrow_right"
+                android:background="@null"
+                android:contentDescription="다음 주" />
+        </LinearLayout>
+
+        <!-- 통계 그래프 -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="horizontal"
+            android:layout_marginTop="12dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/chartStudyTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="400dp" />
+            </LinearLayout>
+        </HorizontalScrollView>
 
         <TextView
             android:text="\n학습 달성률"
@@ -41,7 +89,6 @@
             android:textSize="20sp"
             android:textStyle="bold"/>
 
-        <!-- 전체 과목 총합 목표시간 기준으로 학습 달성률 계산-->
         <!-- 일일 달성률 텍스트 -->
         <TextView
             android:id="@+id/tvDailyProgress"
@@ -50,6 +97,7 @@
             android:text="오늘의 학습 달성률"
             android:textSize="16sp"
             android:layout_marginTop="4dp" />
+
         <!-- 달성률 ProgressBar -->
         <ProgressBar
             android:id="@+id/progressGoal_daily"
@@ -76,7 +124,6 @@
             android:layout_height="20dp"
             android:max="100"
             android:progress="0" />
-
 
         <TextView
             android:text="성적 예측 및 추천"
