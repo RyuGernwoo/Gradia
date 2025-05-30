@@ -179,20 +179,27 @@ public class MainActivity extends AppCompatActivity {
     public void navigateToFragment(int fragmentDestination, int subjectId) {
         Bundle bundle = new Bundle();
         bundle.putInt("subject_id_for_fragment", subjectId); // 전달할 데이터 키
+        Log.d(TAG, "navigateToFragment called for destination: " + fragmentDestination + " with subjectId: " + subjectId + ". Bundle created.");
 
         // ViewPager2의 아이템으로 직접 이동
-        if (fragmentDestination == TIME_FRAGMENT) {
-            // TimeFragment로 이동하면서 Bundle 전달하는 로직 (Adapter나 FragmentFactory 사용 시)
-            // 또는 ViewPager2.setCurrentItem(TIME_FRAGMENT); 호출 후
-            // TimeFragment 내에서 Activity를 통해 Bundle을 받거나, SharedViewModel 사용
+        if (fragmentDestination == SUBJECT_FRAGMENT) { // SUBJECT_FRAGMENT 경우 추가
+            viewPager.setCurrentItem(SUBJECT_FRAGMENT, true);
+            // TODO: SubjectFragment가 subjectId를 사용하여 특정 과목 정보를 표시해야 하는 경우,
+            //  MainFragmentAdapter 또는 SubjectFragment 자체에서 Bundle을 처리하는 로직 추가 필요.
+            Log.d(TAG, "Navigating to SubjectFragment. subjectId: " + subjectId);
+        } else if (fragmentDestination == TIME_FRAGMENT) {
             viewPager.setCurrentItem(TIME_FRAGMENT, true);
             // TODO: TimeFragment가 Bundle을 받도록 MainFragmentAdapter 또는 TimeFragment 수정 필요
-            Log.d("MainActivity", "Navigating to TimeFragment with subject ID: " + subjectId);
-
+            Log.d(TAG, "Navigating to TimeFragment with subject ID: " + subjectId);
         } else if (fragmentDestination == ANALYSIS_FRAGMENT) {
             viewPager.setCurrentItem(ANALYSIS_FRAGMENT, true);
             // TODO: AnalysisFragment가 Bundle을 받도록 MainFragmentAdapter 또는 AnalysisFragment 수정 필요
-            Log.d("MainActivity", "Navigating to AnalysisFragment with subject ID: " + subjectId);
+            Log.d(TAG, "Navigating to AnalysisFragment with subject ID: " + subjectId);
+        } else if (fragmentDestination == HOME_FRAGMENT) { // 다른 프래그먼트로의 이동도 고려하여 추가 (예시)
+            viewPager.setCurrentItem(HOME_FRAGMENT, true);
+            Log.d(TAG, "Navigating to HomeFragment.");
+        } else {
+            Log.w(TAG, "Unknown fragment destination: " + fragmentDestination);
         }
         // 실제 데이터 전달은 ViewPager2 어댑터와 각 대상 Fragment의newInstance 패턴 또는 setArguments를 통해 이루어져야 합니다.
         // 간단하게는 ViewPager 아이템 변경 후, 해당 프래그먼트가 Activity로부터 데이터를 가져가도록 할 수도 있습니다.

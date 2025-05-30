@@ -51,8 +51,8 @@ public class HomeFragment extends Fragment {
     private TextView tvMarqueeNotifications; // 전광판
     private StudySessionViewModel studySessionViewModel; // 과목 세부 정보 가져오기
     private Map<Integer, Long> todayStudiedTimeMap = new HashMap<>(); // 과목 ID별 총 공부 시간(분) 저장
-    private ImageButton sortByButton;
-    private TextView sortTextView;
+    private ImageButton sortByButton; // 정렬 버튼
+    private TextView sortTextView; // 정렬 기준 텍스트
     private int selectedSortType = 0;
 
     @Override
@@ -176,15 +176,20 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "updateSubjectList called. SOriginal subjects count: " + subjects.size() + ", SortType: " + selectedSortType);
         subjectListContainer.removeAllViews();
 
+        // 과목 여부에 따라 오브젝트 숨기기 및 표시하기
         if (subjects == null || subjects.isEmpty()) {
             textNoData.setVisibility(View.VISIBLE);
             btnGoToSubjects.setVisibility(View.VISIBLE);
             subjectListContainer.setVisibility(View.GONE);
+            sortTextView.setVisibility(View.GONE);
+            sortByButton.setVisibility(View.GONE);
             updateMarquee(new ArrayList<>()); // 과목 없을 시 전광판도 비움
         } else {
             textNoData.setVisibility(View.GONE);
             btnGoToSubjects.setVisibility(View.GONE);
             subjectListContainer.setVisibility(View.VISIBLE);
+            sortTextView.setVisibility(View.VISIBLE);
+            sortByButton.setVisibility(View.VISIBLE);
 
             // 정렬 로직 적용
             switch (selectedSortType) {
@@ -224,6 +229,7 @@ public class HomeFragment extends Fragment {
                 TextView studyTimeTV = subjectItemView.findViewById(R.id.study_time); // XML ID는 study_time
                 TextView targetStudyTimeTV = subjectItemView.findViewById(R.id.target_study_time);
 
+                Button btnDetails = subjectItemView.findViewById(R.id.btn_subjects);
                 Button btnRecord = subjectItemView.findViewById(R.id.btn_record_time);
                 Button btnAnalysis = subjectItemView.findViewById(R.id.btn_view_analysis);
 
@@ -282,23 +288,31 @@ public class HomeFragment extends Fragment {
                 expandButton.setOnClickListener(expandClickListener);
                 subjectItemView.setOnClickListener(expandClickListener);
 
-                // 5. 기록/분석 버튼 리스너 설정
-                if (btnRecord != null) {
+                // 5. 세부 버튼 리스너 설정
+                if (btnDetails != null) { // '세부 정보' 버튼 리스너 설정
+                    btnDetails.setOnClickListener(v -> {
+                        if (getActivity() instanceof MainActivity) {
+                            ((MainActivity) getActivity()).navigateToFragment(MainActivity.SUBJECT_FRAGMENT, subject.getSubjectId()); // SUBJECT_FRAGMENT로 이동
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "btn_subjects not found in item_subject_list_home.xml. Did you add the ID?");
+                }
+
+                if (btnRecord != null) { // '공부하기' 버튼 리스너 설정
                     btnRecord.setOnClickListener(v -> {
                         if (getActivity() instanceof MainActivity) {
-                            Toast.makeText(getContext(), subject.getName() + " 기록 화면으로 이동합니다.", Toast.LENGTH_SHORT).show();
-                            ((MainActivity) getActivity()).navigateToFragment(MainActivity.TIME_FRAGMENT, subject.getSubjectId());
+                            ((MainActivity) getActivity()).navigateToFragment(MainActivity.TIME_FRAGMENT, subject.getSubjectId()); // TIME_FRAGMENT로 이동
                         }
                     });
                 } else {
                     Log.e(TAG, "btn_record_time not found in item_subject_list_home.xml. Did you add the ID?");
                 }
 
-                if (btnAnalysis != null) {
+                if (btnAnalysis != null) { // '분석 정보' 버튼 리스너 설정
                     btnAnalysis.setOnClickListener(v -> {
                         if (getActivity() instanceof MainActivity) {
-                            Toast.makeText(getContext(), subject.getName() + " 분석 화면으로 이동합니다.", Toast.LENGTH_SHORT).show();
-                            ((MainActivity) getActivity()).navigateToFragment(MainActivity.ANALYSIS_FRAGMENT, subject.getSubjectId());
+                            ((MainActivity) getActivity()).navigateToFragment(MainActivity.ANALYSIS_FRAGMENT, subject.getSubjectId()); // ANALYSIS_FRAGMENT로 이동
                         }
                     });
                 } else {
