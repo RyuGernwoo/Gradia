@@ -1,5 +1,7 @@
 package mp.gradia.api.models;
 
+import java.util.List;
+
 public class Subject {
     private String id;
     private String name;
@@ -10,6 +12,7 @@ public class Subject {
     private String final_term_schedule;
     private EvaluationRatio evaluation_ratio;
     private TargetStudyTime target_study_time;
+    private List<Todo> todos;
     private String color;
     private String created_at;
     private String updated_at;
@@ -84,6 +87,14 @@ public class Subject {
 
     public void setTarget_study_time(TargetStudyTime target_study_time) {
         this.target_study_time = target_study_time;
+    }
+
+    public List<Todo> getTodos() {
+        return todos;
+    }
+
+    public void setTodos(List<Todo> todos) {
+        this.todos = todos;
     }
 
     public String getColor() {

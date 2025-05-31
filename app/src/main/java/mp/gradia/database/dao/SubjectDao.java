@@ -30,6 +30,9 @@ public interface SubjectDao {
     @Query("SELECT * FROM subjects WHERE subject_id = :id")
     SubjectEntity getById(int id);
 
+    @Query("SELECT * FROM subjects WHERE subject_id = :id")
+    SubjectEntity getByIdSync(int id);
+
     @Query("SELECT * FROM subjects WHERE name LIKE '%' || :keyword || '%'")
     Flowable<List<SubjectEntity>> searchByName(String keyword);
 
@@ -44,6 +47,9 @@ public interface SubjectDao {
 
     @Update
     Completable update(SubjectEntity... subject);
+
+    @Update
+    void updateSync(SubjectEntity subject);
 
     @Delete
     Completable delete(SubjectEntity... subject);
