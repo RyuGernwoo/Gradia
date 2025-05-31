@@ -264,10 +264,24 @@ public class HomeFragment extends Fragment {
                 Log.d(TAG, "Subject: " + subject.getName() + ", Today's Studied Time: " + actualStudiedTimeMinutes + " mins");
 
                 TargetStudyTime targetTime = subject.getTime();
-                int dailyTargetMinutes = 0;
                 if (targetTime != null) {
-                    dailyTargetMinutes = targetTime.getDailyTargetStudyTime(); // 분 단위 가정
-                    targetStudyTimeTV.setText(formatMinutesToHoursAndMinutes(dailyTargetMinutes));
+                    int dailyTargetAsHours = targetTime.getDailyTargetStudyTime(); // 이 값은 이제 '시' 단위로 간주
+                    if (dailyTargetAsHours < 0) { // 음수 값 방지
+                        dailyTargetAsHours = 0;
+                    }
+                    // "X시간 0분" 형식으로 표시
+                    String formattedTargetTime = String.format(Locale.getDefault(), "%d 시간 %d 분", dailyTargetAsHours, 0);
+                    targetStudyTimeTV.setText(formattedTargetTime);
+
+                    // 전광판 메시지용 데이터 수집 시 dailyTargetMinutes 대신 dailyTargetAsHours를 분으로 환산하여 비교
+                    // 또는 실제 공부 시간도 '시' 단위로 비교 (여기서는 분으로 통일하여 비교 가정)
+                    int dailyTargetTotalMinutesForComparison = dailyTargetAsHours * 60;
+                    if (dailyTargetTotalMinutesForComparison > 0 && actualStudiedTimeMinutes < dailyTargetTotalMinutesForComparison) {
+                        if (subject.getName() != null && !subject.getName().isEmpty()) {
+                            unmetTargetSubjects.add(subject.getName());
+                        }
+                    }
+
                 } else {
                     targetStudyTimeTV.setText("미설정");
                 }
@@ -320,13 +334,6 @@ public class HomeFragment extends Fragment {
                 }
 
                 subjectListContainer.addView(subjectItemView);
-
-                // 전광판 메시지용 데이터 수집
-                if (targetTime != null && dailyTargetMinutes > 0 && actualStudiedTimeMinutes < dailyTargetMinutes) {
-                    if (subject.getName() != null && !subject.getName().isEmpty()) {
-                        unmetTargetSubjects.add(subject.getName());
-                    }
-                }
             }
             // 전광판 내용 설정
             updateMarquee(unmetTargetSubjects);
