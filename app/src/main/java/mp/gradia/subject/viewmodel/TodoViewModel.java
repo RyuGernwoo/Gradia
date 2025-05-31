@@ -9,7 +9,8 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 import mp.gradia.database.entity.TodoEntity;
-import mp.gradia.subject.repository.TodoRepository;
+import mp.gradia.database.repository.SubjectRepository;
+import mp.gradia.database.repository.TodoRepository;
 
 public class TodoViewModel extends AndroidViewModel {
 
@@ -28,11 +29,29 @@ public class TodoViewModel extends AndroidViewModel {
         repository.insert(todo);
     }
 
+    public void insert(TodoEntity todo, SubjectRepository.CloudSyncCallback callback) {
+        repository.insert(todo, callback);
+    }
+
     public void update(TodoEntity todo) {
         repository.update(todo);
     }
 
+    public void update(TodoEntity todo, SubjectRepository.CloudSyncCallback callback) {
+        repository.update(todo, callback);
+    }
+
     public void delete(TodoEntity todo) {
         repository.delete(todo);
+    }
+
+    public void delete(TodoEntity todo, SubjectRepository.CloudSyncCallback callback) {
+        repository.delete(todo, callback);
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        repository.dispose();
     }
 }

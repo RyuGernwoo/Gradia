@@ -12,13 +12,15 @@ import java.util.stream.Collectors;
 
 import mp.gradia.api.models.Subject;
 import mp.gradia.api.models.TimetableItem;
+import mp.gradia.api.models.Todo;
 import mp.gradia.database.entity.EvaluationRatio;
 import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.database.entity.TargetStudyTime;
+import mp.gradia.database.entity.TodoEntity;
 
 public class SubjectUtil {
     private static final String TAG = "SubjectUtil";
-    public static Subject convertToApiSubject(SubjectEntity localSubject) {
+    public static Subject convertToApiSubject(SubjectEntity localSubject, List<TodoEntity> todos) {
         Subject apiSubject = new Subject();
         apiSubject.setId(String.valueOf(localSubject.getSubjectId()));
         if (localSubject.getServerId() != null) {
@@ -30,6 +32,14 @@ public class SubjectUtil {
         apiSubject.setDifficulty(localSubject.getDifficulty());
         apiSubject.setMid_term_schedule(localSubject.getMidTermSchedule());
         apiSubject.setFinal_term_schedule(localSubject.getFinalTermSchedule());
+        apiSubject.setTodos(todos.stream()
+                .map(todo -> {
+                    Todo apiTodo = new Todo(
+                            todo.content,
+                            todo.isDone
+                    );
+                    return apiTodo;
+                }).collect(Collectors.toList()));
         apiSubject.setColor(localSubject.getColor());
 
         // 생성 시간과 업데이트 시간을 ISO 형식 문자열로 변환
@@ -53,7 +63,6 @@ public class SubjectUtil {
             apiRatio.setQuiz_ratio(localRatio.quizRatio);
             apiRatio.setAssignment_ratio(localRatio.assignmentRatio);
             apiRatio.setAttendance_ratio(localRatio.attendanceRatio);
-
             apiSubject.setEvaluation_ratio(apiRatio);
         }
 

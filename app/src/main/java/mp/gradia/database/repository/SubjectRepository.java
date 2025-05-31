@@ -3,11 +3,11 @@ package mp.gradia.database.repository;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.core.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.LiveDataReactiveStreams;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,22 +21,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import mp.gradia.api.ApiService;
 import mp.gradia.api.AuthManager;
 import mp.gradia.api.RetrofitClient;
-import mp.gradia.api.models.EvaluationRatio;
 import mp.gradia.api.models.Subject;
 import mp.gradia.api.models.SubjectsApiResponse;
-import mp.gradia.api.models.TargetStudyTime;
 import mp.gradia.api.models.TimetableItem;
 import mp.gradia.api.models.TimetableResponse;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.SubjectDao;
+import mp.gradia.database.dao.TodoDao;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.database.entity.TodoEntity;
 import mp.gradia.utils.SubjectUtil;
+import mp.gradia.utils.TodoUtil;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,6 +47,9 @@ public class SubjectRepository {
     private static final String TAG = "SubjectRepository";
 
     private final SubjectDao subjectDao;
+
+    private final TodoDao todoDao;
+
     // 모든 과목 데이터를 LiveData 형태로 보관
     private final LiveData<List<SubjectEntity>> allSubjects;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -64,6 +69,7 @@ public class SubjectRepository {
     public SubjectRepository(Context context) {
         AppDatabase db = AppDatabase.getInstance(context);
         subjectDao = db.subjectDao();
+        todoDao = db.todoDao();
         allSubjects = LiveDataReactiveStreams.fromPublisher(subjectDao.getAll()); // 초기화 시 전체 과목 조회
 
         // 클라우드 동기화 초기화
@@ -101,28 +107,28 @@ public class SubjectRepository {
         // 2. 서버에도 저장
         if (authManager.isLoggedIn()) {
             disposables.add(localInsert
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(
-                                    (generatedId) -> {
-                                        Log.d(TAG, "로컬 과목 생성 완료: " + subject.getSubjectId());
-                                        if (callback != null)
-                                            callback.onSuccess();
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            (generatedId) -> {
+                                Log.d(TAG, "로컬 과목 생성 완료: " + subject.getSubjectId());
+                                if (callback != null)
+                                    callback.onSuccess();
 
-                                        // 서버 업로드는 별도로 비동기 수행
-                                        disposables.add(uploadSubjectToServer(subject)
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe(
-                                                        () -> Log.d(TAG, "서버 동기화 완료: " + subject.getName()),
-                                                        throwable -> Log.w(TAG,
-                                                                "서버 동기화 실패 (나중에 재시도): " + subject.getName(),
-                                                                throwable)));
-                                    },
-                                    throwable -> {
-                                        Log.e(TAG, "과목 생성 실패", throwable);
-                                        if (callback != null)
-                                            callback.onError("과목 생성 실패: " + throwable.getMessage());
-                                    }));
+                                // 서버 업로드는 별도로 비동기 수행
+                                disposables.add(uploadSubjectToServer(subject)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(
+                                                () -> Log.d(TAG, "서버 동기화 완료: " + subject.getName()),
+                                                throwable -> Log.w(TAG,
+                                                        "서버 동기화 실패 (나중에 재시도): " + subject.getName(),
+                                                        throwable)));
+                            },
+                            throwable -> {
+                                Log.e(TAG, "과목 생성 실패", throwable);
+                                if (callback != null)
+                                    callback.onError("과목 생성 실패: " + throwable.getMessage());
+                            }));
         } else {
             // 로그인되지 않은 경우 로컬 DB만 업데이트
             disposables.add(
@@ -170,24 +176,25 @@ public class SubjectRepository {
                     .subscribe(
                             () -> {
                                 Log.d(TAG, "로컬 과목 업데이트 완료: " + subject.getName());
-                                if (callback != null)
+                                if (callback != null) {
                                     callback.onSuccess();
+                                }
 
                                 // 서버 업데이트는 별도로 비동기 수행
-                                disposables.add(
-                                        updateSubjectOnServer(subject)
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe(
-                                                        () -> Log.d(TAG, "서버 동기화 완료: " + subject.getName()),
-                                                        throwable -> Log.w(TAG,
-                                                                "서버 동기화 실패 (나중에 재시도): " + subject.getName(),
-                                                                throwable)));
+                                disposables.add(updateSubjectOnServer(subject)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(
+                                                () -> Log.d(TAG, "서버 동기화 완료: " + subject.getName()),
+                                                throwable -> Log.w(TAG,
+                                                        "서버 동기화 실패 (나중에 재시도): " + subject.getName(),
+                                                        throwable)));
                             },
                             throwable -> {
                                 Log.e(TAG, "과목 업데이트 실패", throwable);
-                                if (callback != null)
+                                if (callback != null) {
                                     callback.onError("과목 업데이트 실패: " + throwable.getMessage());
+                                }
                             }));
         } else {
             Log.d(TAG, "서버 동기화 조건 불만족 - 로컬 DB만 업데이트");
@@ -294,7 +301,7 @@ public class SubjectRepository {
     private Completable uploadSubjectToServer(SubjectEntity subject) {
         return Completable.create(emitter -> {
             String authHeader = authManager.getAuthHeader();
-            Subject apiSubject = SubjectUtil.convertToApiSubject(subject);
+            Subject apiSubject = SubjectUtil.convertToApiSubject(subject, new ArrayList<>());
             apiSubject.setId(null); // 새 과목이므로 ID는 null로 설정
 
             apiService.createSubject(authHeader, apiSubject).enqueue(new Callback<Subject>() {
@@ -341,37 +348,70 @@ public class SubjectRepository {
      * 서버의 과목 업데이트
      */
     private Completable updateSubjectOnServer(SubjectEntity subject) {
-        return Completable.create(emitter -> {
-            String authHeader = authManager.getAuthHeader();
-            String serverId = subject.getServerId();
-            Subject apiSubject = SubjectUtil.convertToApiSubject(subject);
+        Log.d(TAG, "[updateSubjectOnServer] 시작 - 과목: " + subject.getName() + ", 서버 ID: " + subject.getServerId());
 
-            apiService.updateSubject(authHeader, serverId, apiSubject).enqueue(new Callback<Subject>() {
-                @Override
-                public void onResponse(Call<Subject> call, Response<Subject> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        // 서버에서 받은 업데이트 시간 설정
-                        SubjectUtil.updateTimestampsFromResponse(subject, response.body());
+        return Single.fromCallable(() -> {
+            // 최신 데이터를 동기적으로 가져오기 (IO 스레드에서 실행)
+            SubjectEntity latestSubject = subjectDao.getByIdSync(subject.getSubjectId());
+            List<TodoEntity> todos = todoDao.getTodosForSubjectSync(subject.getSubjectId());
 
-                        // 로컬 DB 업데이트
-                        disposables.add(subjectDao.update(subject)
-                                .subscribeOn(Schedulers.from(executorService))
-                                .subscribe(
-                                        () -> Log.d(TAG, "서버 타임스탬프 업데이트 완료"),
-                                        error -> Log.e(TAG, "서버 타임스탬프 업데이트 실패", error)));
+            Log.d(TAG, "[updateSubjectOnServer] 데이터 조회 완료 - todos: " + todos.size() + "개");
 
-                        emitter.onComplete();
-                    } else {
-                        emitter.onError(new Exception("서버에 과목 업데이트 실패: " + response.code()));
-                    }
-                }
+            // API 모델로 변환
+            Subject apiSubject = SubjectUtil.convertToApiSubject(latestSubject, todos);
 
-                @Override
-                public void onFailure(Call<Subject> call, Throwable t) {
-                    emitter.onError(t);
-                }
-            });
-        });
+            Log.d(TAG, "[updateSubjectOnServer] API 모델 변환 완료");
+
+            return new Object[] { latestSubject, apiSubject };
+        })
+                .subscribeOn(Schedulers.from(executorService))
+                .flatMapCompletable(data -> {
+                    SubjectEntity latestSubject = (SubjectEntity) ((Object[]) data)[0];
+                    Subject apiSubject = (Subject) ((Object[]) data)[1];
+
+                    return Completable.create(emitter -> {
+                        String authHeader = authManager.getAuthHeader();
+                        String serverId = subject.getServerId();
+
+                        Log.d(TAG, "[updateSubjectOnServer] 서버에 업데이트 요청 시작");
+
+                        // 비동기 서버 업데이트 요청
+                        apiService.updateSubject(authHeader, serverId, apiSubject).enqueue(new Callback<Subject>() {
+                            @Override
+                            public void onResponse(Call<Subject> call, Response<Subject> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    Log.d(TAG, "[updateSubjectOnServer] 서버 업데이트 성공");
+
+                                    // 서버에서 받은 업데이트 시간을 로컬에 반영
+                                    SubjectUtil.updateTimestampsFromResponse(latestSubject, response.body());
+
+                                    // 로컬 DB 업데이트 (비동기)
+                                    disposables.add(subjectDao.update(latestSubject)
+                                            .subscribeOn(Schedulers.from(executorService))
+                                            .subscribe(
+                                                    () -> {
+                                                        Log.d(TAG, "[updateSubjectOnServer] 타임스탬프 업데이트 완료");
+                                                        emitter.onComplete();
+                                                    },
+                                                    error -> {
+                                                        Log.e(TAG, "[updateSubjectOnServer] 타임스탬프 업데이트 실패", error);
+                                                        emitter.onError(error);
+                                                    }));
+                                } else {
+                                    String errorMsg = "서버에 과목 업데이트 실패: " + response.code();
+                                    Log.e(TAG, "[updateSubjectOnServer] " + errorMsg);
+                                    emitter.onError(new Exception(errorMsg));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Subject> call, Throwable t) {
+                                Log.e(TAG, "[updateSubjectOnServer] 네트워크 오류", t);
+                                emitter.onError(t);
+                            }
+                        });
+                    });
+                });
     }
 
     /**
@@ -727,46 +767,45 @@ public class SubjectRepository {
             return;
         }
 
-        List<SubjectEntity> localSubjects = new ArrayList<>();
+        List<TodoEntity> localTodos = new ArrayList<>();
 
         // 서버 데이터를 로컬 엔티티로 변환
         for (Subject serverSubject : serverSubjects) {
             try {
                 SubjectEntity localSubject = SubjectUtil.convertServerToLocalSubject(serverSubject);
-                localSubjects.add(localSubject);
+                var single = subjectDao.insertAndGetId(localSubject)
+                        .subscribeOn(Schedulers.from(executorService))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                generatedId -> {
+                                    if (serverSubject.getTodos() != null) {
+                                        Log.d(TAG, "서버 과목의 할 일 목록이 존재합니다: " + serverSubject.getTodos().size() + "개");
+                                        for (var serverTodos : serverSubject.getTodos()) {
+                                            TodoEntity localTodo = TodoUtil.convertServerToLocalTodo(serverTodos,
+                                                    generatedId.intValue());
+
+                                            disposables.add(todoDao.insertCompletable(localTodo)
+                                                    .subscribeOn(Schedulers.from(executorService))
+                                                    .observeOn(AndroidSchedulers.mainThread())
+                                                    .subscribe(
+                                                            () -> Log.d(TAG, "로컬 할 일 저장 완료: " + localTodo.content),
+                                                            throwable -> Log.e(TAG, "로컬 할 일 저장 실패", throwable)));
+                                        }
+                                    }
+                                    localSubject.setSubjectId(generatedId.intValue());
+                                    Log.d(TAG, "서버 과목 데이터 로컬 저장 완료: " + localSubject.getName() + " (ID: "
+                                            + localSubject.getSubjectId() + ")");
+                                },
+                                throwable -> Log.e(TAG, "서버 과목 데이터 로컬 저장 실패", throwable));
+
+                disposables.add(single);
                 Log.d(TAG, "변환된 과목: " + localSubject.getName() + " (서버 ID: " + localSubject.getServerId() + ")");
             } catch (Exception e) {
                 Log.e(TAG, "과목 변환 중 오류: " + serverSubject.getName(), e);
             }
         }
-
-        if (localSubjects.isEmpty()) {
-            Log.w(TAG, "변환된 과목이 없습니다.");
-            if (callback != null) {
-                callback.onSuccess();
-            }
-            return;
-        }
-
-        // 로컬 DB에 일괄 저장
-        SubjectEntity[] subjectsArray = localSubjects.toArray(new SubjectEntity[0]);
-        disposables.add(subjectDao.insert(subjectsArray)
-                .subscribeOn(Schedulers.from(executorService))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        () -> {
-                            Log.d(TAG, "서버 과목 데이터 로컬 저장 완료: " + localSubjects.size() + "개");
-                            if (callback != null) {
-                                callback.onSuccess();
-                            }
-                        },
-                        throwable -> {
-                            Log.e(TAG, "서버 과목 데이터 로컬 저장 실패", throwable);
-                            if (callback != null) {
-                                callback.onError("데이터 저장 실패: " + throwable.getMessage());
-                            }
-                        }));
     }
+
     public void fetchEveryTimeTable(String url, CloudSyncCallback callback) {
         apiService.getTimetable(url).enqueue(new Callback<TimetableResponse>() {
             @Override
@@ -774,7 +813,8 @@ public class SubjectRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     TimetableResponse timetable = response.body();
                     List<TimetableItem> timetableItems = timetable.getTimetable();
-                    List<SubjectEntity> convertedSubjects = SubjectUtil.convertTimetableItemsToSubjectEntities(timetableItems);
+                    List<SubjectEntity> convertedSubjects = SubjectUtil
+                            .convertTimetableItemsToSubjectEntities(timetableItems);
                     for (SubjectEntity subject : convertedSubjects) {
                         insert(subject, new CloudSyncCallback() {
                             @Override
@@ -804,5 +844,15 @@ public class SubjectRepository {
                 }
             }
         });
+    }
+
+    /**
+     * 외부에서 특정 Subject를 서버에 동기화할 수 있는 public 메서드
+     */
+    public Completable syncSubjectToServer(SubjectEntity subject) {
+        if (!authManager.isLoggedIn() || subject.getServerId() == null) {
+            return Completable.complete(); // 조건 불만족 시 즉시 완료
+        }
+        return updateSubjectOnServer(subject);
     }
 }
