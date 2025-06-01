@@ -17,7 +17,6 @@ import mp.gradia.database.repository.StudySessionRepository;
 import mp.gradia.database.repository.SubjectRepository;
 
 public class AnalysisViewModel extends AndroidViewModel {
-
     private final StudySessionRepository studySessionRepository;
     private final SubjectRepository subjectRepository;
     private final LiveData<List<SubjectStudyTime>> totalStudyTimes;
@@ -58,5 +57,4 @@ public class AnalysisViewModel extends AndroidViewModel {
     public LiveData<List<DayStudyTime>> getMonthlyStudyTime() {
         return studySessionRepository.getMonthlyStudyTime();
     }
-
 }

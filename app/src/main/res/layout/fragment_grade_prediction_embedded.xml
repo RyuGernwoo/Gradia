@@ -3,17 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp">
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvPrediction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="학습 데이터를 기반으로 성적을 예측하고 맞춤 조언을 받아보세요"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"/>
 
     <!-- 과목 선택 섹션 -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="2dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
         app:cardBackgroundColor="#FFFFFF"
-        android:layout_marginBottom="12dp">
+        app:cardCornerRadius="15dp"
+        app:cardElevation="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,55 +37,57 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:text="과목 선택"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 android:textColor="#333333"
-                android:layout_marginBottom="12dp" />
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/subjectDropdownLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="과목을 선택하세요"
-                app:hintTextColor="#666666"
-                app:boxStrokeColor="#CCCCCC"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
                 app:boxCornerRadiusBottomEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxStrokeColor="#CCCCCC"
                 app:endIconMode="dropdown_menu"
-                app:endIconTint="#666666">
+                app:endIconTint="#666666"
+                app:hintTextColor="#666666">
 
                 <AutoCompleteTextView
                     android:id="@+id/subjectDropdown"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:inputType="none"
-                    android:focusable="false"
                     android:clickable="true"
-                    android:padding="16dp"
-                    android:gravity="center_vertical"
-                    android:textColor="#333333"
-                    android:textSize="16sp"
                     android:completionThreshold="1"
                     android:dropDownSelector="?android:attr/selectableItemBackground"
-                    android:popupBackground="@android:color/white" />
+                    android:focusable="false"
+                    android:gravity="center_vertical"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:popupBackground="@android:color/white"
+                    android:textColor="#333333"
+                    android:textSize="16sp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
     <!-- 이해도 입력 섹션 -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="2dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
         app:cardBackgroundColor="#FFFFFF"
-        android:layout_marginBottom="12dp">
+        app:cardCornerRadius="15dp"
+        app:cardElevation="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -83,43 +98,43 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:text="이해도 선택"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 android:textColor="#333333"
-                android:layout_marginBottom="16dp" />
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-            <com.google.android.material.card.MaterialCardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="6dp"
-                app:cardElevation="1dp"
+                android:layout_margin="15dp"
                 app:cardBackgroundColor="#F5F5F5"
-                android:layout_marginBottom="12dp">
+                app:cardCornerRadius="6dp"
+                app:cardElevation="1dp">
 
                 <TextView
                     android:id="@+id/understandingLevelText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="이해도: 3 (보통)"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#555555"
                     android:gravity="center"
-                    android:padding="12dp" />
+                    android:padding="12dp"
+                    android:text="이해도: 3 (보통)"
+                    android:textColor="#555555"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-            </com.google.android.material.card.MaterialCardView>
+            </androidx.cardview.widget.CardView>
 
             <SeekBar
                 android:id="@+id/understandingSeekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
                 android:max="5"
                 android:min="1"
                 android:progress="3"
                 android:progressTint="#666666"
-                android:thumbTint="#555555"
-                android:layout_marginBottom="8dp" />
+                android:thumbTint="#555555" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -130,107 +145,114 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:gravity="start"
                     android:text="매우 어려움"
-                    android:textSize="11sp"
                     android:textColor="#888888"
-                    android:gravity="start" />
+                    android:textSize="11sp" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:gravity="end"
                     android:text="매우 쉬움"
-                    android:textSize="11sp"
                     android:textColor="#888888"
-                    android:gravity="end" />
+                    android:textSize="11sp" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
     <!-- 예측 버튼 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/predictButton"
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        android:backgroundTint="#555555"
         android:text="성적 예측하기"
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="#FFFFFF"
         app:cornerRadius="8dp"
-        android:layout_marginBottom="12dp"
-        android:backgroundTint="#555555"
         app:elevation="2dp" />
 
     <!-- 로딩 인디케이터 -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/loadingCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="2dp"
-        app:cardBackgroundColor="#FFFFFF"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
         android:visibility="gone"
-        android:layout_marginBottom="12dp">
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="vertical"
-            android:padding="24dp"
-            android:gravity="center">
+            android:padding="24dp">
 
-            <ProgressBar
+            <com.google.android.material.loadingindicator.LoadingIndicator
                 android:id="@+id/loadingProgress"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:indeterminateTint="#666666"
-                android:layout_marginBottom="12dp" />
+                style="@style/Widget.Material3.LoadingIndicator.Contained"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="15dp" />
 
             <TextView
                 android:id="@+id/loadingText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="성적을 예측하고 있습니다..."
-                android:textSize="14sp"
-                android:textColor="#666666" />
+                android:textColor="#666666"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
     <!-- 신뢰도 경고 콜아웃 -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/reliabilityWarningCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#FFF8E1"
         app:cardCornerRadius="6dp"
         app:cardElevation="1dp"
-        app:cardBackgroundColor="#FFF8E1"
         app:strokeColor="#FFB74D"
-        app:strokeWidth="1dp"
-        android:visibility="gone"
-        android:layout_marginBottom="12dp">
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="12dp"
-            android:gravity="center_vertical">
+            android:padding="12dp">
 
             <TextView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:text="!"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#FF8F00"
+                android:layout_marginEnd="8dp"
                 android:gravity="center"
+                android:text="!"
+                android:textColor="#FF8F00"
+                android:textSize="16sp"
 
-                android:layout_marginEnd="8dp" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/reliabilityWarningText"
@@ -238,22 +260,25 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="신뢰도가 낮습니다. 더 많은 학습 데이터가 필요할 수 있습니다."
-                android:textSize="13sp"
-                android:textColor="#E65100" />
+                android:textColor="#E65100"
+                android:textSize="13sp" />
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
     <!-- 결과 표시 섹션 -->
-    <com.google.android.material.card.MaterialCardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/resultCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="2dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        android:visibility="gone"
         app:cardBackgroundColor="#FFFFFF"
-        android:visibility="gone">
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -271,20 +296,20 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="예측 결과"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
+                    android:layout_marginBottom="4dp"
                     android:gravity="center"
-                    android:layout_marginBottom="4dp" />
+                    android:text="예측 결과"
+                    android:textColor="#333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text="AI 기반 학습 분석"
-                    android:textSize="12sp"
                     android:textColor="#666666"
-                    android:gravity="center" />
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
@@ -298,148 +323,148 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal">
 
                     <!-- 예측 성적 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
-                        app:cardCornerRadius="6dp"
-                        app:cardElevation="1dp"
                         app:cardBackgroundColor="#F8F9FA"
-                        android:layout_marginEnd="6dp">
+                        app:cardCornerRadius="6dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="16dp"
-                            android:gravity="center">
+                            android:padding="16dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="예상 성적"
-                                android:textSize="11sp"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="11sp" />
 
                             <TextView
                                 android:id="@+id/predictedGrade"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text=""
+                                android:textColor="#333333"
                                 android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="#333333" />
+                                android:textStyle="bold" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                     <!-- 예측 점수 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
                         android:layout_weight="1"
-                        app:cardCornerRadius="6dp"
-                        app:cardElevation="1dp"
                         app:cardBackgroundColor="#F8F9FA"
-                        android:layout_marginStart="6dp">
+                        app:cardCornerRadius="6dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="16dp"
-                            android:gravity="center">
+                            android:padding="16dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="예상 점수"
-                                android:textSize="11sp"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="11sp" />
 
                             <TextView
                                 android:id="@+id/predictedScore"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text=""
+                                android:textColor="#333333"
                                 android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="#333333" />
+                                android:textStyle="bold" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
                 <!-- 신뢰도 -->
-                <com.google.android.material.card.MaterialCardView
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="6dp"
-                    app:cardElevation="1dp"
+                    android:layout_marginBottom="16dp"
                     app:cardBackgroundColor="#F8F9FA"
-                    android:layout_marginBottom="16dp">
+                    app:cardCornerRadius="6dp"
+                    app:cardElevation="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:padding="12dp"
-                        android:gravity="center_vertical">
+                        android:padding="12dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
                             android:text="신뢰도"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
                             android:textColor="#555555"
-                            android:layout_marginEnd="8dp" />
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/confidence"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text=""
-                            android:textSize="14sp"
-                            android:textColor="#555555" />
+                            android:textColor="#555555"
+                            android:textSize="14sp" />
 
                     </LinearLayout>
 
-                </com.google.android.material.card.MaterialCardView>
+                </androidx.cardview.widget.CardView>
 
                 <!-- 분석 결과 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="12dp"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="학습 분석"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="#333333"
-                        android:layout_marginBottom="8dp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <!-- 학습량 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
+                        android:layout_marginBottom="6dp"
                         app:cardBackgroundColor="#FAFAFA"
-                        android:layout_marginBottom="6dp">
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -450,33 +475,33 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="학습량"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/learningVolume"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text="분석 중..."
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                     <!-- 학습 품질 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
+                        android:layout_marginBottom="6dp"
                         app:cardBackgroundColor="#FAFAFA"
-                        android:layout_marginBottom="6dp">
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -487,33 +512,33 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="학습 품질"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/learningQuality"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text="분석 중..."
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                     <!-- 학습 일관성 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
+                        android:layout_marginBottom="6dp"
                         app:cardBackgroundColor="#FAFAFA"
-                        android:layout_marginBottom="6dp">
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -524,34 +549,34 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="학습 일관성"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/learningConsistency"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text="분석 중..."
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                     <!-- 주요 요인 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/keyFactorsCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
+                        android:visibility="gone"
                         app:cardBackgroundColor="#FAFAFA"
-                        android:visibility="gone">
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -562,24 +587,24 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="주요 요인"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/keyFactors"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text=""
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
@@ -587,28 +612,28 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="12dp"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="맞춤 조언"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="#333333"
-                        android:layout_marginBottom="8dp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <!-- 최우선 개선 사항 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/priorityHighCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
-                        app:cardBackgroundColor="#FAFAFA"
                         android:layout_marginBottom="6dp"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        app:cardBackgroundColor="#FAFAFA"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -619,35 +644,35 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="최우선 개선 사항"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#D32F2F"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/priorityHighAdvice"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text=""
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                     <!-- 학습 최적화 제안 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/optimizationCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
-                        app:cardBackgroundColor="#FAFAFA"
                         android:layout_marginBottom="6dp"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        app:cardBackgroundColor="#FAFAFA"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -658,34 +683,34 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="학습 최적화 제안"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#1976D2"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/optimizationAdvice"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text=""
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                     <!-- 현재 강점 유지 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/maintenanceCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
+                        android:visibility="gone"
                         app:cardBackgroundColor="#FAFAFA"
-                        android:visibility="gone">
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -696,24 +721,24 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="현재 강점 유지"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#388E3C"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/maintenanceAdvice"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text=""
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
@@ -726,22 +751,22 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="추천 주간 계획"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="#333333"
-                        android:layout_marginBottom="8dp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <!-- 권장 주간 학습 시간 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/targetHoursCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
-                        app:cardBackgroundColor="#FAFAFA"
                         android:layout_marginBottom="6dp"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        app:cardBackgroundColor="#FAFAFA"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -752,35 +777,35 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="권장 주간 학습 시간"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/targetHours"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text=""
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                     <!-- 권장 세션 수 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/targetSessionsCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
-                        app:cardBackgroundColor="#FAFAFA"
                         android:layout_marginBottom="6dp"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        app:cardBackgroundColor="#FAFAFA"
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -791,34 +816,34 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="권장 세션 수"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/targetSessions"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text=""
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                     <!-- 집중 영역 -->
-                    <com.google.android.material.card.MaterialCardView
+                    <androidx.cardview.widget.CardView
                         android:id="@+id/focusAreasCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="1dp"
+                        android:visibility="gone"
                         app:cardBackgroundColor="#FAFAFA"
-                        android:visibility="gone">
+                        app:cardCornerRadius="4dp"
+                        app:cardElevation="1dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -829,24 +854,24 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
                                 android:text="집중 영역"
-                                android:textSize="12sp"
-                                android:textStyle="bold"
                                 android:textColor="#666666"
-                                android:layout_marginBottom="4dp" />
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/focusAreas"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
                                 android:text=""
-                                android:textSize="13sp"
                                 android:textColor="#333333"
-                                android:lineSpacingExtra="2dp" />
+                                android:textSize="13sp" />
 
                         </LinearLayout>
 
-                    </com.google.android.material.card.MaterialCardView>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
@@ -854,6 +879,6 @@
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout> 

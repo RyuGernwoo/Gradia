@@ -5,150 +5,28 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/analysis_container"
         android:orientation="vertical"
-        android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:text="학습 시간 통계"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
-
         <!-- 통계 전환 탭 -->
         <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabMode"
+            android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabIndicatorColor="@android:color/black"
+            android:layout_margin="15dp"
+            app:tabMode="fixed"
+            app:tabGravity="fill"
             app:tabSelectedTextColor="@android:color/black"
             app:tabTextColor="@android:color/darker_gray"
             android:layout_marginTop="8dp" />
 
-        <!-- 주간 범위-->
-        <LinearLayout
-            android:id="@+id/weekControlLayout"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="12dp">
-
-            <ImageButton
-                android:id="@+id/btnPrevWeek"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_arrow_left"
-                android:background="@null"
-                android:contentDescription="이전 주" />
-
-            <TextView
-                android:id="@+id/tvWeekRange"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="00.00 ~ 00.00"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"/>
-
-            <ImageButton
-                android:id="@+id/btnNextWeek"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_arrow_right"
-                android:background="@null"
-                android:contentDescription="다음 주" />
-        </LinearLayout>
-
-        <!-- 통계 그래프 -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="horizontal"
-            android:layout_marginTop="12dp">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/chartStudyTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="400dp" />
-            </LinearLayout>
-        </HorizontalScrollView>
-
-        <TextView
-            android:text="\n학습 달성률"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
-
-        <!-- 일일 달성률 텍스트 -->
-        <TextView
-            android:id="@+id/tvDailyProgress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="오늘의 학습 달성률"
-            android:textSize="16sp"
-            android:layout_marginTop="4dp" />
-
-        <!-- 달성률 ProgressBar -->
-        <ProgressBar
-            android:id="@+id/progressGoal_daily"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:max="100"
-            android:progress="0" />
-
-        <!-- 월간 달성률 텍스트 -->
-        <TextView
-            android:id="@+id/tvMonthlyProgress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="이번 달 평균 달성률"
-            android:textSize="16sp"
-            android:layout_marginTop="4dp" />
-
-        <!-- 달성률 ProgressBar -->
-        <ProgressBar
-            android:id="@+id/progressGoal_monthly"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:max="100"
-            android:progress="0" />
-
-        <TextView
-            android:text="성적 예측 및 추천"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:layout_marginTop="20dp"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/tvPrediction"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="학습 데이터를 기반으로 성적을 예측하고 맞춤 조언을 받아보세요"
-            android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="12dp" />
-
-        <!-- 성적 예측 Fragment Container -->
-        <FrameLayout
-            android:id="@+id/grade_prediction_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp" />
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
     </LinearLayout>
 </ScrollView>

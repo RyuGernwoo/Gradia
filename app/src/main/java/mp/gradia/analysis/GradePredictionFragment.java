@@ -14,11 +14,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
@@ -45,11 +46,11 @@ public class GradePredictionFragment extends Fragment {
     private SeekBar understandingSeekBar;
     private TextView understandingLevelText;
     private MaterialButton predictButton;
-    private ProgressBar loadingProgress;
+    private LoadingIndicator loadingProgress;
     private TextView loadingText;
-    private MaterialCardView loadingCard;
-    private MaterialCardView resultCard;
-    private MaterialCardView reliabilityWarningCard;
+    private CardView loadingCard;
+    private CardView resultCard;
+    private CardView reliabilityWarningCard;
     private TextView reliabilityWarningText;
 
     // Result Views
@@ -62,23 +63,23 @@ public class GradePredictionFragment extends Fragment {
     private TextView learningQuality;
     private TextView learningConsistency;
     private TextView keyFactors;
-    private MaterialCardView keyFactorsCard;
+    private CardView keyFactorsCard;
 
     // 맞춤 조언 개별 요소들
     private TextView priorityHighAdvice;
     private TextView optimizationAdvice;
     private TextView maintenanceAdvice;
-    private MaterialCardView priorityHighCard;
-    private MaterialCardView optimizationCard;
-    private MaterialCardView maintenanceCard;
+    private CardView priorityHighCard;
+    private CardView optimizationCard;
+    private CardView maintenanceCard;
 
     // 주간 계획 개별 요소들
     private TextView targetHours;
     private TextView targetSessions;
     private TextView focusAreas;
-    private MaterialCardView targetHoursCard;
-    private MaterialCardView targetSessionsCard;
-    private MaterialCardView focusAreasCard;
+    private CardView targetHoursCard;
+    private CardView targetSessionsCard;
+    private CardView focusAreasCard;
 
     // Data
     private AnalysisViewModel viewModel;
