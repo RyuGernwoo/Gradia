@@ -272,10 +272,10 @@ public class SubjectDetailFragment extends Fragment {
         String typeText;
         switch (subject.type) {
             case 0:
-                typeText = "전필";
+                typeText = "전공필수";
                 break;
             case 1:
-                typeText = "전선";
+                typeText = "전공선택";
                 break;
             case 2:
                 typeText = "교양";
@@ -287,8 +287,8 @@ public class SubjectDetailFragment extends Fragment {
 
         textType.setText(typeText);
 
-        textCredit.setText(subject.credit + "학점");
-        textDifficulty.setText(subject.difficulty == null ? "정보 없음" : subject.difficulty + " / 5");
+        textCredit.setText(subject.getCredit() + " 학점");
+        textDifficulty.setText(subject.getDifficulty() == null || subject.getDifficulty() == -1 ? "정보 없음" : (subject.getDifficulty() + 1) + " / 5");
 
         textMidSchedule.setText(subject.midTermSchedule);
         textFinalSchedule.setText(subject.finalTermSchedule);

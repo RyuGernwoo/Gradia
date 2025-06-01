@@ -20,7 +20,9 @@ public class SubjectSelectAdapter extends RecyclerView.Adapter<SubjectSelectHold
     private Context context;
 
     // Item Click Listener
-    private OnItemClickListener listener;
+    private OnItemClickListener itemClickListener;
+    private OnSubjectEditButtonClickListener buttonClickListener;
+
 
     // Item 클릭 콜백 정의
     public interface OnItemClickListener {
@@ -31,16 +33,19 @@ public class SubjectSelectAdapter extends RecyclerView.Adapter<SubjectSelectHold
         void onItemClick(SubjectEntity item);
     }
 
+
+
     /**
      * SubjectSelectAdapter의 생성자입니다. 데이터 목록, Context, 클릭 리스너를 인자로 받습니다.
      * @param itemList 표시할 SubjectEntity 객체 목록입니다.
      * @param context 애플리케이션 Context입니다.
-     * @param listener 아이템 클릭 리스너입니다.
+     * @param listener 클릭 리스너입니다.
      */
-    public SubjectSelectAdapter(List<SubjectEntity> itemList, Context context, OnItemClickListener listener) {
+    public SubjectSelectAdapter(List<SubjectEntity> itemList, Context context, OnItemClickListener itemClickListener, OnSubjectEditButtonClickListener buttonClickListener) {
         this.itemList = itemList;
         this.context = context;
-        this.listener = listener;
+        this.itemClickListener = itemClickListener;
+        this.buttonClickListener = buttonClickListener;
     }
 
     /**
@@ -63,8 +68,9 @@ public class SubjectSelectAdapter extends RecyclerView.Adapter<SubjectSelectHold
     @Override
     public void onBindViewHolder(@NonNull SubjectSelectHolder holder, int position) {
         SubjectEntity item = itemList.get(position);
+
         // Bind subject data to view components
-        holder.bind(item, context, listener);
+        holder.bind(item, context, itemClickListener, buttonClickListener);
 
         boolean isExpanded = item.isExpanded();
         TransitionManager.beginDelayedTransition((ViewGroup) holder.itemView);

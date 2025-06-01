@@ -40,6 +40,7 @@ import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.StudySessionEntity;
 import mp.gradia.database.entity.TargetStudyTime;
 import mp.gradia.time.inner.timeline.dialog.adapter.StudySessionAdapter;
+import mp.gradia.time.inner.timeline.dialog.adapter.StudySessionHolder;
 import mp.gradia.time.inner.viewmodel.StudySessionViewModel;
 import mp.gradia.time.inner.viewmodel.StudySessionViewModelFactory;
 import mp.gradia.time.inner.viewmodel.SubjectViewModel;
@@ -64,7 +65,7 @@ public class SessionStatisticalDialog extends DialogFragment {
     private CardView weeklyTargetStudyTimeContainer;
     private CardView monthlyTargetStudyTimeContainer;
     private TextView totalFocusTimeTextView;
-    private TextView avgFocusTimeTextView;
+    private TextView mostFocusSubjectTextView;
     private TextView mostFocusTimeTextView;
     private TextView focusLevel1CountTextView;
     private TextView focusLevel2CountTextView;
@@ -193,7 +194,7 @@ public class SessionStatisticalDialog extends DialogFragment {
         weeklyTargetStudyTimeContainer = v.findViewById(R.id.weekly_target_study_time_container);
         monthlyTargetStudyTimeContainer = v.findViewById(R.id.monthly_target_study_time_container);
         totalFocusTimeTextView = v.findViewById(R.id.total_focus_time_textview);
-        avgFocusTimeTextView = v.findViewById(R.id.avg_focus_time_textview);
+        mostFocusSubjectTextView = v.findViewById(R.id.most_focus_subject_textview);
         mostFocusTimeTextView = v.findViewById(R.id.most_focus_time_textview);
         focusLevel1CountTextView = v.findViewById(R.id.focus_level1_count_textview);
         focusLevel2CountTextView = v.findViewById(R.id.focus_level2_count_textview);
@@ -231,6 +232,7 @@ public class SessionStatisticalDialog extends DialogFragment {
                             loadBundle();
 
                             loadTargetStudyTime();
+                            setupMostFocusSubject();
                             setupProgressData();
                         }
                     }
@@ -379,6 +381,26 @@ public class SessionStatisticalDialog extends DialogFragment {
         }
     }
 
+    private void setupMostFocusSubject() {
+        List<StudySessionEntity> s = bundle.getIntegratedList();
+        if (!s.isEmpty()) {
+            long max = s.get(0).getStudyTime();
+            int idx = 0;
+            for (StudySessionEntity session : s) {
+                if (session.getStudyTime() > max) {
+                    max = session.getStudyTime();
+                    idx = s.indexOf(session);
+                }
+            }
+            String subjectName = s.get(idx).getSubjectName();
+            if (subjectName.length() > 7)
+                subjectName = subjectName.substring(0, 7) + "...";
+            mostFocusSubjectTextView.setText(subjectName);
+        }
+        else {
+            mostFocusSubjectTextView.setText("NULL");
+        }
+    }
     /**
      * 집중 레벨별 세션 수를 UI에 표시합니다.
      */

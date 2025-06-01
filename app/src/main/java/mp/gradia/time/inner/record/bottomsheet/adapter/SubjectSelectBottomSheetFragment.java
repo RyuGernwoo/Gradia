@@ -23,6 +23,7 @@ import mp.gradia.R;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.subject.ui.SubjectAddDialog;
 import mp.gradia.time.inner.viewmodel.SubjectViewModel;
 import mp.gradia.time.inner.viewmodel.SubjectViewModelFactory;
 
@@ -110,7 +111,14 @@ public class SubjectSelectBottomSheetFragment extends BottomSheetDialogFragment 
             if (listener != null) {
                 listener.onBottomSheetItemClick(item);
             }
-        });
+        }, subjectId -> {
+            Bundle bundle = new Bundle();
+            bundle.putInt("subjectId", subjectId);
+            SubjectAddDialog dialog = SubjectAddDialog.newInstance(bundle);
+            dialog.show(getParentFragmentManager(), "SubjectAddDialog");
+            dismiss();
+        }
+        );
         rv.setAdapter(adapter);
     }
 

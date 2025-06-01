@@ -112,6 +112,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 if (photoUrl != null && !photoUrl.isEmpty()) {
                                     Log.d(TAG, "Glide 로드 시도: " + photoUrl);
                                     Glide.with(this).load(photoUrl).apply(glideOptions).into(imgProfilePicture);
+                                    
                                 } else {
                                     Log.d(TAG, "프로필 사진 URL 없음. 기본 이미지 로드.");
                                     Glide.with(this).load(R.drawable.ic_default_profile).apply(glideOptions)

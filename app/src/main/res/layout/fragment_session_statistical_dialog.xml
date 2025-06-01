@@ -120,13 +120,13 @@
                                 android:layout_marginTop="10dp"
                                 android:layout_marginEnd="10dp"
                                 android:layout_marginBottom="5dp"
-                                android:text="@string/avg_focus_time"
+                                android:text="@string/most_focus_subject"
                                 android:textColor="@color/gray"
                                 android:textSize="10sp"
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:id="@+id/avg_focus_time_textview"
+                                android:id="@+id/most_focus_subject_textview"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
@@ -134,7 +134,7 @@
                                 android:layout_marginTop="5dp"
                                 android:layout_marginEnd="10dp"
                                 android:layout_marginBottom="10dp"
-                                android:text="50min"
+                                android:text="MobileProgramming"
                                 android:textSize="20sp"
                                 android:textStyle="bold" />
 

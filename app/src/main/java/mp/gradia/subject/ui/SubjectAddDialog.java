@@ -59,6 +59,7 @@ import mp.gradia.database.entity.SubjectEntity;
 import mp.gradia.database.entity.TargetStudyTime;
 import mp.gradia.database.repository.SubjectRepository;
 import mp.gradia.subject.viewmodel.SubjectViewModel;
+import mp.gradia.time.inner.record.dialog.SessionAddDialog;
 
 // 과목 추가 및 수정 화면 fragment
 
@@ -104,6 +105,12 @@ public class SubjectAddDialog extends DialogFragment {
     private Random random = new Random();
 
     public SubjectAddDialog() {
+    }
+
+    public static SubjectAddDialog newInstance(Bundle bundle) {
+        SubjectAddDialog dialog = new SubjectAddDialog();
+        dialog.setArguments(bundle);
+        return dialog;
     }
 
     @Override
@@ -289,7 +296,7 @@ public class SubjectAddDialog extends DialogFragment {
 
     private void setupCreditChips() {
         subjectCreditChipGroup.check(R.id.subject_credit_1);
-        credit = 3;
+        credit = 1;
         subjectCreditChipGroup.setOnCheckedStateChangeListener((group, checkedId) -> {
             if (!checkedId.isEmpty()) {
                 int selectedChipId = checkedId.get(0);
@@ -297,13 +304,13 @@ public class SubjectAddDialog extends DialogFragment {
                 String chipText = selectedChip.getText().toString();
 
                 switch (chipText) {
-                    case "1학점":
+                    case "1 학점":
                         credit = 1;
                         break;
-                    case "2학점":
+                    case "2 학점":
                         credit = 2;
                         break;
-                    case "3학점":
+                    case "3 학점":
                         credit = 3;
                         break;
                 }
@@ -418,19 +425,19 @@ public class SubjectAddDialog extends DialogFragment {
     private void setDifficultyChips(int difficulty) {
         this.difficulty = difficulty;
         switch (difficulty) {
-            case 1:
+            case 0:
                 subjectDifficultyChipGroup.check(R.id.subject_difficulty_1);
                 break;
-            case 2:
+            case 1:
                 subjectDifficultyChipGroup.check(R.id.subject_difficulty_2);
                 break;
-            case 3:
+            case 2:
                 subjectDifficultyChipGroup.check(R.id.subject_difficulty_3);
                 break;
-            case 4:
+            case 3:
                 subjectDifficultyChipGroup.check(R.id.subject_difficulty_4);
                 break;
-            case 5:
+            case 4:
                 subjectDifficultyChipGroup.check(R.id.subject_difficulty_5);
                 break;
         }
@@ -588,7 +595,7 @@ public class SubjectAddDialog extends DialogFragment {
                 // currentEditingSubject의 필드를 UI 값으로 업데이트
                 currentEditingSubject.setName(subjectNameStr);
                 currentEditingSubject.setCredit(credit);
-                // 색상은 기존 값 유지 (currentEditingSubject.color는 변경하지 않음)
+                currentEditingSubject.setColor(String.format("#%06X", (0xFFFFFF & subjectColor)));
                 currentEditingSubject.setType(type);
                 currentEditingSubject.setMidTermSchedule(midScheduleStr);
                 currentEditingSubject.setFinalTermSchedule(finalScheduleStr);

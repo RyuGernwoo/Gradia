@@ -43,26 +43,19 @@
         android:id="@+id/layout_expand"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="4">
+        android:columnCount="3">
 
         <TextView
             style="@style/subject_expand_item"
             android:layout_row="0"
             android:layout_column="0"
-            android:text="@string/text_label_subject_studied_hour"
-            android:textStyle="bold" />
-
-        <TextView
-            style="@style/subject_expand_item"
-            android:layout_row="0"
-            android:layout_column="1"
             android:text="@string/text_label_subject_target_hour"
             android:textStyle="bold" />
 
         <TextView
             style="@style/subject_expand_item"
             android:layout_row="0"
-            android:layout_column="3"
+            android:layout_column="1"
             android:text="@string/text_label_subject_credit"
             android:textStyle="bold" />
 
@@ -73,9 +66,8 @@
             android:text="@string/text_label_subject_type"
             android:textStyle="bold" />
 
-
         <TextView
-            android:id="@+id/study_time"
+            android:id="@+id/target_study_time"
             style="@style/subject_expand_item"
             android:layout_row="1"
             android:layout_column="0"
@@ -83,18 +75,10 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/target_study_time"
-            style="@style/subject_expand_item"
-            android:layout_row="1"
-            android:layout_column="1"
-            android:text="0 시간"
-            android:textSize="16sp" />
-
-        <TextView
             android:id="@+id/subject_type"
             style="@style/subject_expand_item"
             android:layout_row="1"
-            android:layout_column="2"
+            android:layout_column="1"
             android:text="전필"
             android:textSize="16sp" />
 
@@ -102,11 +86,12 @@
             android:id="@+id/subject_credit"
             style="@style/subject_expand_item"
             android:layout_row="1"
-            android:layout_column="3"
+            android:layout_column="2"
             android:text="3 학점"
             android:textSize="16sp" />
 
         <Button
+            android:id="@+id/subject_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_row="2"
@@ -114,20 +99,8 @@
             android:layout_gravity="fill_horizontal"
             android:background="@android:color/transparent"
             android:padding="10dp"
-            android:text="버튼"
-            android:textColor="@color/c6"
-            android:textStyle="bold" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_row="2"
-            android:layout_column="3"
-            android:layout_gravity="fill_horizontal"
-            android:background="@android:color/transparent"
-            android:padding="10dp"
-            android:text="버튼"
-            android:textColor="@color/black"
+            android:text="@string/text_label_subject_edit"
+            android:textColor="@color/red"
             android:textStyle="bold" />
     </GridLayout>
     <!--
