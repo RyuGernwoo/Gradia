@@ -72,7 +72,9 @@ Implemented the dialog interface for adding new study sessions.
 - Implemented subject data CRUD functionalities and associated user interface logic.
 #### Development of Key UI Custom Widgets 
 - Developed a Pomodoro-style timer custom widget.
+  - [Android-Pomodoro-Timer-Widget](https://github.com/orion-gz/Android-Pomodoro-Timer-Widget)
 - Developed a custom ScheduleView widget for displaying schedules in a timetable format.
+  - [Android-Schedule-View-Widget](https://github.com/orion-gz/Android-Schedule-View-Widget)
 ## 강지윤
 #### Subject tab implementation
 - List screen that summarizes subject name search box, sorting bar, and subject information in box form
