@@ -799,9 +799,15 @@ public class SubjectRepository {
                                 throwable -> Log.e(TAG, "서버 과목 데이터 로컬 저장 실패", throwable));
 
                 disposables.add(single);
+                if (callback != null) {
+                    callback.onSuccess();
+                }
                 Log.d(TAG, "변환된 과목: " + localSubject.getName() + " (서버 ID: " + localSubject.getServerId() + ")");
             } catch (Exception e) {
                 Log.e(TAG, "과목 변환 중 오류: " + serverSubject.getName(), e);
+                if (callback != null) {
+                    callback.onError("과목 변환 실패: " + e.getMessage());
+                }
             }
         }
     }

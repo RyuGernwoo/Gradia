@@ -10,17 +10,17 @@ public class GradePredictionResponseV2 {
     public static class LearningPatternAnalysis {
         public int total_sessions;
 
-        public int total_actual_hours;
+        public double total_actual_hours;
 
-        public int avg_focus_level;
+        public double avg_focus_level;
 
-        public int recent_week_hours;
+        public double recent_week_hours;
 
-        public int recent_week_focus;
+        public double recent_week_focus;
 
         public String time_distribution;
 
-        public int study_days_per_week;
+        public double study_days_per_week;
 
         public int avg_session_length;
 
