@@ -7,6 +7,7 @@ import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity(tableName = "subjects")

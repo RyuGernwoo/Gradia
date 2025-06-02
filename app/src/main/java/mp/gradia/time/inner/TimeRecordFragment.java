@@ -284,7 +284,6 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
                         addSessionFab.setAlpha(1F);
 
                         selectedSubject = subjectList.get(0);
-                        subjectViewModel.selectSubject(selectedSubject);
                         setSelectedSubject(selectedSubject);
 
                         if (getChildFragmentManager().findFragmentById(R.id.fragment_container) == null) {
@@ -312,7 +311,6 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
     public void onBottomSheetItemClick(SubjectEntity item) {
         modalBottomSheet.dismiss();
         selectedSubject = item;
-        subjectViewModel.selectSubject(selectedSubject);
         setSelectedSubject(selectedSubject);
     }
 
@@ -329,6 +327,7 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
      * 선택된 과목 정보를 UI에 표시합니다 (과목 이름, 색상).
      */
     public void setSelectedSubject(SubjectEntity subject) {
+        subjectViewModel.selectSubject(selectedSubject);
         selectedSubjectTextView.setText(subject.getName());
         GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.color_circle);
         drawable.setColor(Color.parseColor(subject.getColor()));
