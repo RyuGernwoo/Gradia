@@ -74,16 +74,16 @@ Implemented the dialog interface for adding new study sessions.
 - Developed a Pomodoro-style timer custom widget.
 - Developed a custom ScheduleView widget for displaying schedules in a timetable format.
 ## 강지윤
-### Subject tab implementation
+#### Subject tab implementation
 : List screen that summarizes subject name search box, sorting bar, and subject information in box form
 Add subjects (as subject db items), modify, subject details, and check box-based add-ons
 (When the Save button is clicked on the bottom, it returns to the Room DB and the subject list, pre-loads existing information when modified, and when the Delete button is clicked, the confirmation pop-up is deleted and the list is updated from the DB)
 Add subject-related entities, repository, ViewModel structures
-### Analysis tab implementation
+#### Analysis tab implementation
 Use MPAndroid Chart to visualize weekly cumulative data in a bar form
 Separate tabs by subject and day of the week to implement graphs
 Visualize achievement relative bar(progress par) to learning objectives in horizontal bar form
-### Tutorial implementation
+#### Tutorial implementation
 Use the Spotlight 2.0.4 library to step-by-step guide each feature in the bottom bar when the first app is launched
 Introduce each feature in overlay form
 Designed to run tutorials only once with Shared Preferences
