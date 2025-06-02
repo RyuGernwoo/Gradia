@@ -3,12 +3,14 @@ package mp.gradia.tutorial;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.takusemba.spotlight.Spotlight;
 import com.takusemba.spotlight.Target;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mp.gradia.R;
+import mp.gradia.main.MainActivity;
 
 public class TutorialManager {
 
@@ -63,8 +66,7 @@ public class TutorialManager {
 
         Spotlight spotlight = buildSpotlight(activity, targets);
 
-
-        setupButtonListeners(spotlight, overlays);
+        setupButtonListeners(activity, spotlight, overlays);
 
         spotlight.start();
     }
@@ -72,7 +74,6 @@ public class TutorialManager {
 
     private static View createOverlayView(Activity activity, LayoutInflater inflater, int index) {
         View overlay = inflater.inflate(R.layout.tutorial_overlay, null, false);
-
         TextView title = overlay.findViewById(R.id.tutorial_title);
         TextView desc = overlay.findViewById(R.id.tutorial_desc);
         title.setText(activity.getString(getTitleRes(index)));
@@ -86,7 +87,7 @@ public class TutorialManager {
         return new Spotlight.Builder(activity)
                 .setTargets(targets.toArray(new Target[0]))
                 .setBackgroundColor(ContextCompat.getColor(activity, R.color.spotlightBackground))
-                .setDuration(700L)
+                .setDuration(100L)
                 .setAnimation(new android.view.animation.DecelerateInterpolator(2f))
                 .setOnSpotlightListener(new OnSpotlightListener() {
                     @Override
@@ -101,12 +102,23 @@ public class TutorialManager {
     }
 
 
-    private static void setupButtonListeners(Spotlight spotlight, List<View> overlays) {
-        for (View overlay : overlays) {
-            Button btnNext = overlay.findViewById(R.id.btn_next);
-            Button btnSkip = overlay.findViewById(R.id.btn_skip);
+    private static void setupButtonListeners(Activity activity, Spotlight spotlight, List<View> overlays) {
+        ViewPager2 viewPager = activity.findViewById(R.id.view_pager);
 
-            btnNext.setOnClickListener(v -> spotlight.next());
+        for (int i = 0; i < overlays.size(); i++) {
+            Button btnNext = overlays.get(i).findViewById(R.id.btn_next);
+            Button btnSkip = overlays.get(i).findViewById(R.id.btn_skip);
+
+            if (i == (overlays.size() - 1))
+                btnNext.setText("마침");
+
+            final int currentIdx = i + 1;
+            btnNext.setOnClickListener(v -> {
+                spotlight.next();
+                viewPager.setCurrentItem(currentIdx);
+                if (currentIdx == overlays.size())
+                    viewPager.setCurrentItem(0);
+            });
             btnSkip.setOnClickListener(v -> spotlight.finish());
 
         }
