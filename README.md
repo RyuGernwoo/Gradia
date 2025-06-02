@@ -56,6 +56,7 @@ Implemented a real-time data synchronization system to ensure consistent and up-
 ## 류건우
 ### Home & Profile UI Design and Feature Implementation
 - Designed user interfaces and implemented key features for the home and user profile sections.
+- Includes Google and Kakao Social Login.
 ### Social Login System Implementation
 - Developed and integrated a system enabling users to log in via social media accounts.
 ### Integrate account information and profile
