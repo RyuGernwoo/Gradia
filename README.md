@@ -52,8 +52,15 @@ Created and optimized AI prompts tailored for specific analytical tasks and inte
 Implemented functionality to parse and extract class schedule data from Everytime, enabling integration of user timetable information into the analysis system.
 ### Data Synchronization System
 Implemented a real-time data synchronization system to ensure consistent and up-to-date data flow between the frontend, backend, and external sources.
+
 ## 류건우
-- 맡은 역할 작성
+### Home & Profile UI Design and Feature Implementation
+- Designed user interfaces and implemented key features for the home and user profile sections.
+### Social Login System Implementation
+- Developed and integrated a system enabling users to log in via social media accounts.
+### Integrate account information and profile
+- Connected and synchronized user account data with their respective profile displays.
+
 ## 이정우
 ### Android RoomDB Integration and Data Management 
 - Designed the application's local database schema.
@@ -75,6 +82,7 @@ Implemented the dialog interface for adding new study sessions.
   - [Android-Pomodoro-Timer-Widget](https://github.com/orion-gz/Android-Pomodoro-Timer-Widget)
 - Developed a custom ScheduleView widget for displaying schedules in a timetable format.
   - [Android-Schedule-View-Widget](https://github.com/orion-gz/Android-Schedule-View-Widget)
+
 ## 강지윤
 #### Subject tab implementation
 - List screen that summarizes subject name search box, sorting bar, and subject information in box form
