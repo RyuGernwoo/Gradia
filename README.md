@@ -40,7 +40,18 @@ Gradia is a combination of Grade and AI, an app service that provides personaliz
 
 # Team
 ## 권영훈
-- 맡은 역할 작성
+### Backend Server Development
+Build backend server using FastAPI to handle API requests, manage data, and serve AI service.
+
+Backend Repository: [gradia-backend](https://github.com/windopper/gradia-backend)
+### AI Analysis UI Implementation
+Designed and developed an interface that allows users to interact with AI-driven data analysis.
+### AI Prompt Engineering & Backend Integration
+Created and optimized AI prompts tailored for specific analytical tasks and integrated into the backend.
+### Everytime Timetable Parsing
+Implemented functionality to parse and extract class schedule data from Everytime, enabling integration of user timetable information into the analysis system.
+### Data Synchronization System
+Implemented a real-time data synchronization system to ensure consistent and up-to-date data flow between the frontend, backend, and external sources.
 ## 류건우
 - 맡은 역할 작성
 ## 이정우
