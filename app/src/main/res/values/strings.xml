@@ -138,4 +138,22 @@
     <string name="google_web_client_id">637824960431-fo6ev723vd5u0pmqm4m17r79icm5ugc1.apps.googleusercontent.com</string>
     <string name="kakao_web_client_id">kakao0ae3bc452c369df08a11b5fd073d3df9</string>
 
+
+    <!--tutorial-->
+    <string name="tutorial_title_home">홈</string>
+    <string name="tutorial_title_subject">과목</string>
+    <string name="tutorial_title_record">기록</string>
+    <string name="tutorial_title_analysis">분석</string>
+    <string name="tutorial_title_default">기능 안내</string>
+
+    <string name="tutorial_desc_home">홈 화면에서 주요 정보와 알림을 확인하세요</string>
+    <string name="tutorial_desc_subject">과목 탭에서 학습 과목을 추가 및 관리할 수 있습니다 \n\n각 과목 탭을 클릭해 세부 정보를 확인하고 필요한 과목을 직접 추가하거나 에브리타임에서 불러와 보세요!</string>
+    <string name="tutorial_desc_record">기록 탭에서 다양한 기록 도구와 학습 이력을 확인하세요 \n\n타임라인과 "세션 통계 데이터 보기"를 통해 오늘의 학습을 되돌아 보세요!</string>
+    <string name="tutorial_desc_analysis">분석 탭에서 목표달성량과 주간 학습시간을 보고 공부계획에 반영해보세요\n\n"성적예측하기"를 통해 현재 공부 상태를 확인하고 피드백을 받아보는 건 어떨까요?\n\n\n 이제 Gradia와 함께 시작해볼 시간이예요!</string>
+    <string name="tutorial_desc_default">Gradia와 함께 시작해보세요! .</string>
+
+    <string name="tutorial_skip">건너뛰기</string>
+    <string name="tutorial_next">다음</string>
+
+
 </resources>

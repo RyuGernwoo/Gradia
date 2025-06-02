@@ -3,9 +3,9 @@ package mp.gradia.main;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -20,7 +20,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +30,7 @@ import mp.gradia.api.models.AuthResponse;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.tutorial.TutorialManager;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
 
         // API Helper와 Auth Manager 초기화
         apiHelper = new ApiHelper(this);
@@ -124,6 +125,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        //튜토리얼 부분
+        ViewGroup menuView = (ViewGroup) bottomNavigation.getChildAt(0);
+
+        View navHome = menuView.getChildAt(0);      // 홈
+        View navSubject = menuView.getChildAt(1);   // 과목
+        View navTime = menuView.getChildAt(2);      // 기록
+        View navAnalysis = menuView.getChildAt(3);  // 분석
+
+
+        navHome.post(() -> {
+            TutorialManager.showTutorial(this, navHome, navSubject, navTime, navAnalysis);
+        });
+
     }
 
     /**

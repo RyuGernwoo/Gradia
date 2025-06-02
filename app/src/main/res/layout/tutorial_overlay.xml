@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/transparent"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="120dp"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/tutorial_title"
+        android:textColor="@android:color/white"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="Title"/>
+
+    <TextView
+        android:id="@+id/tutorial_desc"
+        android:textColor="@android:color/white"
+        android:textSize="15sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:padding="16dp"
+        android:text="Description"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btn_skip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="건너뛰기"
+            android:padding="8dp"
+            android:background="?android:attr/selectableItemBackground"/>
+
+        <Button
+            android:id="@+id/btn_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="다음"
+            android:padding="8dp"
+            android:layout_marginStart="16dp"
+            android:background="?android:attr/selectableItemBackground"/>
+    </LinearLayout>
+</LinearLayout>
+    </FrameLayout>
+
+

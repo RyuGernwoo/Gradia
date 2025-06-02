@@ -41,6 +41,9 @@ android {
 }
 
 dependencies {
+    //튜토리얼
+    implementation("com.github.takusemba:spotlight:2.0.4")
+
     // implementation(files("../libs/ScheduleView.aar"))
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
@@ -104,3 +107,4 @@ dependencies {
     // 또는 최신 가이드에 따라 ksp 사용
     ksp("com.github.bumptech.glide:ksp:4.16.0") // Glide KSP
 }
+
