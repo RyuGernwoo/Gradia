@@ -133,7 +133,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void logoutUser() {
         Log.i(TAG, "로그아웃 시작. Provider: " + currentUserProvider);
-
         Runnable clearSessionAndGoToLogin = () -> {
             // SharedPreferences에서 세션 정보 삭제
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);

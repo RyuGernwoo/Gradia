@@ -222,7 +222,7 @@ public class SessionAddDialog extends DialogFragment {
         AppBarLayout appBarLayout = v.findViewById(R.id.appbar_layout);
         ViewCompat.setOnApplyWindowInsetsListener(appBarLayout, (view, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            view.setPadding(view.getPaddingLeft(), insets.top, v.getPaddingRight(),  v.getPaddingBottom());
+            view.setPadding(view.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
             return windowInsets;
         });
 
@@ -789,8 +789,7 @@ public class SessionAddDialog extends DialogFragment {
                         });
             }
             return true;
-        }
-        else {
+        } else {
             dateInputLayout.setError(null);
             dateInputLayout.setErrorEnabled(false);
             startTimeInputLayout.setError(null);
@@ -800,6 +799,7 @@ public class SessionAddDialog extends DialogFragment {
             return false;
         }
     }
+
     /**
      * 시간 유효성 검사를 수행하고 결과를 표시합니다.
      */

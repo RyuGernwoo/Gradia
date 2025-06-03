@@ -47,6 +47,7 @@ import mp.gradia.database.entity.UserEntity;
 import mp.gradia.main.MainActivity;
 import mp.gradia.database.repository.StudySessionRepository;
 import mp.gradia.database.repository.SubjectRepository;
+import mp.gradia.time.inner.record.dialog.SessionAddDialog;
 
 public class LoginActivity extends AppCompatActivity {
 

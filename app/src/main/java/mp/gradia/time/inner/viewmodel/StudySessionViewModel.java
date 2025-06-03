@@ -116,13 +116,13 @@ public class StudySessionViewModel extends AndroidViewModel {
 
         compositeDisposable.add(
                 Single.zip(sessionDate, sessionEndDate, allSessions,
-                        (sessionsToday, sessionsYesterday, sessions) -> {
+                                (sessionsToday, sessionsYesterday, sessions) -> {
                                     Log.d("SessionStatisticalDialog", "loadScheduleItemsByDate");
                                     for (StudySessionEntity session : sessionsToday) {
                                         Log.d("SessionStatisticalDialog", session.getSubjectName() + " " + session.getDate() + " " + session.getStartTime());
                                     }
 
-                            List<ScheduleEventItem> items = new ArrayList<>();
+                                    List<ScheduleEventItem> items = new ArrayList<>();
                                     List<StudySessionEntity> weeklySession = new ArrayList<>();
                                     List<StudySessionEntity> monthlySession = new ArrayList<>();
                                     Map<Integer, TargetStudyTime> targetStudyTimes = new HashMap();
@@ -132,46 +132,46 @@ public class StudySessionViewModel extends AndroidViewModel {
                                     LocalDate monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
                                     LocalDate sunday = monday.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
-                            // monthly
+                                    // monthly
                                     LocalDate startOfMonth = date.withDayOfMonth(1);
                                     LocalDate endOfMonth = date.with(TemporalAdjusters.lastDayOfMonth());
 
                                     for (int i = 0; i < sessionsToday.size(); i++) {
-                                SubjectEntity subject = subjectDao.getById(sessionsToday.get(i).getSubjectId());
-                                int eventColor = Color.parseColor(subject.getColor());
+                                        SubjectEntity subject = subjectDao.getById(sessionsToday.get(i).getSubjectId());
+                                        int eventColor = Color.parseColor(subject.getColor());
 
-                                LocalDate startDate = sessionsToday.get(i).getDate();
-                                LocalDate endDate = sessionsToday.get(i).getEndDate();
+                                        LocalDate startDate = sessionsToday.get(i).getDate();
+                                        LocalDate endDate = sessionsToday.get(i).getEndDate();
 
-                                LocalTime startTime = sessionsToday.get(i).getStartTime();
-                                LocalTime endTime = sessionsToday.get(i).getEndTime();
-                                LocalTime displayTime = startTime;
-                                LocalTime displayEndTime = endTime;
+                                        LocalTime startTime = sessionsToday.get(i).getStartTime();
+                                        LocalTime endTime = sessionsToday.get(i).getEndTime();
+                                        LocalTime displayTime = startTime;
+                                        LocalTime displayEndTime = endTime;
 
-                                // 세션이 여러 날에 걸쳐 있는 경우
-                                // !endDate.equals(date) 와 동치
-                                if (endDate.isAfter(startDate)) {
-                                    displayEndTime = LocalTime.MAX;
-                                }
-                                subjectIds[i] = sessionsToday.get(i).getSubjectId();
+                                        // 세션이 여러 날에 걸쳐 있는 경우
+                                        // !endDate.equals(date) 와 동치
+                                        if (endDate.isAfter(startDate)) {
+                                            displayEndTime = LocalTime.MAX;
+                                        }
+                                        subjectIds[i] = sessionsToday.get(i).getSubjectId();
                                         addEventItem(items, sessionsToday.get(i), displayTime, displayEndTime, eventColor);
-                                scheduleSession.add(sessionsToday.get(i));
-                                targetStudyTimes.put(sessionsToday.get(i).getSubjectId(), subjectDao.getById(sessionsToday.get(i).getSubjectId()).getTime());
-                            }
+                                        scheduleSession.add(sessionsToday.get(i));
+                                        targetStudyTimes.put(sessionsToday.get(i).getSubjectId(), subjectDao.getById(sessionsToday.get(i).getSubjectId()).getTime());
+                                    }
 
-                            for (StudySessionEntity session : sessionsYesterday) {
-                                LocalDate startDate = session.getDate();
-                                LocalDate endDate = session.getEndDate();
+                                    for (StudySessionEntity session : sessionsYesterday) {
+                                        LocalDate startDate = session.getDate();
+                                        LocalDate endDate = session.getEndDate();
 
-                                // 여러 날에 걸친 이벤트 중 date 에 종료되는 이벤트만 추가
-                                if (startDate.isBefore(date) && endDate.equals(date) && startDate.isBefore(endDate)) {
-                                    SubjectEntity subject = subjectDao.getById(session.getSubjectId());
-                                    int eventColor = Color.parseColor(subject.getColor());
+                                        // 여러 날에 걸친 이벤트 중 date 에 종료되는 이벤트만 추가
+                                        if (startDate.isBefore(date) && endDate.equals(date) && startDate.isBefore(endDate)) {
+                                            SubjectEntity subject = subjectDao.getById(session.getSubjectId());
+                                            int eventColor = Color.parseColor(subject.getColor());
 
-                                    LocalTime endTime = session.getEndTime();
-                                    addEventItem(items, session, LocalTime.MIN, endTime, eventColor);
-                                    scheduleSession.add(session);
-                                    targetStudyTimes.put(session.getSubjectId(), subjectDao.getById(session.getSubjectId()).getTime());
+                                            LocalTime endTime = session.getEndTime();
+                                            addEventItem(items, session, LocalTime.MIN, endTime, eventColor);
+                                            scheduleSession.add(session);
+                                            targetStudyTimes.put(session.getSubjectId(), subjectDao.getById(session.getSubjectId()).getTime());
                                         }
                                     }
 
@@ -195,16 +195,15 @@ public class StudySessionViewModel extends AndroidViewModel {
                                                     monthlySession.add(sessions.get(i));
                                             }
                                         }
-                                }
+                                    }
 
-                            return new ScheduleDataBundle(items, scheduleSession, targetStudyTimes, weeklySession, monthlySession);
-                        })
+                                    return new ScheduleDataBundle(items, scheduleSession, targetStudyTimes, weeklySession, monthlySession);
+                                })
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 scheduleDataBundle -> {
                                     List<ScheduleEventItem> scheduleEventList = scheduleDataBundle.getEventItemList();
-                                    List<StudySessionEntity> scheduleSessionList = scheduleDataBundle
-                                            .getEventSessionList();
+                                    List<StudySessionEntity> scheduleSessionList = scheduleDataBundle.getEventSessionList();
                                     List<StudySessionEntity> weeklySessionList = scheduleDataBundle.getWeeklySessionList();
                                     List<StudySessionEntity> monthlySessionList = scheduleDataBundle.getMonthlySessionList();
 
@@ -269,7 +268,7 @@ public class StudySessionViewModel extends AndroidViewModel {
      * @param eventColor 이벤트 색상
      */
     private void addEventItem(List<ScheduleEventItem> items, StudySessionEntity session, LocalTime startTime,
-            LocalTime endTime, int eventColor) {
+                              LocalTime endTime, int eventColor) {
         if (startTime.isAfter(endTime) || startTime.equals(endTime)
                 || (startTime.equals(LocalTime.MIN) && endTime.equals(LocalTime.MAX)))
             return;
@@ -372,19 +371,19 @@ public class StudySessionViewModel extends AndroidViewModel {
                     repository.delete(v);
                 }));
 
-//        compositeDisposable.add(
-//                sessionDao.deleteById(id)
-//                        .subscribeOn(Schedulers.io())
-//                        .observeOn(AndroidSchedulers.mainThread())
-//                        .subscribe(
-//                                () -> {
-//                                    Log.d("SessionAddDialog", "Session deleted successfully");
-//                                },
-//                                throwable -> {
-//                                    Log.e("SessionAddDialog", "Error deleting session", throwable);
-//                                }
-//                        )
-//        );
+        compositeDisposable.add(
+                sessionDao.deleteById(id)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                () -> {
+                                    Log.d("SessionAddDialog", "Session deleted successfully");
+                                },
+                                throwable -> {
+                                    Log.e("SessionAddDialog", "Error deleting session", throwable);
+                                }
+                        )
+        );
     }
 
     /**
@@ -439,9 +438,16 @@ public class StudySessionViewModel extends AndroidViewModel {
             return eventSessionList;
         }
 
-        public Map<Integer, TargetStudyTime> getTargetStudyTimes() {return targetStudyTimes; }
+        public Map<Integer, TargetStudyTime> getTargetStudyTimes() {
+            return targetStudyTimes;
+        }
 
-        public List<StudySessionEntity> getWeeklySessionList() { return weeklySessionList; }
-        public List<StudySessionEntity> getMonthlySessionList() { return monthlySessionList; }
+        public List<StudySessionEntity> getWeeklySessionList() {
+            return weeklySessionList;
+        }
+
+        public List<StudySessionEntity> getMonthlySessionList() {
+            return monthlySessionList;
+        }
     }
 }

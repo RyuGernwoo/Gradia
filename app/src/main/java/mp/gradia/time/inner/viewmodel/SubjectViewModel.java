@@ -73,7 +73,7 @@ public class SubjectViewModel extends ViewModel {
      * @param id 로드할 과목의 ID
      */
     public void loadSubjectById(int id) {
-        compositeDisposable.add(subjectDao.getByIdSingle(id)
+        compositeDisposable.add(subjectDao.getByIdFlowable(id)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

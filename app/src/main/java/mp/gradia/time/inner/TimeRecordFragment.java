@@ -82,6 +82,11 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
         if (isTimerRunning) {
             int selectedSubjectId = timerPrefs.getInt(TimerService.KEY_SELECTED_SUBJECT_ID, -1);
             subjectViewModel.loadSubjectById(selectedSubjectId);
+            subjectViewModel.selectedSubjectLiveData.observe(getViewLifecycleOwner(),
+                    subject -> {
+                        setSelectedSubject(subject);
+                    }
+            );
 
             boolean isPause = timerPrefs.getBoolean(TimerService.KEY_IS_PAUSED, false);
             if (isPause) {
@@ -95,6 +100,11 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
         } else if (isStopwatchRunning) {
             int selectedSubjectId = stopwatchPrefs.getInt(StopwatchService.KEY_SELECTED_SUBJECT_ID, -1);
             subjectViewModel.loadSubjectById(selectedSubjectId);
+            subjectViewModel.selectedSubjectLiveData.observe(getViewLifecycleOwner(),
+                    subject -> {
+                        setSelectedSubject(subject);
+                    }
+            );
 
             boolean isPause = stopwatchPrefs.getBoolean(StopwatchService.KEY_IS_PAUSED, false);
             if (isPause) {
@@ -274,7 +284,6 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
                         addSessionFab.setClickable(false);
                         addSessionFab.setAlpha(0.5F);
                         Log.d("hasData", "DATA " + String.valueOf(hasData));
-                        Toast.makeText(requireContext(), R.string.toast_message_no_subjects, Toast.LENGTH_LONG).show();
                     } else {
                         hasData = true;
                         Log.d("hasData", "DATA " + String.valueOf(hasData));
@@ -284,6 +293,7 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
                         addSessionFab.setAlpha(1F);
 
                         selectedSubject = subjectList.get(0);
+                        subjectViewModel.selectSubject(selectedSubject);
                         setSelectedSubject(selectedSubject);
 
                         if (getChildFragmentManager().findFragmentById(R.id.fragment_container) == null) {
@@ -311,6 +321,7 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
     public void onBottomSheetItemClick(SubjectEntity item) {
         modalBottomSheet.dismiss();
         selectedSubject = item;
+        subjectViewModel.selectSubject(selectedSubject);
         setSelectedSubject(selectedSubject);
     }
 
@@ -327,7 +338,6 @@ public class TimeRecordFragment extends Fragment implements OnSubjectSelectListe
      * 선택된 과목 정보를 UI에 표시합니다 (과목 이름, 색상).
      */
     public void setSelectedSubject(SubjectEntity subject) {
-        subjectViewModel.selectSubject(selectedSubject);
         selectedSubjectTextView.setText(subject.getName());
         GradientDrawable drawable = (GradientDrawable) getResources().getDrawable(R.drawable.color_circle);
         drawable.setColor(Color.parseColor(subject.getColor()));

@@ -1,5 +1,6 @@
 package mp.gradia.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +31,10 @@ import mp.gradia.api.models.AuthResponse;
 import mp.gradia.database.AppDatabase;
 import mp.gradia.database.dao.SubjectDao;
 import mp.gradia.database.entity.SubjectEntity;
+import mp.gradia.home.ProfileActivity;
+import mp.gradia.login.LoginActivity;
+import mp.gradia.time.inner.record.stopwatch.StopwatchService;
+import mp.gradia.time.inner.record.timer.TimerService;
 import mp.gradia.tutorial.TutorialManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,8 +61,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
-
         // API Helper와 Auth Manager 초기화
         apiHelper = new ApiHelper(this);
         authManager = AuthManager.getInstance(this);
@@ -71,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(0, systemBars.top, 0, 0);
             return insets;
         });
+
 
         // SubjectDao 인스턴스 가져오기
         subjectDao = AppDatabase.getInstance(getApplicationContext()).subjectDao();
@@ -126,6 +130,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        if (getIntent() != null) {
+            Intent intent = getIntent();
+            int fragment = intent.getIntExtra(TimerService.EXTRA_SHOW_TIMER_FRAGMENT, -1);
+
+            if (fragment != -1)
+                viewPager.setCurrentItem(fragment);
+            else {
+                fragment = intent.getIntExtra(StopwatchService.EXTRA_SHOW_STOPWATCH_FRAGMENT, -1);
+                if (fragment != -1)
+                    viewPager.setCurrentItem(fragment);
+            }
+        }
+
         //튜토리얼 부분
         ViewGroup menuView = (ViewGroup) bottomNavigation.getChildAt(0);
 
@@ -138,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
         navHome.post(() -> {
             TutorialManager.showTutorial(this, navHome, navSubject, navTime, navAnalysis);
         });
-
     }
 
     /**
@@ -225,7 +241,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
