@@ -1,5 +1,5 @@
 # Gradia
----
+[![Video Label(https://youtu.be/59USvjy2toI)]](https://youtu.be/Mh08-SeNcfI)
 # Overview
 Gradia is a combination of Grade and AI, an app service that provides personalized learning management and grade prediction services based on the user's coursework, learning time, and grade data.
 
